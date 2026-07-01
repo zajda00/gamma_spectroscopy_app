@@ -3,7 +3,7 @@
 ## ✅ Implementation Complete
 
 ### Modified Files
-- **decay_scheme_app/main_window.py** — 756 lines (was 707)
+- **app_decay_scheme/main_window.py** — 756 lines (was 707)
 
 ### What Changed
 

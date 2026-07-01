@@ -36,7 +36,7 @@ DecaySchemeApp/
   requirements.txt
   pyproject.toml
   main.py
-  decay_scheme_app/
+  app_decay_scheme/
     models.py
     loaders.py
     beta_inputs.py
@@ -114,9 +114,9 @@ The phase-space factor is intentionally approximate in this first release.
 
 ## Future integration points
 
-- `decay_scheme_app.weisskopf_adapter.WeisskopfAdapter`
-- `decay_scheme_app.logft.ExternalLogftAdapter`
-- `decay_scheme_app.eps_template.EpsTemplateEngine`
+- `app_decay_scheme.weisskopf_adapter.WeisskopfAdapter`
+- `app_decay_scheme.logft.ExternalLogftAdapter`
+- `app_decay_scheme.eps_template.EpsTemplateEngine`
 
 ## Recommended workflow
 

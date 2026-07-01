@@ -16,11 +16,16 @@ def ghostscript_available() -> bool:
     return find_ghostscript_executable() is not None
 
 
-def render_eps_to_png(eps_path: Path, png_path: Path) -> tuple[bool, str]:
+def render_eps_to_png(eps_path: Path, png_path: Path, white_background: bool = True) -> tuple[bool, str]:
     exe = find_ghostscript_executable()
     if not exe:
         return False, 'Ghostscript executable not found in PATH.'
 
+    # Choose device based on background preference
+    # png16m: 24-bit RGB (best for white background)
+    # pngalpha: 32-bit RGBA (with transparency)
+    device = 'png16m' if white_background else 'pngalpha'
+    
     cmd = [
         exe,
         '-dSAFER',
@@ -28,7 +33,7 @@ def render_eps_to_png(eps_path: Path, png_path: Path) -> tuple[bool, str]:
         '-dNOPAUSE',
         '-dEPSCrop',
         '-r150',
-        '-sDEVICE=pngalpha',
+        f'-sDEVICE={device}',
         f'-sOutputFile={png_path}',
         str(eps_path),
     ]

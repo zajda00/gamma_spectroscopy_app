@@ -28,6 +28,24 @@ class BetaInputs:
     show_neutron_separation: bool = False
     ground_state_strategy: str = 'closure_to_100'
     normalization_reference_keV: float | None = None
+    # Extended nucleus data for mother
+    mother_a: int = 0
+    mother_z: int = 0
+    mother_n: int = 0
+    # Extended nucleus data for daughter
+    daughter_a: int = 0
+    daughter_z: int = 0
+    daughter_n: int = 0
+    # Additional mother display values
+    mother_t12: str = ''  # e.g., "0.72(10) s"
+    mother_spinpar: str = ''  # e.g., "(1-), (9-)"
+    mother_q: str = ''  # e.g., "9510(40) keV"
+    mother_sn: str = ''  # separation energy neutron
+    mother_pn: str = ''  # other nuclear parameter
+    # Decay channel (0=blank, 1=alpha, 2=beta-, 3=beta+, 4=beta-n)
+    decay_channel: int = 2
+    # Separation energy type: 'n' or 'p'
+    separation_energy_type: str = 'n'
 
 @dataclass
 class Level:
@@ -70,11 +88,37 @@ class Transition:
     in_scheme: bool = True
 
 @dataclass
+class RenderSettings:
+    """Settings for rendering the EPS scheme diagram."""
+    # Mother nucleus display
+    mother_show: bool = True
+    mother_t12_show: bool = True
+    mother_spinpar_show: bool = True
+    mother_q_show: bool = True
+    mother_sn_show: bool = False
+    mother_pn_show: bool = False
+    # Separation energy
+    separation_energy_show: bool = False
+    # Level-side annotations
+    beta_feeding_show: bool = True
+    logft_show: bool = True
+    spinpar_show: bool = True
+    t12_show: bool = True
+    # Drawing scales and layout
+    scale_x: float = 0.1
+    scale_e: float = 2.7
+    font_size: int = 15
+    font_size_trans: int = 12
+    # PNG output settings
+    png_white_background: bool = True
+
+@dataclass
 class ProjectData:
     root: Path
     beta_inputs: BetaInputs
     levels: list[Level]
     transitions: list[Transition]
+    render_settings: RenderSettings = field(default_factory=RenderSettings)
     uncertain_rows: list[dict[str, Any]] = field(default_factory=list)
     literature_rows: list[dict[str, Any]] = field(default_factory=list)
     category_summary_rows: list[dict[str, Any]] = field(default_factory=list)

@@ -2,7 +2,7 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
-from decay_scheme_app.loaders import ProjectDataLoader
+from app_decay_scheme.loaders import ProjectDataLoader
 
 
 def run_validate(folder: str) -> int:
@@ -24,7 +24,7 @@ def main() -> int:
         return run_validate(args.validate)
 
     from PySide6.QtWidgets import QApplication
-    from decay_scheme_app.main_window import MainWindow
+    from app_decay_scheme.main_window import MainWindow
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()

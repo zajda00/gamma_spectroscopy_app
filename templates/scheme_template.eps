@@ -1,4 +1,4 @@
-\%!PS-Adobe-3.0 EPSF-3.0
+%!PS-Adobe-3.0 EPSF-3.0
 %%Title: Scheme of excited states in 122Cd
 %%BoundingBox: 0 0 1400 1600
 %%Pages: 1
@@ -25,52 +25,99 @@
 
 %%BeginProlog
 
-% Some options
-/dSym (Cd) def 	%daughter nucleus' symbol
-/dA 122 def 	%number of nucleons in daughter nucleus 
-/dZ 48 def 		%number of protons in daughter nucleus
-/mShow 1 def 	%set 1 if you want to show mother nucleus
-/mSym (Ag) def 	%mother nucleus' symbol
-/mA 122 def 	%number of nucleons in mother nucleus
-/mZ 47 def		%number of protons in mother nucleus
-/decay 2 def	%decay mode
-% decay mode	| /decay 	%
-% blank			| 0			%
-% alpha			| 1			%
-% beta-			| 2			%
-% beta+			| 3			%
-% beta-n		| 4			%
+%=======================================================================
+% PROJECT VARIABLES
+% Wszystkie podstawowe dane projektu i parametry rysowania edytuj tutaj.
+% Aplikacja powinna podmieniać tylko te wartości.
+%=======================================================================
 
-/mT12Show 1 def					%set 1 if you want to show half-life time of mother nucleus
-/mSpinparShow 1 def				%set 1 if you want to show spin and parity of mother nucleus
-/mQShow 1 def					%set 1 if you want to show Q value of decay
-/mSnShow 0 def					%set 1 if you want to show single-neutron separation energy
-/mPnShow 0 def					%set 1 if you want to show P(n) value 
+%-------------------------
+% Daughter nucleus
+%-------------------------
+/dSym (Cd) def                 % daughter nucleus symbol
+/dA 122 def                    % daughter mass number A
+/dZ 48 def                     % daughter proton number Z
+/dN 74 def                     % daughter neutron number N
 
-/mT12 (0,72(10) s) def			%half-life time of mother nucleus (for microseconds write us)
-/mSpinpar ((8-)) def				%spin and parity of mother nuclues
-/mSn () def						%single-neutron separation energy
-/mPn() def						%Pn value
+%-------------------------
+% Mother nucleus
+%-------------------------
+/mShow 1 def                   % 1 = show mother nucleus, 0 = hide
+/mSym (Ag) def                 % mother nucleus symbol
+/mA 122 def                    % mother mass number A
+/mZ 47 def                     % mother proton number Z
+/mN 75 def                     % mother neutron number N
 
-/sNuclShow 0 def				%set 1 if you want to show nucleus separation energy
-/sNucl 5834 def 				%nucleus separation energy (keV)
-/sNuclType (n) def				%type of nucleus (p - proton, n - neutron)
+%-------------------------
+% Decay channel
+% 0 = blank
+% 1 = alpha
+% 2 = beta-
+% 3 = beta+
+% 4 = beta-n
+%-------------------------
+/decay 2 def
 
-/betapcShow 1 def				%set 1 if you want to show beta feeding
-/logftShow 1 def				%set 1 if you want to show logft
-/spinparShow 1 def 				%set 1 if you want to show spins and parities
-/t12Show 1 def 					%set 1 if you want to show half-life time of level
+%-------------------------
+% Mother-info display toggles
+%-------------------------
+/mT12Show 1 def                % show mother half-life
+/mSpinparShow 1 def            % show mother spin/parity
+/mQShow 1 def                  % show mother Q value
+/mSnShow 0 def                 % show mother Sn text
+/mPnShow 0 def                 % show mother Pn text
 
-/scaleX {0.1 mul} def 			% this will give a wider plot
-/scaleE {2.7 mul} def 			% definition of energy scale, maxE = 6780 keV for scaleE = 1
+%-------------------------
+% Mother values
+%-------------------------
+/mT12 () def                   % e.g. (0.72(10) s)
+/mSpinpar () def               % e.g. ((1-), (9-))
+/mQ () def                     % e.g. (9510(40) keV)
+/mSn () def                    % e.g. (5834 keV)
+/mPn () def                    % e.g. (12.3)
 
-/fontSize 15 def 				%levels font size
+%-------------------------
+% Separation-energy helper line
+%-------------------------
+/sNuclShow 0 def               % 1 = show separation-energy level
+/sNucl 0 def                   % separation energy in keV
+/sNuclType (n) def             % (n) neutron, (p) proton
 
-/fontSizeTrans 12 def 			%transition font size
+%-------------------------
+% Level-side annotations
+%-------------------------
+/betapcShow 1 def              % show beta feeding
+/logftShow 1 def               % show logft
+/spinparShow 1 def             % show level spin/parity
+/t12Show 1 def                 % show level half-life
 
-%Some magic functions
-/s 20 string def 				%create very useful string
-/cm {28.3464567 mul} def 		%centimeter definition
+%-------------------------
+% Drawing scales and layout
+%-------------------------
+/scaleX {0.1 mul} def          % horizontal scale helper
+/scaleE {2.7 mul} def          % energy scale helper
+/fontSize 15 def               % level font size
+/fontSizeTrans 12 def          % transition font size
+
+%-------------------------
+% Color convention
+%-------------------------
+% 0 = black, accepted
+% 1 = red, new
+% 2 = blue, literature / unevaluated
+% 3 = green, helper / separation line
+
+%-------------------------
+% Dashed convention
+%-------------------------
+% 0 = solid
+% 1 = dashed
+% -1 = long-dashed
+
+% Some magic functions
+/s 20 string def
+/cm {28.3464567 mul} def
+
 
 %convert 2 vars name (e.g. stringwidth) to 1 var
 /xytox {
@@ -362,17 +409,23 @@ mShow 1 eq {
 		
 		newpath
 		/Helvetica findfont fontSize scalefont setfont
+
+		% line 1: spin/parity close to the mother nucleus
 		0.5 cm 53.6 cm moveto
 		mSpinparShow 1 eq {
 			mSpinpar convertToMinus fontSize upShow
 		} if
-		mT12Show 1 eq {
-			mSpinparShow 1 eq {
-			(   ) show
-			} if
-			mT12 assymShow
-		} if
 		stroke
+
+		% line 2: mother-state half-life under the mother nucleus, above Q-value
+		mT12Show 1 eq {
+			newpath
+			/Helvetica findfont fontSize scalefont setfont
+			0.8 cm 49.1 cm moveto
+			mT12 assymShow
+			stroke
+		} if
+
 
 		%drawing arrowhead
 		6.5 cm 51 cm 0.5 cm 30 arrow
@@ -856,15 +909,6 @@ end
 %0 0 0 setrgbcolor
 %-0 cm 10.5 cm translate
 
-/mSym (Ag) def 	%mother nucleus' symbol
-/mA 122 def 	%number of nucleons in mother nucleus
-/mZ 47 def		%number of protons in mother nucleus
-/mN 75 def		%number of neutrons in mother nucleus
-/decay 2 def	%decay mode
-/mT12 () def			%half-life time of mother nucleus (for microseconds write us)
-/mSpinpar ((1-), (9-)) def				%spin and parity of mother nuclues
-/mQ (9510(40) keV) def			%Q value of decays
-
 0 cm 0.1 cm translate
 0 0	 0.0 setrgbcolor %RGB: 0 128 0
 motherNucleus
@@ -881,44 +925,40 @@ nucleusSeparationLevel
 
 0 %begining value of /lastLevelEndELabel
 
-()	()			(0.00)			(0+)		0.00	(	)		0	0	level	%mother level - ground state
-(>5.85)	(7.467)			(569.36)		(2+)		569.36		()		0	0	level
-(>5.83)	(5.289)			(1328.92)		((4+))		1328.92	()		0	0	level
-(>5.71)	(6.727)			(1367.88)		((2)+)		1367.88	()		0	0	level
-(>6.36)	(1.246)			(1704.59)		(0(+))		1704.59	()		0	0	level
-(>6.43)	(0.944)			(1909.97)	 	((3-))		1909.97	()		0	0	level
-(>5.37)	(10.321)		(1978.97)	 	((3,4+), 5-)		1978.97	()		0	0	level
-(>6.37)	(1.028)			(1992.05)	 	(0(+))		1992.05	()		0	0	level
-(>5.65)	(4.880)			(2177.64)		((6+))		2177.64 	()		0	0	level
-(>6.15)	(1.504)			(2196.41)		()		2196.41 	()		0	0	level
-(>6.25)	(1.129)			(2315.85)		()		2315.85	()		0	0	level
-()	()			(2444.47)		()		2444.47	()		0	0	level
-(>5.21)	(11.031)		(2502.11)		((7-))		2502.11	()		0	0	level
-(>5.63)	(4.043)			(2535.66)		()		2535.66	()		0	0	level
-(>5.87)	(2.290)			(2577.57)		()		2577.57	()		0	0	level
-(6.40)	(0.657)			(2616.22)		((8-))		2616.22	()		0	2	level
-(>5.05)	(14.273)		(2644.12)		()		2644.12	()		0	0	level
-(>5.82)	(2.411)			(2668.27)		()		2668.27	()		0	0	level
-(>6.62)	(0.370)			(2702.14)		()		2702.14	()		0	1	level
-(>5.62)	(3.540)			(2800.16)		()		2800.16	()		0	0	level
-(>6.36)	(0.625)			(2822.87)		((8+))		2822.87	()		0	0	level
-(>6.03)	(1.322)			(2854.24)		()		2854.24	()		0	1	level
-(>6.50)	(0.425)			(2923.29)		((10+))		2923.29	()		0	1	level
-(>5.94)	(1.533)			(2935.58)		((1-))		2935.58	()		0	1	level
-(>6.10)	(1.030)			(2964.99)		()		2964.99	()		0	1	level
-(>5.74)	(2.250)			(3050.48)		((2+))		3050.48	()		0	1	level
-(>5.29)	(4.682)			(3466.95)		((1, 2))		3466.95	()		0	1	level
-(>5.82)	(1.313)			(3554.80)		((1, 2))		3554.80	()		0	1	level
-(>6.60)	(0.209)			(3607.51)		()		3607.51	()		0	1	level
-(>5.43)	(2.660)			(3808.60)		((1, 2))		3808.60	()		0	1	level
-(>5.91)	(0.706)			(4084.20)		((1, 2))		4084.20	()		0	1	level
-(>5.45)	(1.925)			(4134.90)		()		4134.90	()		0	1	level
-(>5.46)	(1.672)			(4301.94)		((1-))		4301.94	()		0	1	level
-(>5.66)	(0.582)			(4955.00)		((10, 11))		4955.00	()		0	1	level
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% HOW TO EDIT LEVEL LINES
+%%
+%% Format jednej linii:
+%% (logft) (betapc) (E_label) (Jpi) E_level (T12) dashed color level
+%%
+%% Znaczenie pól:
+%% (logft)   - napis po lewej, np. (5.72) albo ()
+%% (betapc)  - napis po lewej, np. (7.467) albo ()
+%% (E_label) - tekst energii wyświetlany przy poziomie, np. (569.36)
+%% (Jpi)     - spin/parity poziomu, np. (2+) albo ()
+%% E_level   - wartość energii poziomu jako liczba, np. 569.36
+%% (T12)     - półokres poziomu, np. (2.4 ns) albo ()
+%% dashed    - 0 linia ciągła, 1 linia przerywana, -1 specjalna przerywana
+%% color     - 0 czarny, 1 czerwony, 2 niebieski, 3 zielony
+%%
+%% UWAGA:
+%% Pierwsza wartość na stosie przed pierwszą linią level to poprzednia pozycja
+%% etykiety energii, ustawiona przez marker:
+%% 0 %begining value of /lastLevelEndELabel
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-()	()			(7610(3))		(Sn)		5500.00  	()		-1	3	level
+% PRZYKŁAD 1: poziom podstawowy
+% ()     ()        (0.00)      (0+)        0.00      ()        0   0   level
+
+% PRZYKŁAD 2: poziom pewny
+% (5.72) (7.467)   (569.36)    (2+)        569.36    ()        0   0   level
+
+% PRZYKŁAD 3: poziom niepewny / pomocniczy
+% ()     ()        (2196.41)   ()          2196.41   ()        1   2   level
+
 
 levelEndX 2.3 cm sub %begining (max) value of x coordinate for transitions
+
 
 } def %end of /preparePage
 
@@ -929,63 +969,48 @@ levelEndX 2.3 cm sub %begining (max) value of x coordinate for transitions
 %-------------------------------------------------------------------------------
 
 %(I) (dI) (E [keV]) (dE) Efrom Eto thickness dashed color trans
-%color 0 - black - NNDC
+%color 0 - black - accepted
 %color 1 - red - new
-%color 2 - blue - published, unevaluated
-%color 3 - green - neutron separation level
+%color 2 - blue - literature / unevaluated
+%color 3 - green - helper / separation related
 
-%color other - black
 %%Page: 1 1
 preparePage
 
 levelEndX 2.3 cm sub %begining (max) value of x coordinate for transitions
 
-()	()	(569.4 (100.0))	()		 	  569.36	0.0		50	0	0	trans
-()	()	(759.6 (68.2))	()			  1328.92	569.36		50	0	0	trans
-()	()	(798.4 (7.3))	()			  1367.88	569.36		50	0	0	trans
-()	()	(1368.0 (3.1))	()			  1367.88	0.0		50	0	0	trans
-()	()	(1135.2 (2.0))	()			  1704.59	569.36		50	0	0	trans
-()	()	(541.9 (0.6))	()			  1909.97	1367.88	50	0	1	trans
-()	()	(1340.6 (0.8))	()			  1909.97	569.36		50	0	0	trans
-()	()	(650.1 (42.4))	()			  1978.97	1328.92	50	0	0	trans
-()	()	(1422.7 (1.2))	()			  1992.05	569.36		50	0	0	trans
-()	()	(848.7 (18.7))	()			  2177.64 	1328.92	50	0	0	trans
-()	()	(1627.1 (1.6))	()			  2196.41	569.36		50	0	0	trans
-()	()	(1746.5 (1.3))	()			  2315.85	569.36		50	0	0	trans
-()	()	(465.5 (2.0))	()			  2444.47	1978.97	50	0	0	trans
-()	()	(324.6 (5.5))	()			  2502.11	2177.64	50	0	0	trans
-()	()	(523.1 (9.2))	()			  2502.11	1978.97	50	0	0	trans
-()	()	(556.7 (5.0))	()			  2535.66	1978.97	50	0	0	trans
-()	()	(2008.2 (2.6))	()			  2577.57	569.36		50	0	0	trans
-()	()	(114.1 (1.9))	()			  2616.22	2502.11	50	0	2	trans
-()	()	(108.5 (0.4))	()			  2644.12	2535.66	50	0	2	trans
-()	()	(142.0 (0.3))	()			  2644.12	2502.11	50	0	1	trans
-()	()	(466.4 (4.7))	()			  2644.12	2177.64	50	0	0	trans
-()	()	(665.3 (6.4))	()			  2644.12	1978.97	50	0	0	trans
-()	()	(689.3 (2.1))	()			  2668.27	1978.97	50	0	0	trans
-()	()	(2099.0 (0.6))	()			  2668.27	569.36		50	0	1	trans
-()	()	(792.0 (0.4))	()			  2702.14	1909.97	50	0	1	trans
-()	()	(821.2 (4.0))	()			  2800.16	1978.97	50	0	0	trans
-()	()	(645.2 (1.2))	()			  2822.87	2177.64	50	0	0	trans
-()	()	(875.3 (1.5))	()			  2854.24	1978.97	50	0	1	trans
-()	()	(100.4 (0.5))	()			  2923.29	2822.87	50	0	1	trans
-()	()	(2366.1 (0.5))	()			  2935.58	569.36		50	0	1	trans
-()	()	(2935.7 (1.2))	()			  2935.58	0.00		50	0	1	trans
-()	()	(348.8 (1.2))	()			  2964.99	2616.22	50	0	1	trans
-()	()	(1721.4 (1.0))	()			  3050.48	1328.92	50	0	1	trans
-()	()	(3050.6 (1.5))	()			  3050.48	0.00		50	0	1	trans
-()	()	(2897.4 (2.7))	()			  3466.95	569.36		50	0	1	trans
-()	()	(3467.2 (2.6))	()			  3466.95	0.00		50	0	1	trans
-()	()	(2985.1 (0.7))	()			  3554.80	569.36		50	0	1	trans
-()	()	(3555.1 (0.8))	()			  3554.80	0.00		50	0	1	trans
-()	()	(3038.2 (0.2))	()			  3607.51	569.36		50	0	1	trans
-()	()	(3239.2 (1.4))	()			  3808.60	569.36		50	0	1	trans
-()	()	(3808.6 (1.5))	()			  3808.60	0.00		50	0	1	trans
-()	()	(4084.2 (0.8))	()			  4084.20	0.00		50	0	1	trans
-()	()	(2767.0 (2.2))	()			  4134.90	1367.88	50	0	1	trans
-()	()	(2596.2 (0.6))	()			  4301.94	1704.59	50	0	1	trans
-()	()	(3732.8 (0.8))	()			  4301.94	569.36		50	0	1	trans
-()	()	(4302.8 (0.5))	()			  4301.94	0.00		50	0	1	trans
-()	()	(2031.7 (0.7))	()			  4955.00	2923.29	50	0	1	trans
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% HOW TO EDIT TRANSITION LINES
+%%
+%% Format użycia po markerze levelEndX...:
+%% (I) (dI) (E_label) (dE) Efrom Eto thickness dashed color trans
+%%
+%% Znaczenie pól:
+%% (I)       - etykieta intensywności, np. () albo ()
+%% (dI)      - etykieta niepewności intensywności, zwykle ()
+%% (E_label) - etykieta energii i intensywności, np. (569.4 (100.0))
+%% (dE)      - niepewność energii jako tekst, np. () albo (0.2)
+%% Efrom     - energia poziomu początkowego
+%% Eto       - energia poziomu końcowego
+%% thickness - grubość strzałki, zwykle 50 dla standardowej linii
+%% dashed    - 0 ciągła, 1 przerywana
+%% color     - 0 czarna, 1 czerwona, 2 niebieska, 3 zielona
+%%
+%% UWAGA:
+%% Pierwsza wartość x dla pierwszego przejścia jest już ustawiona przez:
+%% levelEndX 2.3 cm sub
+%% Funkcja /trans zwraca nową wartość x dla następnej linii, więc kolejne
+%% przejścia można wpisywać jedno pod drugim bez ręcznego podawania x.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% PRZYKŁAD 1: przejście pewne
+% () () (569.4 (100.0)) ()   569.36 0.00    50 0 0 trans
+
+% PRZYKŁAD 2: przejście nowe
+% () () (2031.7 (0.7))  ()   4955.00 2923.29 50 0 1 trans
+
+% PRZYKŁAD 3: przejście niepewne
+% () () (875.3 (1.5))   ()   2854.24 1978.97 50 1 2 trans
+
 
 showpage

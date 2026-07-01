@@ -3,13 +3,13 @@ from dataclasses import asdict
 from pathlib import Path
 from datetime import datetime
 import shutil
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSignalBlocker
 from PySide6.QtGui import QAction, QPixmap
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QFileDialog, QMessageBox, QVBoxLayout, QHBoxLayout,
     QTabWidget, QLabel, QLineEdit, QPushButton, QTableWidget, QTableWidgetItem,
     QSplitter, QPlainTextEdit, QCheckBox, QComboBox, QFormLayout, QScrollArea,
-    QDialog, QTextEdit, QInputDialog
+    QDialog, QTextEdit, QInputDialog, QSpinBox, QDoubleSpinBox, QGroupBox
 )
 
 from .abf import compute_abf
@@ -18,6 +18,7 @@ from .eps_template import EpsTemplateEngine
 from .loaders import ProjectDataLoader
 from .logft import compute_logft
 from .preview import render_eps_to_png, find_ghostscript_executable
+from .periodic_table import complete_from_symbol, complete_from_z, z_from_symbol, symbol_from_z
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -29,7 +30,8 @@ class MainWindow(QMainWindow):
         self.input_folder: Path | None = None     # Original input folder
         self.template_path: Path | None = None
         self.output_folder: Path | None = None    # Folder in outputs/ for this project
-        self.output_eps_path: Path | None = None
+        self.output_eps_path: Path | None = None  # Permanent output file (only written by Save)
+        self.temp_eps_path: Path | None = None    # Temporary file (overwritten by Reload)
         self.preview_pixmap = None
         self.preview_zoom = 1.0
         self.preview_fit_to_window = False  # Default: show at 100% zoom instead of trying to fit (which may fail during init)
@@ -108,8 +110,8 @@ class MainWindow(QMainWindow):
             self._populate_ui_from_project()
             self.recompute_everything()
             
-            # Generate preview immediately
-            self.maybe_write_scheme(force=True)
+            # Generate preview immediately to temporary file
+            self.maybe_write_scheme(force=True, use_temp_file=True)
             
             QMessageBox.information(
                 self,
@@ -165,8 +167,8 @@ class MainWindow(QMainWindow):
             self._populate_ui_from_project()
             self.recompute_everything()
             
-            # Generate preview immediately
-            self.maybe_write_scheme(force=True)
+            # Generate preview immediately to temporary file
+            self.maybe_write_scheme(force=True, use_temp_file=True)
             
             QMessageBox.information(
                 self,
@@ -262,6 +264,12 @@ class MainWindow(QMainWindow):
         filename = f'{parent}_{daughter}_{timestamp}.eps'
         
         return self.output_folder / filename
+
+    def _get_temp_eps_path(self) -> Path:
+        """Get temporary EPS file path (in system temp directory)."""
+        import tempfile
+        temp_dir = Path(tempfile.gettempdir())
+        return temp_dir / 'decay_scheme_preview.eps'
 
 
     def _setup_ui(self):
@@ -376,40 +384,259 @@ class MainWindow(QMainWindow):
         return container
 
     def _build_settings_tab(self):
+        """Extended Settings tab with nucleus data, decay params, and render settings."""
         main_layout = QVBoxLayout(self.settings_tab)
-        
         split = QSplitter(Qt.Horizontal)
         
-        # Left side: settings form
+        # Left side: scrollable settings form
+        settings_scroll = QScrollArea()
+        settings_scroll.setWidgetResizable(True)
         settings_widget = QWidget()
-        layout = QFormLayout(settings_widget)
+        form = QFormLayout(settings_widget)
+        
+        # ===== DECAY PROCESS =====
+        decay_grp = QGroupBox("Decay Process")
+        decay_lay = QFormLayout(decay_grp)
         self.parent_edit = QLineEdit()
         self.daughter_edit = QLineEdit()
+        self.decay_channel_spin = QSpinBox(); self.decay_channel_spin.setRange(0, 4); self.decay_channel_spin.setValue(2)
+        decay_lay.addRow('Parent nucleus', self.parent_edit)
+        decay_lay.addRow('Daughter nucleus', self.daughter_edit)
+        decay_lay.addRow('Decay channel (0=blank, 1=α, 2=β-, 3=β+, 4=β-n)', self.decay_channel_spin)
+        form.addRow(decay_grp)
+        
+        # ===== MOTHER NUCLEUS DATA =====
+        m_nuc_grp = QGroupBox("Mother nucleus (detailed)")
+        m_nuc_lay = QFormLayout(m_nuc_grp)
+        self.mother_a_spin = QSpinBox(); self.mother_a_spin.setRange(1, 300)
+        self.mother_symbol_edit = QLineEdit()
+        self.mother_z_spin = QSpinBox(); self.mother_z_spin.setRange(1, 118)
+        self.mother_n_spin = QSpinBox(); self.mother_n_spin.setReadOnly(True); self.mother_n_spin.setRange(0, 300)
+        m_nuc_lay.addRow('A', self.mother_a_spin)
+        m_nuc_lay.addRow('Symbol', self.mother_symbol_edit)
+        m_nuc_lay.addRow('Z', self.mother_z_spin)
+        m_nuc_lay.addRow('N (auto)', self.mother_n_spin)
+        form.addRow(m_nuc_grp)
+        
+        # ===== DAUGHTER NUCLEUS DATA =====
+        d_nuc_grp = QGroupBox("Daughter nucleus (detailed)")
+        d_nuc_lay = QFormLayout(d_nuc_grp)
+        self.daughter_a_spin = QSpinBox(); self.daughter_a_spin.setRange(1, 300)
+        self.daughter_symbol_edit = QLineEdit()
+        self.daughter_z_spin = QSpinBox(); self.daughter_z_spin.setRange(1, 118)
+        self.daughter_n_spin = QSpinBox(); self.daughter_n_spin.setReadOnly(True); self.daughter_n_spin.setRange(0, 300)
+        d_nuc_lay.addRow('A', self.daughter_a_spin)
+        d_nuc_lay.addRow('Symbol', self.daughter_symbol_edit)
+        d_nuc_lay.addRow('Z', self.daughter_z_spin)
+        d_nuc_lay.addRow('N (auto)', self.daughter_n_spin)
+        form.addRow(d_nuc_grp)
+        
+        # ===== Q-VALUE =====
+        q_grp = QGroupBox("Q-value")
+        q_lay = QFormLayout(q_grp)
         self.qbeta_edit = QLineEdit()
         self.dqbeta_edit = QLineEdit()
-        self.mother_spin_edit = QLineEdit()
-        self.mother_t12_edit = QLineEdit()
+        q_lay.addRow('Qbeta [keV]', self.qbeta_edit)
+        q_lay.addRow('dQbeta [keV]', self.dqbeta_edit)
+        form.addRow(q_grp)
+        
+        # ===== MOTHER DISPLAY VALUES =====
+        m_val_grp = QGroupBox("Mother display values")
+        m_val_lay = QFormLayout(m_val_grp)
+        self.mother_spinpar_edit = QLineEdit(); self.mother_spinpar_edit.setPlaceholderText('e.g., (1-)')
+        self.mother_t12_edit = QLineEdit(); self.mother_t12_edit.setPlaceholderText('e.g., 0.72(10) s')
+        self.mother_q_edit = QLineEdit(); self.mother_q_edit.setPlaceholderText('e.g., 9510(40) keV')
+        self.mother_sn_edit = QLineEdit(); self.mother_sn_edit.setPlaceholderText('e.g., 5834 keV')
+        self.mother_pn_edit = QLineEdit(); self.mother_pn_edit.setPlaceholderText('e.g., 12.3')
+        m_val_lay.addRow('Spin/parity', self.mother_spinpar_edit)
+        m_val_lay.addRow('T1/2', self.mother_t12_edit)
+        m_val_lay.addRow('Q value', self.mother_q_edit)
+        m_val_lay.addRow('Sn', self.mother_sn_edit)
+        m_val_lay.addRow('Pn', self.mother_pn_edit)
+        form.addRow(m_val_grp)
+        
+        # ===== SEPARATION ENERGY =====
+        sep_grp = QGroupBox("Separation energy")
+        sep_lay = QFormLayout(sep_grp)
         self.sn_edit = QLineEdit()
-        self.sn_show_combo = QComboBox(); self.sn_show_combo.addItems(['0', '1'])
+        self.sn_show_check = QCheckBox()
+        self.sep_energy_type_combo = QComboBox(); self.sep_energy_type_combo.addItems(['n', 'p'])
+        sep_lay.addRow('Value [keV]', self.sn_edit)
+        sep_lay.addRow('Show', self.sn_show_check)
+        sep_lay.addRow('Type (n/p)', self.sep_energy_type_combo)
+        form.addRow(sep_grp)
+        
+        # ===== MOTHER DISPLAY TOGGLES =====
+        m_tog_grp = QGroupBox("Mother display toggles")
+        m_tog_lay = QFormLayout(m_tog_grp)
+        self.mother_show_check = QCheckBox(); self.mother_show_check.setChecked(True)
+        self.mother_t12_show_check = QCheckBox(); self.mother_t12_show_check.setChecked(True)
+        self.mother_spinpar_show_check = QCheckBox(); self.mother_spinpar_show_check.setChecked(True)
+        self.mother_q_show_check = QCheckBox(); self.mother_q_show_check.setChecked(True)
+        self.mother_sn_show_check = QCheckBox(); self.mother_sn_show_check.setChecked(False)
+        self.mother_pn_show_check = QCheckBox(); self.mother_pn_show_check.setChecked(False)
+        m_tog_lay.addRow('Show nucleus', self.mother_show_check)
+        m_tog_lay.addRow('Show T1/2', self.mother_t12_show_check)
+        m_tog_lay.addRow('Show spin/parity', self.mother_spinpar_show_check)
+        m_tog_lay.addRow('Show Q', self.mother_q_show_check)
+        m_tog_lay.addRow('Show Sn', self.mother_sn_show_check)
+        m_tog_lay.addRow('Show Pn', self.mother_pn_show_check)
+        form.addRow(m_tog_grp)
+        
+        # ===== LEVEL ANNOTATIONS =====
+        lev_grp = QGroupBox("Level annotations")
+        lev_lay = QFormLayout(lev_grp)
+        self.beta_feeding_show_check = QCheckBox(); self.beta_feeding_show_check.setChecked(True)
+        self.logft_show_check = QCheckBox(); self.logft_show_check.setChecked(True)
+        self.spinpar_show_check = QCheckBox(); self.spinpar_show_check.setChecked(True)
+        self.t12_show_check = QCheckBox(); self.t12_show_check.setChecked(True)
+        lev_lay.addRow('Show beta feeding', self.beta_feeding_show_check)
+        lev_lay.addRow('Show log ft', self.logft_show_check)
+        lev_lay.addRow('Show spin/parity', self.spinpar_show_check)
+        lev_lay.addRow('Show T1/2', self.t12_show_check)
+        form.addRow(lev_grp)
+        
+        # ===== DRAWING PARAMETERS =====
+        draw_grp = QGroupBox("Drawing parameters")
+        draw_lay = QFormLayout(draw_grp)
+        self.font_size_spin = QSpinBox(); self.font_size_spin.setRange(8, 36); self.font_size_spin.setValue(15)
+        self.font_size_trans_spin = QSpinBox(); self.font_size_trans_spin.setRange(8, 36); self.font_size_trans_spin.setValue(12)
+        draw_lay.addRow('Font size (levels)', self.font_size_spin)
+        draw_lay.addRow('Font size (transitions)', self.font_size_trans_spin)
+        form.addRow(draw_grp)
+        
+        # ===== ABF/LOGFT OPTIONS =====
+        abf_grp = QGroupBox("ABF/logft computation")
+        abf_lay = QFormLayout(abf_grp)
         self.abf_field_combo = QComboBox(); self.abf_field_combo.addItems(['absolute_percent', 'relative_percent'])
-        layout.addRow('Parent nucleus', self.parent_edit)
-        layout.addRow('Daughter nucleus', self.daughter_edit)
-        layout.addRow('Qbeta [keV]', self.qbeta_edit)
-        layout.addRow('dQbeta [keV]', self.dqbeta_edit)
-        layout.addRow('Mother spin display', self.mother_spin_edit)
-        layout.addRow('Mother half-life display', self.mother_t12_edit)
-        layout.addRow('Neutron separation energy [keV]', self.sn_edit)
-        layout.addRow('Show neutron separation', self.sn_show_combo)
-        layout.addRow('ABF basis field', self.abf_field_combo)
-        for w in [self.parent_edit, self.daughter_edit, self.qbeta_edit, self.dqbeta_edit, self.mother_spin_edit, self.mother_t12_edit, self.sn_edit]:
-            w.editingFinished.connect(self._sync_settings_to_model)
-        self.sn_show_combo.currentIndexChanged.connect(self._sync_settings_to_model)
+        abf_lay.addRow('ABF basis field', self.abf_field_combo)
+        form.addRow(abf_grp)
         
-        split.addWidget(settings_widget)
+        # ===== PNG OUTPUT =====
+        png_grp = QGroupBox("PNG output")
+        png_lay = QFormLayout(png_grp)
+        self.png_white_background_check = QCheckBox(); self.png_white_background_check.setChecked(True)
+        png_lay.addRow('White background', self.png_white_background_check)
+        form.addRow(png_grp)
+        
+        settings_scroll.setWidget(settings_widget)
+        split.addWidget(settings_scroll)
         split.addWidget(self._create_preview_widget(include_reload_save=True))
-        split.setSizes([600, 1000])
-        
+        split.setSizes([700, 900])
         main_layout.addWidget(split)
+        
+        # Connect auto-fill and sync signals
+        self._connect_nucleus_auto_fill()
+        self._connect_settings_signals()
+
+    def _connect_nucleus_auto_fill(self):
+        """Set up auto-fill logic for nucleus fields using periodic table."""
+        self.mother_a_spin.valueChanged.connect(self._mother_nucleus_changed)
+        self.mother_symbol_edit.editingFinished.connect(self._mother_nucleus_changed)
+        self.mother_z_spin.valueChanged.connect(self._mother_nucleus_changed)
+        self.daughter_a_spin.valueChanged.connect(self._daughter_nucleus_changed)
+        self.daughter_symbol_edit.editingFinished.connect(self._daughter_nucleus_changed)
+        self.daughter_z_spin.valueChanged.connect(self._daughter_nucleus_changed)
+
+    def _mother_nucleus_changed(self):
+        """Auto-fill mother nucleus fields (A, symbol, Z, N)."""
+        if self._building or self.project is None:
+            return
+        
+        a = self.mother_a_spin.value()
+        symbol = self.mother_symbol_edit.text().strip()
+        z = self.mother_z_spin.value()
+        
+        # Try A + symbol → Z + N
+        if a > 0 and symbol:
+            try:
+                data = complete_from_symbol(a, symbol)
+                with QSignalBlocker(self.mother_z_spin):
+                    self.mother_z_spin.setValue(data['Z'])
+                with QSignalBlocker(self.mother_n_spin):
+                    self.mother_n_spin.setValue(data['N'])
+                return
+            except:
+                pass
+        
+        # Try A + Z → symbol + N
+        if a > 0 and z > 0:
+            try:
+                data = complete_from_z(a, z)
+                with QSignalBlocker(self.mother_symbol_edit):
+                    self.mother_symbol_edit.setText(data['symbol'])
+                with QSignalBlocker(self.mother_n_spin):
+                    self.mother_n_spin.setValue(data['N'])
+                return
+            except:
+                pass
+        
+        # Just update N = A - Z
+        if a > 0 and z > 0:
+            n = a - z
+            with QSignalBlocker(self.mother_n_spin):
+                self.mother_n_spin.setValue(max(0, n))
+
+    def _daughter_nucleus_changed(self):
+        """Auto-fill daughter nucleus fields (A, symbol, Z, N)."""
+        if self._building or self.project is None:
+            return
+        
+        a = self.daughter_a_spin.value()
+        symbol = self.daughter_symbol_edit.text().strip()
+        z = self.daughter_z_spin.value()
+        
+        # Try A + symbol → Z + N
+        if a > 0 and symbol:
+            try:
+                data = complete_from_symbol(a, symbol)
+                with QSignalBlocker(self.daughter_z_spin):
+                    self.daughter_z_spin.setValue(data['Z'])
+                with QSignalBlocker(self.daughter_n_spin):
+                    self.daughter_n_spin.setValue(data['N'])
+                return
+            except:
+                pass
+        
+        # Try A + Z → symbol + N
+        if a > 0 and z > 0:
+            try:
+                data = complete_from_z(a, z)
+                with QSignalBlocker(self.daughter_symbol_edit):
+                    self.daughter_symbol_edit.setText(data['symbol'])
+                with QSignalBlocker(self.daughter_n_spin):
+                    self.daughter_n_spin.setValue(data['N'])
+                return
+            except:
+                pass
+        
+        # Just update N = A - Z
+        if a > 0 and z > 0:
+            n = a - z
+            with QSignalBlocker(self.daughter_n_spin):
+                self.daughter_n_spin.setValue(max(0, n))
+
+    def _connect_settings_signals(self):
+        """Connect all settings widgets to sync-to-model."""
+        for w in [self.parent_edit, self.daughter_edit, self.qbeta_edit, self.dqbeta_edit,
+                  self.mother_spinpar_edit, self.mother_t12_edit, self.mother_q_edit,
+                  self.mother_sn_edit, self.mother_pn_edit, self.sn_edit]:
+            w.editingFinished.connect(self._sync_settings_to_model)
+        
+        for w in [self.decay_channel_spin, self.mother_a_spin, self.mother_z_spin,
+                  self.daughter_a_spin, self.daughter_z_spin, self.font_size_spin,
+                  self.font_size_trans_spin]:
+            w.valueChanged.connect(self._sync_settings_to_model)
+        
+        for w in [self.sep_energy_type_combo, self.abf_field_combo]:
+            w.currentIndexChanged.connect(self._sync_settings_to_model)
+        
+        for w in [self.sn_show_check, self.mother_show_check, self.mother_t12_show_check,
+                  self.mother_spinpar_show_check, self.mother_q_show_check,
+                  self.mother_sn_show_check, self.mother_pn_show_check,
+                  self.beta_feeding_show_check, self.logft_show_check,
+                  self.spinpar_show_check, self.t12_show_check, self.png_white_background_check]:
+            w.stateChanged.connect(self._sync_settings_to_model)
 
     def _build_levels_tab(self):
         main_layout = QVBoxLayout(self.levels_tab)
@@ -569,8 +796,16 @@ class MainWindow(QMainWindow):
         def on_save():
             new_text = editor.toPlainText()
             self.eps_preview.setPlainText(new_text)
-            if self.output_eps_path:
-                self.output_eps_path.write_text(new_text, encoding='utf-8')
+            # Save edited EPS to temporary file for preview
+            temp_eps_path = self._get_temp_eps_path()
+            temp_eps_path.write_text(new_text, encoding='utf-8')
+            # Re-render preview
+            png_path = temp_eps_path.with_suffix('.png')
+            white_bg = self.project.render_settings.png_white_background if self.project else True
+            ok, preview_message = render_eps_to_png(temp_eps_path, png_path, white_background=white_bg)
+            if ok:
+                self.preview_pixmap = QPixmap(str(png_path))
+                self._update_preview_pixmap()
             dialog.accept()
         
         save_btn.clicked.connect(on_save)
@@ -588,22 +823,81 @@ class MainWindow(QMainWindow):
         path, _ = QFileDialog.getOpenFileName(self, 'Select scheme template txt/eps', '', 'Text or EPS (*.txt *.eps *.ps);;All files (*)')
         if path:
             self.template_path = Path(path)
+            # Generate preview immediately to temporary file
             self.maybe_write_scheme(force=True)
 
     def _populate_ui_from_project(self):
+        """Populate all GUI fields from project data."""
         self._building = True
         b = self.project.beta_inputs
+        r = self.project.render_settings
+        
+        # Decay process
         self.parent_edit.setText(b.parent_nucleus)
         self.daughter_edit.setText(b.daughter_nucleus)
+        self.decay_channel_spin.setValue(b.decay_channel)
+        
+        # Mother nucleus (detailed)
+        self.mother_a_spin.setValue(b.mother_a if b.mother_a > 0 else 122)
+        self.mother_symbol_edit.setText(symbol_from_z(b.mother_z) if b.mother_z > 0 else 'Ag')
+        self.mother_z_spin.setValue(b.mother_z if b.mother_z > 0 else 47)
+        self.mother_n_spin.setValue(b.mother_n if b.mother_n > 0 else b.mother_a - b.mother_z)
+        
+        # Daughter nucleus (detailed)
+        self.daughter_a_spin.setValue(b.daughter_a if b.daughter_a > 0 else 122)
+        self.daughter_symbol_edit.setText(symbol_from_z(b.daughter_z) if b.daughter_z > 0 else 'Cd')
+        self.daughter_z_spin.setValue(b.daughter_z if b.daughter_z > 0 else 48)
+        self.daughter_n_spin.setValue(b.daughter_n if b.daughter_n > 0 else b.daughter_a - b.daughter_z)
+        
+        # Q-value
         self.qbeta_edit.setText(str(b.qbeta_keV))
         self.dqbeta_edit.setText(str(b.dqbeta_keV))
-        self.mother_spin_edit.setText(b.mother_spin_display)
-        self.mother_t12_edit.setText(b.mother_half_life_display)
+        
+        # Mother display values
+        self.mother_spinpar_edit.setText(b.mother_spinpar or b.mother_spin_display)
+        self.mother_t12_edit.setText(b.mother_t12 or b.mother_half_life_display)
+        self.mother_q_edit.setText(b.mother_q)
+        self.mother_sn_edit.setText(b.mother_sn)
+        self.mother_pn_edit.setText(b.mother_pn)
+        
+        # Separation energy
         self.sn_edit.setText('' if b.neutron_separation_energy_keV is None else str(b.neutron_separation_energy_keV))
-        self.sn_show_combo.setCurrentText('1' if b.show_neutron_separation else '0')
+        self.sn_show_check.setChecked(b.show_neutron_separation)
+        self.sep_energy_type_combo.setCurrentText(b.separation_energy_type)
+        
+        # Mother display toggles
+        self.mother_show_check.setChecked(r.mother_show)
+        self.mother_t12_show_check.setChecked(r.mother_t12_show)
+        self.mother_spinpar_show_check.setChecked(r.mother_spinpar_show)
+        self.mother_q_show_check.setChecked(r.mother_q_show)
+        self.mother_sn_show_check.setChecked(r.mother_sn_show)
+        self.mother_pn_show_check.setChecked(r.mother_pn_show)
+        
+        # Level annotations
+        self.beta_feeding_show_check.setChecked(r.beta_feeding_show)
+        self.logft_show_check.setChecked(r.logft_show)
+        self.spinpar_show_check.setChecked(r.spinpar_show)
+        self.t12_show_check.setChecked(r.t12_show)
+        
+        # Drawing parameters
+        self.font_size_spin.setValue(r.font_size)
+        self.font_size_trans_spin.setValue(r.font_size_trans)
+        
+        # ABF/logft
+        self.abf_field_combo.setCurrentText(self.abf_field_combo.itemText(
+            max(0, self.abf_field_combo.findText('absolute_percent' if hasattr(self, '_abf_field') else 'absolute_percent'))
+        ) if hasattr(self, '_abf_field') else 'absolute_percent')
+        
+        # PNG output settings
+        self.png_white_background_check.setChecked(r.png_white_background)
+        
+        # Notes
         self.notes_edit.setPlainText(self.project.analysis_notes_text)
+        
+        # Tables
         self._fill_levels_table()
         self._fill_transitions_table()
+        
         self._building = False
 
     def _fill_levels_table(self):
@@ -659,22 +953,66 @@ class MainWindow(QMainWindow):
         self.recompute_everything()
 
     def _sync_settings_to_model(self):
+        """Sync all GUI settings to project model."""
         if self._building or self.project is None:
             return
         b = self.project.beta_inputs
+        r = self.project.render_settings
+        
+        # Decay process
         b.parent_nucleus = self.parent_edit.text().strip()
         b.daughter_nucleus = self.daughter_edit.text().strip()
+        b.decay_channel = self.decay_channel_spin.value()
+        
+        # Mother nucleus (detailed)
+        b.mother_a = self.mother_a_spin.value()
+        b.mother_z = self.mother_z_spin.value()
+        b.mother_n = self.mother_n_spin.value()
+        
+        # Daughter nucleus (detailed)
+        b.daughter_a = self.daughter_a_spin.value()
+        b.daughter_z = self.daughter_z_spin.value()
+        b.daughter_n = self.daughter_n_spin.value()
+        
+        # Q-value
         try: b.qbeta_keV = float(self.qbeta_edit.text())
         except ValueError: pass
         try: b.dqbeta_keV = float(self.dqbeta_edit.text())
         except ValueError: pass
-        b.mother_spin_display = self.mother_spin_edit.text().strip()
-        b.mother_half_life_display = self.mother_t12_edit.text().strip()
+        
+        # Mother display values
+        b.mother_spinpar = self.mother_spinpar_edit.text().strip()
+        b.mother_t12 = self.mother_t12_edit.text().strip()
+        b.mother_q = self.mother_q_edit.text().strip()
+        b.mother_sn = self.mother_sn_edit.text().strip()
+        b.mother_pn = self.mother_pn_edit.text().strip()
+        
+        # Separation energy
         try: b.neutron_separation_energy_keV = float(self.sn_edit.text()) if self.sn_edit.text().strip() else None
         except ValueError: pass
-        b.show_neutron_separation = self.sn_show_combo.currentText() == '1'
-        # Note: settings changes require manual 'Reload Scheme' button to regenerate EPS
-        # This avoids unwanted regeneration during typing
+        b.show_neutron_separation = self.sn_show_check.isChecked()
+        b.separation_energy_type = self.sep_energy_type_combo.currentText()
+        
+        # Mother display toggles → RenderSettings
+        r.mother_show = self.mother_show_check.isChecked()
+        r.mother_t12_show = self.mother_t12_show_check.isChecked()
+        r.mother_spinpar_show = self.mother_spinpar_show_check.isChecked()
+        r.mother_q_show = self.mother_q_show_check.isChecked()
+        r.mother_sn_show = self.mother_sn_show_check.isChecked()
+        r.mother_pn_show = self.mother_pn_show_check.isChecked()
+        
+        # Level annotations → RenderSettings
+        r.beta_feeding_show = self.beta_feeding_show_check.isChecked()
+        r.logft_show = self.logft_show_check.isChecked()
+        r.spinpar_show = self.spinpar_show_check.isChecked()
+        r.t12_show = self.t12_show_check.isChecked()
+        
+        # Drawing parameters → RenderSettings
+        r.font_size = self.font_size_spin.value()
+        r.font_size_trans = self.font_size_trans_spin.value()
+        
+        # PNG output settings → RenderSettings
+        r.png_white_background = self.png_white_background_check.isChecked()
 
     def recompute_everything(self):
         if self.project is None:
@@ -690,7 +1028,7 @@ class MainWindow(QMainWindow):
         self.maybe_write_scheme(abf_with=abf_with, logft=logft)
 
     def reload_scheme(self):
-        """Manually reload and regenerate scheme from current data."""
+        """Manually reload and regenerate scheme from current data (to temporary file)."""
         if self.project is None:
             QMessageBox.warning(self, 'No project', 'Load a project first')
             return
@@ -710,7 +1048,7 @@ class MainWindow(QMainWindow):
         logft = compute_logft(self.project.levels, abf_with, self.project.beta_inputs)
         self._fill_logft_table(logft)
         
-        # Generate and write scheme
+        # Generate and write scheme to TEMPORARY file
         self.maybe_write_scheme(force=True, abf_with=abf_with, logft=logft)
         
         # Ensure preview displays at 100% zoom for immediate visibility
@@ -721,27 +1059,40 @@ class MainWindow(QMainWindow):
         QMessageBox.information(self, 'Scheme reloaded', 'Scheme has been regenerated with current data.')
     
     def save_scheme(self):
-        """Manually save current scheme to output folder."""
+        """Save the temporary preview scheme to permanent output folder."""
         if self.project is None or self.output_folder is None:
             QMessageBox.warning(self, 'Error', 'Load a project first')
             return
-        if self.output_eps_path is None:
-            QMessageBox.warning(self, 'Error', 'No output path set')
+        
+        temp_eps_path = self._get_temp_eps_path()
+        if not temp_eps_path.exists():
+            QMessageBox.warning(self, 'Error', 'No preview generated. Click "Reload scheme" first.')
             return
         
         try:
-            # EPS file should already be saved by maybe_write_scheme
-            # PNG file should also exist if Ghostscript worked
-            png_path = self.output_eps_path.with_suffix('.png')
+            import shutil
+            
+            # Build permanent output path
+            self.output_eps_path = self._build_output_path()
+            output_png_path = self.output_eps_path.with_suffix('.png')
+            temp_png_path = temp_eps_path.with_suffix('.png')
+            
+            # Ensure output directory exists
+            self.output_eps_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Copy EPS and PNG files from temporary to permanent location
+            shutil.copy2(str(temp_eps_path), str(self.output_eps_path))
+            if temp_png_path.exists():
+                shutil.copy2(str(temp_png_path), str(output_png_path))
             
             files_saved = [f'EPS: {self.output_eps_path}']
-            if png_path.exists():
-                files_saved.append(f'PNG: {png_path}')
+            if output_png_path.exists():
+                files_saved.append(f'PNG: {output_png_path}')
             
             QMessageBox.information(
                 self,
                 'Scheme saved',
-               f'Scheme files saved in:\n{self.output_folder}\n\n' + '\n'.join(files_saved)
+                f'Scheme files saved in:\n{self.output_folder}\n\n' + '\n'.join(files_saved)
             )
         except Exception as exc:
             QMessageBox.critical(self, 'Error', f'Failed to save scheme:\n{exc}')
@@ -762,17 +1113,18 @@ class MainWindow(QMainWindow):
             for j, v in enumerate(vals):
                 self.logft_table.setItem(i, j, QTableWidgetItem(v))
 
-    def maybe_write_scheme(self, force: bool = False, abf_with=None, logft=None):
+    def maybe_write_scheme(self, force: bool = False, abf_with=None, logft=None, use_temp_file: bool = False):
+        """
+        Generate EPS scheme to temporary file for preview.
+        Permanent save to output folder is only done via save_scheme().
+        """
         if self.project is None or self.template_path is None:
             return
-        if self.output_folder is None:
-            print('Warning: output_folder not set, cannot write scheme')
-            return
-        if not self.auto_write.isChecked() and not force:
+        if not self.auto_write.isChecked() and not force and not use_temp_file:
             return
         
-        # Build output path based on current parent/daughter
-        self.output_eps_path = self._build_output_path()
+        # Always write to temporary file for preview
+        output_file_path = self._get_temp_eps_path()
         
         try:
             engine = EpsTemplateEngine.from_file(self.template_path)
@@ -788,11 +1140,14 @@ class MainWindow(QMainWindow):
                     logft_map[row.level_id] = f"{logft_map[row.level_id]}/{label}" if logft_map[row.level_id] else label
                 elif label:
                     logft_map[row.level_id] = label
-            text = engine.render(self.project.beta_inputs, self.project.levels, self.project.transitions, abf_map=abf_map, logft_map=logft_map)
-            self.output_eps_path.write_text(text, encoding='utf-8')
+            text = engine.render(self.project.beta_inputs, self.project.levels, self.project.transitions, 
+                                 render_settings=self.project.render_settings,
+                                 abf_map=abf_map, logft_map=logft_map)
+            output_file_path.write_text(text, encoding='utf-8')
             self.eps_preview.setPlainText(text)
-            png_path = self.output_eps_path.with_suffix('.png')
-            ok, preview_message = render_eps_to_png(self.output_eps_path, png_path)
+            png_path = output_file_path.with_suffix('.png')
+            white_bg = self.project.render_settings.png_white_background
+            ok, preview_message = render_eps_to_png(output_file_path, png_path, white_background=white_bg)
             if ok:
                 self.preview_pixmap = QPixmap(str(png_path))
                 self._update_preview_pixmap()
@@ -800,7 +1155,7 @@ class MainWindow(QMainWindow):
 
                 gs_path = find_ghostscript_executable() or 'not found'
                 error_message = (
-                    f'Preview not rendered. Output file updated\n{self.output_eps_path}\n\nGhostscript: {gs_path}\n\n{preview_message}'
+                    f'Preview not rendered\n{output_file_path}\n\nGhostscript: {gs_path}\n\n{preview_message}'
                 )
                 for label in self.preview_labels:
                     label.setText(error_message)

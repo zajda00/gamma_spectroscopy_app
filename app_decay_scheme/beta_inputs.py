@@ -44,6 +44,20 @@ def load_beta_inputs_from_text(text: str) -> BetaInputs:
         show_neutron_separation=bool(payload.get('sNuclShow', False)),
         ground_state_strategy=(payload.get('ground_state_feeding', {}) or {}).get('estimation_method', 'closure_to_100'),
         normalization_reference_keV=float((payload.get('normalization', {}) or {}).get('reference_transition_keV', 0.0) or 0.0),
+        # New fields with defaults
+        mother_a=0,
+        mother_z=0,
+        mother_n=0,
+        daughter_a=0,
+        daughter_z=0,
+        daughter_n=0,
+        mother_t12='',
+        mother_spinpar='',
+        mother_q='',
+        mother_sn='',
+        mother_pn='',
+        decay_channel=2,
+        separation_energy_type='n',
     )
 
 

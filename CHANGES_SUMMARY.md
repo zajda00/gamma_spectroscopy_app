@@ -1,8 +1,8 @@
-# Podsumowanie zmian - Pierwsza większa poprawka do decay_scheme_app
+# Podsumowanie zmian - Pierwsza większa poprawka do app_decay_scheme
 
 ## Pliki zmodyfikowane
 
-### 1. `decay_scheme_app/main_window.py` - główne zmiany
+### 1. `app_decay_scheme/main_window.py` - główne zmiany
 
 #### 1.1. Import:
 - **Dodano**: `from datetime import datetime` - do budowania timestampów w ścieżkach output

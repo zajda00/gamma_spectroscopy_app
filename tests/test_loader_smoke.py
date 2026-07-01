@@ -1,5 +1,5 @@
 from pathlib import Path
-from decay_scheme_app.loaders import ProjectDataLoader
+from app_decay_scheme.loaders import ProjectDataLoader
 
 def test_loader_smoke():
     project = ProjectDataLoader().load_project(Path(__file__).resolve().parents[1] / "example_data")

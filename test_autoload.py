@@ -3,7 +3,7 @@
 
 from pathlib import Path
 from datetime import datetime
-from decay_scheme_app.loaders import ProjectDataLoader
+from app_decay_scheme.loaders import ProjectDataLoader
 
 def test_auto_load_project():
     """Test auto-load of project from data folder."""
