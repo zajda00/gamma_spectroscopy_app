@@ -32,7 +32,7 @@ class MainWindow(QMainWindow):
         self.output_eps_path: Path | None = None
         self.preview_pixmap = None
         self.preview_zoom = 1.0
-        self.preview_fit_to_window = True
+        self.preview_fit_to_window = False  # Default: show at 100% zoom instead of trying to fit (which may fail during init)
         self.eps_edit_mode = False
 
         self._building = False
@@ -46,15 +46,79 @@ class MainWindow(QMainWindow):
         self._show_welcome_dialog()
 
     def _show_welcome_dialog(self):
-        """Show welcome dialog prompting user to load input data."""
-        result = QMessageBox.question(
-            self,
-            'Load Input Data',
-            'Welcome to Decay Scheme App!\n\nWould you like to load input data now?',
-            QMessageBox.Yes | QMessageBox.No
-        )
-        if result == QMessageBox.Yes:
+        """Show welcome dialog: New project or Open existing?"""
+        dialog = QMessageBox(self)
+        dialog.setWindowTitle('Decay Scheme App')
+        dialog.setText('Welcome!\n\nWould you like to create a new project or open an existing one?')
+        new_btn = dialog.addButton('New Project', QMessageBox.AcceptRole)
+        open_btn = dialog.addButton('Open Existing', QMessageBox.AcceptRole)
+        dialog.addButton(QMessageBox.Cancel)
+        
+        dialog.exec()
+        
+        if dialog.clickedButton() == new_btn:
             self.load_input_folder()
+        elif dialog.clickedButton() == open_btn:
+            self._open_existing_project()
+    
+    def _open_existing_project(self):
+        """Show list of existing projects in data/ folder and let user choose."""
+        data_dir = Path('data').resolve()
+        data_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Get list of project folders
+        project_folders = sorted([d for d in data_dir.iterdir() if d.is_dir()])
+        
+        if not project_folders:
+            QMessageBox.warning(self, 'No Projects', 'No existing projects found in data/ folder.')
+            return
+        
+        # Create selection dialog
+        dialog = QMessageBox(self)
+        dialog.setWindowTitle('Open Project')
+        dialog.setText('Select a project to open:')
+        
+        # Add buttons for each project
+        project_buttons = {}
+        for proj_folder in project_folders:
+            btn = dialog.addButton(proj_folder.name, QMessageBox.AcceptRole)
+            project_buttons[btn] = proj_folder
+        
+        dialog.addButton(QMessageBox.Cancel)
+        dialog.exec()
+        
+        clicked_btn = dialog.clickedButton()
+        if clicked_btn in project_buttons:
+            self.project_folder = project_buttons[clicked_btn]
+            self._load_existing_project()
+    
+    def _load_existing_project(self):
+        """Load an existing project from project_folder."""
+        if self.project_folder is None:
+            return
+        
+        try:
+            # Determine output folder from project folder name
+            self.output_folder = (Path('outputs').resolve() / self.project_folder.name)
+            self.output_folder.mkdir(parents=True, exist_ok=True)
+            
+            # Load project
+            loader = ProjectDataLoader()
+            self.project = loader.load_project(self.project_folder)
+            self._populate_ui_from_project()
+            self.recompute_everything()
+            
+            # Generate preview immediately
+            self.maybe_write_scheme(force=True)
+            
+            QMessageBox.information(
+                self,
+                'Project Loaded',
+                f'Project loaded from:\n{self.project_folder}'
+            )
+        except Exception as exc:
+            QMessageBox.critical(self, 'Error', f'Failed to load project:\n{exc}')
+            self.project_folder = None
     
     def _try_auto_load_template(self):
         """Attempt to auto-load template from 'templates/scheme_template.eps'."""
@@ -100,6 +164,9 @@ class MainWindow(QMainWindow):
             self.project = loader.load_project(self.project_folder)
             self._populate_ui_from_project()
             self.recompute_everything()
+            
+            # Generate preview immediately
+            self.maybe_write_scheme(force=True)
             
             QMessageBox.information(
                 self,
@@ -339,7 +406,7 @@ class MainWindow(QMainWindow):
         self.sn_show_combo.currentIndexChanged.connect(self._sync_settings_to_model)
         
         split.addWidget(settings_widget)
-        split.addWidget(self._create_preview_widget())
+        split.addWidget(self._create_preview_widget(include_reload_save=True))
         split.setSizes([600, 1000])
         
         main_layout.addWidget(split)
@@ -354,7 +421,7 @@ class MainWindow(QMainWindow):
         split.addWidget(self.levels_table)
         
         # Right side: preview
-        split.addWidget(self._create_preview_widget())
+        split.addWidget(self._create_preview_widget(include_reload_save=True))
         split.setSizes([600, 1000])
         
         main_layout.addWidget(split)
@@ -370,7 +437,7 @@ class MainWindow(QMainWindow):
         split.addWidget(self.transitions_table)
         
         # Right side: preview
-        split.addWidget(self._create_preview_widget())
+        split.addWidget(self._create_preview_widget(include_reload_save=True))
         split.setSizes([600, 1000])
         
         main_layout.addWidget(split)
@@ -393,7 +460,7 @@ class MainWindow(QMainWindow):
         results_layout.addWidget(self.logft_table)
         
         split.addWidget(results_widget)
-        split.addWidget(self._create_preview_widget())
+        split.addWidget(self._create_preview_widget(include_reload_save=True))
         split.setSizes([800, 800])
         
         main_layout.addWidget(split)
@@ -439,18 +506,30 @@ class MainWindow(QMainWindow):
             return
 
         if self.preview_fit_to_window:
+            fit_success = False
             for label in self.preview_labels:
                 try:
                     viewport_size = label.parent().viewport().size()
-                    scaled = self.preview_pixmap.scaled(
-                        viewport_size,
-                        Qt.KeepAspectRatio,
-                        Qt.SmoothTransformation,
-                    )
-                    label.setPixmap(scaled)
-                    label.resize(scaled.size())
+                    # Only scale if viewport has valid size
+                    if viewport_size.width() > 0 and viewport_size.height() > 0:
+                        scaled = self.preview_pixmap.scaled(
+                            viewport_size,
+                            Qt.KeepAspectRatio,
+                            Qt.SmoothTransformation,
+                        )
+                        label.setPixmap(scaled)
+                        label.resize(scaled.size())
+                        fit_success = True
+                    else:
+                        raise ValueError('Invalid viewport size')
                 except:
+                    # Fallback: show at 100% if fit-to-window fails
                     pass
+            # If fit-to-window completely failed for all labels, fallback to 100% view
+            if not fit_success:
+                self.preview_fit_to_window = False
+                self._update_preview_pixmap()
+                return
         else:
             width = max(1, int(self.preview_pixmap.width() * self.preview_zoom))
             height = max(1, int(self.preview_pixmap.height() * self.preview_zoom))
@@ -607,6 +686,7 @@ class MainWindow(QMainWindow):
         self._fill_abf_table(self.abf_with_table, abf_with)
         logft = compute_logft(self.project.levels, abf_with, self.project.beta_inputs)
         self._fill_logft_table(logft)
+        # Always regenerate preview when data changes (respects auto_write checkbox)
         self.maybe_write_scheme(abf_with=abf_with, logft=logft)
 
     def reload_scheme(self):
@@ -632,6 +712,11 @@ class MainWindow(QMainWindow):
         
         # Generate and write scheme
         self.maybe_write_scheme(force=True, abf_with=abf_with, logft=logft)
+        
+        # Ensure preview displays at 100% zoom for immediate visibility
+        self.preview_fit_to_window = False
+        self.preview_zoom = 1.0
+        self._update_preview_pixmap()
         
         QMessageBox.information(self, 'Scheme reloaded', 'Scheme has been regenerated with current data.')
     
