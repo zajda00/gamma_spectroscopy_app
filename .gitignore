@@ -1,0 +1,26 @@
+# Virtual environment
+.venv/
+.vscode/
+
+# Environment variables
+.env
+
+# Generated outputs
+outputs/
+
+# Project data
+data/
+
+# Python cache and build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
