@@ -12,6 +12,7 @@ outputs/
 data/
 
 # Python cache and build artifacts
+decay_scheme_app/__pycache__/
 __pycache__/
 *.py[cod]
 *$py.class
