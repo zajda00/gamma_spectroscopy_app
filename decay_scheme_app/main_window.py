@@ -2,12 +2,14 @@ from __future__ import annotations
 from dataclasses import asdict
 from pathlib import Path
 from datetime import datetime
+import shutil
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction, QPixmap
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QFileDialog, QMessageBox, QVBoxLayout, QHBoxLayout,
     QTabWidget, QLabel, QLineEdit, QPushButton, QTableWidget, QTableWidgetItem,
-    QSplitter, QPlainTextEdit, QCheckBox, QComboBox, QFormLayout, QScrollArea
+    QSplitter, QPlainTextEdit, QCheckBox, QComboBox, QFormLayout, QScrollArea,
+    QDialog, QTextEdit, QInputDialog
 )
 
 from .abf import compute_abf
@@ -23,21 +25,130 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('Decay scheme app')
         self.resize(1600, 980)
         self.project = None
-        self.project_folder: Path | None = None
+        self.project_folder: Path | None = None  # Folder in data/ with copied input files
+        self.input_folder: Path | None = None     # Original input folder
         self.template_path: Path | None = None
+        self.output_folder: Path | None = None    # Folder in outputs/ for this project
         self.output_eps_path: Path | None = None
         self.preview_pixmap = None
         self.preview_zoom = 1.0
         self.preview_fit_to_window = True
+        self.eps_edit_mode = False
 
         self._building = False
         self._setup_ui()
         self._setup_actions()
         
-        # Auto-load data folder and template at startup
-        self._try_auto_load_project()
+        # Try to load default template, but don't crash if it fails
         self._try_auto_load_template()
-        self._build_output_path_if_needed()
+        
+        # Show welcome dialog to load input data
+        self._show_welcome_dialog()
+
+    def _show_welcome_dialog(self):
+        """Show welcome dialog prompting user to load input data."""
+        result = QMessageBox.question(
+            self,
+            'Load Input Data',
+            'Welcome to Decay Scheme App!\n\nWould you like to load input data now?',
+            QMessageBox.Yes | QMessageBox.No
+        )
+        if result == QMessageBox.Yes:
+            self.load_input_folder()
+    
+    def _try_auto_load_template(self):
+        """Attempt to auto-load template from 'templates/scheme_template.eps'."""
+        template_file = Path('templates/scheme_template.eps').resolve()
+        if not template_file.exists():
+            # Template not found - that's OK, user will select it later
+            print('Note: templates/scheme_template.eps not found. You will need to select it manually.')
+            return
+        try:
+            self.template_path = template_file
+            print(f'Auto-loaded template from {template_file}')
+        except Exception as exc:
+            print(f'Auto-load template failed: {exc}')
+    
+    def load_input_folder(self):
+        """Load input data from user-selected folder and create project folder."""
+        folder = QFileDialog.getExistingDirectory(self, 'Select input data folder')
+        if not folder:
+            return
+        
+        self.input_folder = Path(folder)
+        
+        # Ask for project name
+        project_name, ok = QInputDialog.getText(
+            self,
+            'Project Name',
+            'Enter project name:',
+            text='my_project'
+        )
+        if not ok or not project_name.strip():
+            return
+        
+        project_name = project_name.strip()
+        
+        # Create project folder in data/ with timestamp
+        try:
+            self.project_folder = self._create_project_folder(project_name)
+            self._copy_input_files_to_project()
+            self._create_output_folder()
+            
+            # Load project from copied folder
+            loader = ProjectDataLoader()
+            self.project = loader.load_project(self.project_folder)
+            self._populate_ui_from_project()
+            self.recompute_everything()
+            
+            QMessageBox.information(
+                self,
+                'Project Loaded',
+                f'Project created at:\n{self.project_folder}\n\nFiles copied successfully.'
+            )
+        except Exception as exc:
+            QMessageBox.critical(self, 'Error', f'Failed to load project:\n{exc}')
+            self.project_folder = None
+            self.input_folder = None
+    
+    def _create_project_folder(self, project_name: str) -> Path:
+        """Create project folder in data/ with timestamp."""
+        data_dir = Path('data').resolve()
+        data_dir.mkdir(parents=True, exist_ok=True)
+        
+        timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        folder_name = f'{project_name}_{timestamp}'
+        project_path = data_dir / folder_name
+        
+        project_path.mkdir(parents=True, exist_ok=True)
+        print(f'Created project folder: {project_path}')
+        
+        return project_path
+    
+    def _copy_input_files_to_project(self):
+        """Copy all files from input folder to project folder."""
+        if self.input_folder is None or self.project_folder is None:
+            raise ValueError('Input or project folder not set')
+        
+        for src_file in self.input_folder.glob('*'):
+            if src_file.is_file():
+                dst_file = self.project_folder / src_file.name
+                shutil.copy2(src_file, dst_file)
+                print(f'Copied: {src_file.name}')
+    
+    def _create_output_folder(self):
+        """Create output folder with same name as project folder."""
+        if self.project_folder is None:
+            raise ValueError('Project folder not set')
+        
+        outputs_dir = Path('outputs').resolve()
+        outputs_dir.mkdir(parents=True, exist_ok=True)
+        
+        folder_name = self.project_folder.name
+        self.output_folder = outputs_dir / folder_name
+        self.output_folder.mkdir(parents=True, exist_ok=True)
+        
+        print(f'Created output folder: {self.output_folder}')
 
     def _try_auto_load_project(self):
         """Attempt to auto-load project from 'data' folder at startup."""
@@ -74,20 +185,16 @@ class MainWindow(QMainWindow):
         self.output_eps_path = self._build_output_path()
 
     def _build_output_path(self) -> Path:
-        """Build output path: outputs/parent_daughter_timestamp.eps"""
-        if self.project is None:
+        """Build output EPS file path based on project folder, parent, and daughter."""
+        if self.project is None or self.output_folder is None:
             return Path('output.eps')
-        
-        # Create outputs folder if needed
-        outputs_dir = Path('outputs').resolve()
-        outputs_dir.mkdir(parents=True, exist_ok=True)
         
         parent = self.project.beta_inputs.parent_nucleus.strip()
         daughter = self.project.beta_inputs.daughter_nucleus.strip()
         timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         filename = f'{parent}_{daughter}_{timestamp}.eps'
         
-        return outputs_dir / filename
+        return self.output_folder / filename
 
 
     def _setup_ui(self):
@@ -96,17 +203,22 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout(central)
 
         top = QHBoxLayout()
-        self.load_btn = QPushButton('Load project folder')
+        self.load_input_btn = QPushButton('Load input data')
         self.template_btn = QPushButton('Select scheme template')
-        self.output_btn = QPushButton('Select output EPS/TXT')
-        self.reload_btn = QPushButton('Reload Scheme')
         self.compute_btn = QPushButton('Recompute ABF / log ft')
-        self.save_btn = QPushButton('Save project files')
+        self.save_project_btn = QPushButton('Save project files')
         self.auto_write = QCheckBox('Auto write EPS')
         self.auto_write.setChecked(True)
-        for w in [self.load_btn, self.template_btn, self.output_btn, self.reload_btn, self.compute_btn, self.save_btn, self.auto_write]:
+        for w in [self.load_input_btn, self.template_btn, self.compute_btn, self.save_project_btn, self.auto_write]:
             top.addWidget(w)
         layout.addLayout(top)
+
+        # Initialize shared preview widgets (will be used by all tabs)
+        self.eps_preview = QPlainTextEdit()
+        self.eps_preview.setReadOnly(True)
+
+        # List to track all preview labels across tabs for synchronized updating
+        self.preview_labels = []
 
         self.tabs = QTabWidget()
         layout.addWidget(self.tabs)
@@ -125,19 +237,85 @@ class MainWindow(QMainWindow):
         self._build_preview_tab()
         self._build_notes_tab()
 
-        self.load_btn.clicked.connect(self.load_project_folder)
+        self.load_input_btn.clicked.connect(self.load_input_folder)
         self.template_btn.clicked.connect(self.select_template)
-        self.output_btn.clicked.connect(self.select_output)
-        self.reload_btn.clicked.connect(self.reload_scheme)
         self.compute_btn.clicked.connect(self.recompute_everything)
-        self.save_btn.clicked.connect(self.save_project_files)
+        self.save_project_btn.clicked.connect(self.save_project_files)
         self.auto_write.toggled.connect(lambda _: self.maybe_write_scheme())
 
     def _setup_actions(self):
         pass
 
+    def _create_preview_controls(self, include_reload_save: bool = False) -> QHBoxLayout:
+        """Create preview control buttons (Fit, 100%, Zoom in/out, and optionally Reload/Save)."""
+        controls = QHBoxLayout()
+        self.preview_fit_btn = QPushButton('Fit to window')
+        self.preview_100_btn = QPushButton('100%')
+        self.preview_zoom_in_btn = QPushButton('Zoom in')
+        self.preview_zoom_out_btn = QPushButton('Zoom out')
+
+        controls.addWidget(self.preview_fit_btn)
+        controls.addWidget(self.preview_100_btn)
+        controls.addWidget(self.preview_zoom_in_btn)
+        controls.addWidget(self.preview_zoom_out_btn)
+        
+        if include_reload_save:
+            controls.addSpacing(20)
+            self.reload_scheme_btn = QPushButton('Reload scheme')
+            self.save_scheme_btn = QPushButton('Save scheme')
+            controls.addWidget(self.reload_scheme_btn)
+            controls.addWidget(self.save_scheme_btn)
+            self.reload_scheme_btn.clicked.connect(self.reload_scheme)
+            self.save_scheme_btn.clicked.connect(self.save_scheme)
+        
+        controls.addStretch(1)
+
+        self.preview_fit_btn.clicked.connect(self._preview_fit)
+        self.preview_100_btn.clicked.connect(self._preview_100)
+        self.preview_zoom_in_btn.clicked.connect(self._preview_zoom_in)
+        self.preview_zoom_out_btn.clicked.connect(self._preview_zoom_out)
+        
+        return controls
+
+    def _create_preview_widget(self, include_edit_button: bool = False, include_reload_save: bool = False) -> QWidget:
+        """Create a widget with preview controls and PNG display. Optionally add Edit button and Reload/Save."""
+        container = QWidget()
+        layout = QVBoxLayout(container)
+
+        controls = self._create_preview_controls(include_reload_save=include_reload_save)
+        
+        if include_edit_button:
+            self.edit_postscript_btn = QPushButton('Edit PostScript')
+            self.edit_postscript_btn.clicked.connect(self._show_edit_postscript_dialog)
+            controls.addWidget(self.edit_postscript_btn)
+        
+        layout.addLayout(controls)
+        
+        # Create scrollable preview area with label
+        preview_scroll = QScrollArea()
+        preview_scroll.setWidgetResizable(False)
+        
+        png_label = QLabel('No rendered preview yet')
+        png_label.setAlignment(Qt.AlignCenter)
+        png_label.setScaledContents(False)
+        png_label.resize(800, 1000)
+        
+        preview_scroll.setWidget(png_label)
+        layout.addWidget(preview_scroll)
+        
+        # Track this label so we can sync updates across all tabs
+        self.preview_labels.append(png_label)
+        
+        return container
+
     def _build_settings_tab(self):
-        layout = QFormLayout(self.settings_tab)
+        main_layout = QVBoxLayout(self.settings_tab)
+        
+        split = QSplitter(Qt.Horizontal)
+        
+        # Left side: settings form
+        settings_widget = QWidget()
+        layout = QFormLayout(settings_widget)
         self.parent_edit = QLineEdit()
         self.daughter_edit = QLineEdit()
         self.qbeta_edit = QLineEdit()
@@ -159,71 +337,82 @@ class MainWindow(QMainWindow):
         for w in [self.parent_edit, self.daughter_edit, self.qbeta_edit, self.dqbeta_edit, self.mother_spin_edit, self.mother_t12_edit, self.sn_edit]:
             w.editingFinished.connect(self._sync_settings_to_model)
         self.sn_show_combo.currentIndexChanged.connect(self._sync_settings_to_model)
+        
+        split.addWidget(settings_widget)
+        split.addWidget(self._create_preview_widget())
+        split.setSizes([600, 1000])
+        
+        main_layout.addWidget(split)
 
     def _build_levels_tab(self):
-        layout = QVBoxLayout(self.levels_tab)
+        main_layout = QVBoxLayout(self.levels_tab)
+        
+        split = QSplitter(Qt.Horizontal)
+        
+        # Left side: levels table
         self.levels_table = QTableWidget()
-        layout.addWidget(self.levels_table)
+        split.addWidget(self.levels_table)
+        
+        # Right side: preview
+        split.addWidget(self._create_preview_widget())
+        split.setSizes([600, 1000])
+        
+        main_layout.addWidget(split)
         self.levels_table.itemChanged.connect(self._levels_changed)
 
     def _build_transitions_tab(self):
-        layout = QVBoxLayout(self.transitions_tab)
+        main_layout = QVBoxLayout(self.transitions_tab)
+        
+        split = QSplitter(Qt.Horizontal)
+        
+        # Left side: transitions table
         self.transitions_table = QTableWidget()
-        layout.addWidget(self.transitions_table)
+        split.addWidget(self.transitions_table)
+        
+        # Right side: preview
+        split.addWidget(self._create_preview_widget())
+        split.setSizes([600, 1000])
+        
+        main_layout.addWidget(split)
         self.transitions_table.itemChanged.connect(self._transitions_changed)
 
     def _build_results_tab(self):
-        layout = QVBoxLayout(self.results_tab)
+        main_layout = QVBoxLayout(self.results_tab)
+        
+        split = QSplitter(Qt.Horizontal)
+        
+        # Left side: results tables
+        results_widget = QWidget()
+        results_layout = QVBoxLayout(results_widget)
         self.abf_no_table = QTableWidget(); self.abf_with_table = QTableWidget(); self.logft_table = QTableWidget()
-        layout.addWidget(QLabel('ABF without ground-state feeding'))
-        layout.addWidget(self.abf_no_table)
-        layout.addWidget(QLabel('ABF with closure-based ground-state feeding'))
-        layout.addWidget(self.abf_with_table)
-        layout.addWidget(QLabel('Approximate local log ft'))
-        layout.addWidget(self.logft_table)
+        results_layout.addWidget(QLabel('ABF without ground-state feeding'))
+        results_layout.addWidget(self.abf_no_table)
+        results_layout.addWidget(QLabel('ABF with closure-based ground-state feeding'))
+        results_layout.addWidget(self.abf_with_table)
+        results_layout.addWidget(QLabel('Approximate local log ft'))
+        results_layout.addWidget(self.logft_table)
+        
+        split.addWidget(results_widget)
+        split.addWidget(self._create_preview_widget())
+        split.setSizes([800, 800])
+        
+        main_layout.addWidget(split)
 
     def _build_preview_tab(self):
-        layout = QVBoxLayout(self.preview_tab)
-
-        controls = QHBoxLayout()
-        self.preview_fit_btn = QPushButton('Fit to window')
-        self.preview_100_btn = QPushButton('100%')
-        self.preview_zoom_in_btn = QPushButton('Zoom in')
-        self.preview_zoom_out_btn = QPushButton('Zoom out')
-
-        controls.addWidget(self.preview_fit_btn)
-        controls.addWidget(self.preview_100_btn)
-        controls.addWidget(self.preview_zoom_in_btn)
-        controls.addWidget(self.preview_zoom_out_btn)
-        controls.addStretch(1)
-        layout.addLayout(controls)
-
+        main_layout = QVBoxLayout(self.preview_tab)
+        
         split = QSplitter(Qt.Horizontal)
-
+        
+        # Left side: PostScript code editor
         self.eps_preview = QPlainTextEdit()
         self.eps_preview.setReadOnly(True)
-
-        self.preview_scroll = QScrollArea()
-        self.preview_scroll.setWidgetResizable(False)
-
-        self.png_label = QLabel('No rendered preview yet')
-        self.png_label.setAlignment(Qt.AlignCenter)
-        self.png_label.setScaledContents(False)
-        self.png_label.resize(800, 1000)
-
-
-        self.preview_scroll.setWidget(self.png_label)
-
         split.addWidget(self.eps_preview)
-        split.addWidget(self.preview_scroll)
+        
+        # Right side: preview with controls, Edit button, Reload/Save
+        split.addWidget(self._create_preview_widget(include_edit_button=True, include_reload_save=True))
         split.setSizes([650, 950])
-
-        layout.addWidget(split)
-
-        self.preview_fit_btn.clicked.connect(self._preview_fit)
-        self.preview_100_btn.clicked.connect(self._preview_100)
-        self.preview_zoom_in_btn.clicked.connect(self._preview_zoom_in)
-        self.preview_zoom_out_btn.clicked.connect(self._preview_zoom_out)
+        
+        main_layout.addWidget(split)
 
     def _preview_fit(self):
         self.preview_fit_to_window = True
@@ -250,14 +439,18 @@ class MainWindow(QMainWindow):
             return
 
         if self.preview_fit_to_window:
-            viewport_size = self.preview_scroll.viewport().size()
-            scaled = self.preview_pixmap.scaled(
-                viewport_size,
-                Qt.KeepAspectRatio,
-                Qt.SmoothTransformation,
-            )
-            self.png_label.setPixmap(scaled)
-            self.png_label.resize(scaled.size())
+            for label in self.preview_labels:
+                try:
+                    viewport_size = label.parent().viewport().size()
+                    scaled = self.preview_pixmap.scaled(
+                        viewport_size,
+                        Qt.KeepAspectRatio,
+                        Qt.SmoothTransformation,
+                    )
+                    label.setPixmap(scaled)
+                    label.resize(scaled.size())
+                except:
+                    pass
         else:
             width = max(1, int(self.preview_pixmap.width() * self.preview_zoom))
             height = max(1, int(self.preview_pixmap.height() * self.preview_zoom))
@@ -267,8 +460,9 @@ class MainWindow(QMainWindow):
                 Qt.KeepAspectRatio,
                 Qt.SmoothTransformation,
             )
-            self.png_label.setPixmap(scaled)
-            self.png_label.resize(scaled.size())
+            for label in self.preview_labels:
+                label.setPixmap(scaled)
+                label.resize(scaled.size())
 
 
 
@@ -277,33 +471,45 @@ class MainWindow(QMainWindow):
         self.notes_edit = QPlainTextEdit()
         layout.addWidget(self.notes_edit)
 
-    def load_project_folder(self):
-        folder = QFileDialog.getExistingDirectory(self, 'Select project folder')
-        if not folder:
-            return
-        try:
-            loader = ProjectDataLoader()
-            self.project = loader.load_project(Path(folder))
-            self.project_folder = Path(folder)
-            self._populate_ui_from_project()
-            self.recompute_everything()
-        except Exception as exc:
-            QMessageBox.critical(self, 'Load failed', str(exc))
+    def _show_edit_postscript_dialog(self):
+        """Open a dialog to edit PostScript code."""
+        dialog = QDialog(self)
+        dialog.setWindowTitle('Edit PostScript Code')
+        dialog.resize(1000, 700)
+        
+        layout = QVBoxLayout(dialog)
+        
+        editor = QPlainTextEdit()
+        editor.setPlainText(self.eps_preview.toPlainText())
+        layout.addWidget(editor)
+        
+        button_layout = QHBoxLayout()
+        save_btn = QPushButton('Save')
+        cancel_btn = QPushButton('Cancel')
+        
+        def on_save():
+            new_text = editor.toPlainText()
+            self.eps_preview.setPlainText(new_text)
+            if self.output_eps_path:
+                self.output_eps_path.write_text(new_text, encoding='utf-8')
+            dialog.accept()
+        
+        save_btn.clicked.connect(on_save)
+        cancel_btn.clicked.connect(dialog.reject)
+        
+        button_layout.addStretch(1)
+        button_layout.addWidget(save_btn)
+        button_layout.addWidget(cancel_btn)
+        
+        layout.addLayout(button_layout)
+        dialog.exec()
 
     def select_template(self):
+        """Allow user to select a different template than the default."""
         path, _ = QFileDialog.getOpenFileName(self, 'Select scheme template txt/eps', '', 'Text or EPS (*.txt *.eps *.ps);;All files (*)')
         if path:
             self.template_path = Path(path)
             self.maybe_write_scheme(force=True)
-
-    def select_output(self):
-        path, _ = QFileDialog.getSaveFileName(self, 'Select output EPS/TXT', '', 'Text or EPS (*.txt *.eps *.ps);;All files (*)')
-        if path:
-            self.output_eps_path = Path(path)
-            self.maybe_write_scheme(force=True)
-        elif self.output_eps_path is None:
-            # If user cancelled dialog and no output is set, generate auto path
-            self.output_eps_path = self._build_output_path()
 
     def _populate_ui_from_project(self):
         self._building = True
@@ -411,13 +617,49 @@ class MainWindow(QMainWindow):
         if self.template_path is None:
             QMessageBox.warning(self, 'No template', 'Select a template first')
             return
-        # Ensure output path is set
+        
+        # Sync current GUI state to model (especially Settings changes)
+        self._sync_settings_to_model()
+        
+        # Recompute ABF and logft
+        field = self.abf_field_combo.currentText()
+        abf_no = compute_abf(self.project.levels, self.project.transitions, mode='no_ground_state', field=field)
+        abf_with = compute_abf(self.project.levels, self.project.transitions, mode='with_ground_state_closure', field=field)
+        self._fill_abf_table(self.abf_no_table, abf_no)
+        self._fill_abf_table(self.abf_with_table, abf_with)
+        logft = compute_logft(self.project.levels, abf_with, self.project.beta_inputs)
+        self._fill_logft_table(logft)
+        
+        # Generate and write scheme
+        self.maybe_write_scheme(force=True, abf_with=abf_with, logft=logft)
+        
+        QMessageBox.information(self, 'Scheme reloaded', 'Scheme has been regenerated with current data.')
+    
+    def save_scheme(self):
+        """Manually save current scheme to output folder."""
+        if self.project is None or self.output_folder is None:
+            QMessageBox.warning(self, 'Error', 'Load a project first')
+            return
         if self.output_eps_path is None:
-            self.output_eps_path = self._build_output_path()
-        # Recompute and regenerate scheme
-        self.recompute_everything()
-        # Force write, bypassing auto_write checkbox
-        self.maybe_write_scheme(force=True)
+            QMessageBox.warning(self, 'Error', 'No output path set')
+            return
+        
+        try:
+            # EPS file should already be saved by maybe_write_scheme
+            # PNG file should also exist if Ghostscript worked
+            png_path = self.output_eps_path.with_suffix('.png')
+            
+            files_saved = [f'EPS: {self.output_eps_path}']
+            if png_path.exists():
+                files_saved.append(f'PNG: {png_path}')
+            
+            QMessageBox.information(
+                self,
+                'Scheme saved',
+               f'Scheme files saved in:\n{self.output_folder}\n\n' + '\n'.join(files_saved)
+            )
+        except Exception as exc:
+            QMessageBox.critical(self, 'Error', f'Failed to save scheme:\n{exc}')
 
     def _fill_abf_table(self, table, rows):
         cols = ['level_id','e_level_keV','jpi','incoming','outgoing','abf_raw','abf_clipped','mode']
@@ -438,11 +680,15 @@ class MainWindow(QMainWindow):
     def maybe_write_scheme(self, force: bool = False, abf_with=None, logft=None):
         if self.project is None or self.template_path is None:
             return
-        # Ensure output path is set, using auto-generated if needed
-        if self.output_eps_path is None:
-            self.output_eps_path = self._build_output_path()
+        if self.output_folder is None:
+            print('Warning: output_folder not set, cannot write scheme')
+            return
         if not self.auto_write.isChecked() and not force:
             return
+        
+        # Build output path based on current parent/daughter
+        self.output_eps_path = self._build_output_path()
+        
         try:
             engine = EpsTemplateEngine.from_file(self.template_path)
             if abf_with is None:
@@ -468,9 +714,11 @@ class MainWindow(QMainWindow):
             else:
 
                 gs_path = find_ghostscript_executable() or 'not found'
-                self.png_label.setText(
+                error_message = (
                     f'Preview not rendered. Output file updated\n{self.output_eps_path}\n\nGhostscript: {gs_path}\n\n{preview_message}'
                 )
+                for label in self.preview_labels:
+                    label.setText(error_message)
         except Exception as exc:
             self.eps_preview.setPlainText(f'Could not generate EPS preview: {exc}')
     def resizeEvent(self, event):
