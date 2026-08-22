@@ -1,0 +1,16 @@
+category,file_tool_id,rank_in_category,energy_keV,decay,origin,comment,integral_counts,relative_percent,absolute_percent
+background,mock_background,1,2297.92,background,synthetic,"synthetic background peak, not physical data",4464,2.2288,0.2089
+background,mock_background,2,2637.05,background,synthetic,"synthetic background peak, not physical data",12722,2.1329,0.1968
+background,mock_background,3,4892.01,background,synthetic,"synthetic background peak, not physical data",11050,2.1061,0.2122
+daughters,mock_daughters,1,1702.83,daughters,synthetic,"synthetic daughters peak, not physical data",1582,2.6873,0.2607
+daughters,mock_daughters,2,3322.95,daughters,synthetic,"synthetic daughters peak, not physical data",690,1.9650,0.2123
+daughters,mock_daughters,3,405.68,daughters,synthetic,"synthetic daughters peak, not physical data",3499,1.3819,0.1548
+neglected,mock_neglected,1,4329.77,neglected,synthetic,"synthetic neglected peak, not physical data",1373,2.6363,0.2923
+neglected,mock_neglected,2,1007.50,neglected,synthetic,"synthetic neglected peak, not physical data",272,2.1606,0.1370
+neglected,mock_neglected,3,1157.08,neglected,synthetic,"synthetic neglected peak, not physical data",10315,1.1745,0.0989
+uncertain,mock_uncertain,1,1781.84,uncertain,synthetic,"synthetic uncertain peak, not physical data",14829,2.5593,0.2953
+uncertain,mock_uncertain,2,582.13,uncertain,synthetic,"synthetic uncertain peak, not physical data",9125,2.4172,0.2002
+uncertain,mock_uncertain,3,2156.85,uncertain,synthetic,"synthetic uncertain peak, not physical data",12840,2.4062,0.2556
+unidentified,mock_unidentified,1,305.88,unidentified,synthetic,"synthetic unidentified peak, not physical data",8579,2.5534,0.1843
+unidentified,mock_unidentified,2,730.55,unidentified,synthetic,"synthetic unidentified peak, not physical data",2199,2.4396,0.2562
+unidentified,mock_unidentified,3,2317.37,unidentified,synthetic,"synthetic unidentified peak, not physical data",6645,2.3963,0.2568

@@ -1,0 +1,2522 @@
+gamma_spectroscopy_app/
+├── .git/ [zawartość pominięta]
+├── .venv/ [zawartość pominięta]
+├── .vscode/ [zawartość pominięta]
+├── app_bricc/
+│   └── briccs
+├── app_decay_scheme/
+│   ├── __pycache__/ [zawartość pominięta]
+│   ├── __init__.py
+│   ├── abf.py
+│   ├── beta_inputs.py
+│   ├── eps_template.py
+│   ├── loaders.py
+│   ├── logft.py
+│   ├── main_window.py
+│   ├── models.py
+│   ├── periodic_table.py
+│   ├── preview.py
+│   ├── spin_rules.py
+│   └── weisskopf_adapter.py
+├── app_logft/
+│   └── RadiationReport-main/
+│       ├── .github/
+│       │   └── workflows/
+│       │       ├── sync-to-NSDD.yml
+│       │       └── sync-to-org.yml
+│       ├── RadiationReport_09December2025/
+│       │   ├── ame/
+│       │   │   ├── base/
+│       │   │   │   ├── AMEConfig.class
+│       │   │   │   ├── AMEControl.class
+│       │   │   │   ├── AMEEntry$Isomer.class
+│       │   │   │   ├── AMEEntry$ParseFunction.class
+│       │   │   │   ├── AMEEntry.class
+│       │   │   │   ├── AMERun$Calculator.class
+│       │   │   │   ├── AMERun$QCalc.class
+│       │   │   │   ├── AMERun.class
+│       │   │   │   ├── AMETable$MassChain.class
+│       │   │   │   ├── AMETable.class
+│       │   │   │   ├── HeaderParser$RangeFilter.class
+│       │   │   │   ├── HeaderParser.class
+│       │   │   │   ├── Main.class
+│       │   │   │   ├── Point.class
+│       │   │   │   ├── PointWrap.class
+│       │   │   │   ├── QLineMaker.class
+│       │   │   │   ├── QValueWrap.class
+│       │   │   │   ├── Setup.class
+│       │   │   │   ├── Test.class
+│       │   │   │   └── Test0.class
+│       │   │   └── ui/
+│       │   │       ├── InstructionFrame$1.class
+│       │   │       ├── InstructionFrame.class
+│       │   │       ├── MasterFrame$1.class
+│       │   │       ├── MasterFrame$10.class
+│       │   │       ├── MasterFrame$11.class
+│       │   │       ├── MasterFrame$12$1.class
+│       │   │       ├── MasterFrame$12.class
+│       │   │       ├── MasterFrame$13.class
+│       │   │       ├── MasterFrame$14.class
+│       │   │       ├── MasterFrame$15.class
+│       │   │       ├── MasterFrame$16.class
+│       │   │       ├── MasterFrame$17.class
+│       │   │       ├── MasterFrame$2.class
+│       │   │       ├── MasterFrame$3.class
+│       │   │       ├── MasterFrame$4.class
+│       │   │       ├── MasterFrame$5.class
+│       │   │       ├── MasterFrame$6.class
+│       │   │       ├── MasterFrame$7.class
+│       │   │       ├── MasterFrame$8.class
+│       │   │       ├── MasterFrame$9.class
+│       │   │       ├── MasterFrame.class
+│       │   │       ├── NuclidePanel$1.class
+│       │   │       ├── NuclidePanel$2.class
+│       │   │       ├── NuclidePanel$3.class
+│       │   │       ├── NuclidePanel$4.class
+│       │   │       ├── NuclidePanel.class
+│       │   │       ├── QValueUpdaterFrame$1.class
+│       │   │       ├── QValueUpdaterFrame$10.class
+│       │   │       ├── QValueUpdaterFrame$11.class
+│       │   │       ├── QValueUpdaterFrame$12.class
+│       │   │       ├── QValueUpdaterFrame$13.class
+│       │   │       ├── QValueUpdaterFrame$14.class
+│       │   │       ├── QValueUpdaterFrame$15.class
+│       │   │       ├── QValueUpdaterFrame$16.class
+│       │   │       ├── QValueUpdaterFrame$17.class
+│       │   │       ├── QValueUpdaterFrame$2$1.class
+│       │   │       ├── QValueUpdaterFrame$2.class
+│       │   │       ├── QValueUpdaterFrame$3.class
+│       │   │       ├── QValueUpdaterFrame$4.class
+│       │   │       ├── QValueUpdaterFrame$5.class
+│       │   │       ├── QValueUpdaterFrame$6.class
+│       │   │       ├── QValueUpdaterFrame$7.class
+│       │   │       ├── QValueUpdaterFrame$8.class
+│       │   │       ├── QValueUpdaterFrame$9.class
+│       │   │       ├── QValueUpdaterFrame.class
+│       │   │       ├── ReferenceFrame$1.class
+│       │   │       ├── ReferenceFrame.class
+│       │   │       ├── RestrictedFileSystemView$FileSystemRoot.class
+│       │   │       └── RestrictedFileSystemView.class
+│       │   ├── assets/
+│       │   │   └── org/
+│       │   │       └── apache/
+│       │   │           └── commons/
+│       │   │               └── math3/
+│       │   │                   ├── exception/
+│       │   │                   │   └── util/
+│       │   │                   │       └── LocalizedFormats_fr.properties
+│       │   │                   └── random/
+│       │   │                       └── new-joe-kuo-6.1000
+│       │   ├── ensdfparser/
+│       │   │   ├── base/
+│       │   │   │   ├── BaseApp$DecayIntensity.class
+│       │   │   │   ├── BaseApp.class
+│       │   │   │   ├── BaseControl.class
+│       │   │   │   ├── BaseRun$1.class
+│       │   │   │   ├── BaseRun$2.class
+│       │   │   │   ├── BaseRun$3.class
+│       │   │   │   ├── BaseRun.class
+│       │   │   │   └── BaseSetup.class
+│       │   │   ├── calc/
+│       │   │   │   ├── AnyDistribution$Function.class
+│       │   │   │   ├── AnyDistribution.class
+│       │   │   │   ├── Average.class
+│       │   │   │   ├── BriccExeWrap.class
+│       │   │   │   ├── BriccsWrap.class
+│       │   │   │   ├── BXLBase.class
+│       │   │   │   ├── DataPoint.class
+│       │   │   │   ├── DataPoint2D.class
+│       │   │   │   ├── GammaBranch.class
+│       │   │   │   ├── GammaBranchingCalculator.class
+│       │   │   │   ├── Histogram1D$1.class
+│       │   │   │   ├── Histogram1D.class
+│       │   │   │   ├── InvalidFunctionResultException.class
+│       │   │   │   ├── MCErrorPropagation$CustomRandom.class
+│       │   │   │   ├── MCErrorPropagation$Function1D.class
+│       │   │   │   ├── MCErrorPropagation$Function2D.class
+│       │   │   │   ├── MCErrorPropagation$FunctionMD.class
+│       │   │   │   ├── MCErrorPropagation$Param.class
+│       │   │   │   ├── MCErrorPropagation$SampleMaker.class
+│       │   │   │   ├── MCErrorPropagation.class
+│       │   │   │   ├── ResultOfUncertainties.class
+│       │   │   │   ├── SimpleBranchingCalculator$Branch.class
+│       │   │   │   ├── SimpleBranchingCalculator.class
+│       │   │   │   ├── UncertaintyParser$UncParser.class
+│       │   │   │   ├── UncertaintyParser.class
+│       │   │   │   └── XDX.class
+│       │   │   ├── check/
+│       │   │   │   ├── LOGFT.class
+│       │   │   │   ├── RUL.class
+│       │   │   │   ├── RUL_OLD.class
+│       │   │   │   ├── SimpleEnsdfData.class
+│       │   │   │   ├── SpinParityParser.class
+│       │   │   │   └── TransferInfo.class
+│       │   │   ├── ensdf/
+│       │   │   │   ├── ABE.class
+│       │   │   │   ├── AbsInt.class
+│       │   │   │   ├── Alpha.class
+│       │   │   │   ├── Atomic$AtomicData.class
+│       │   │   │   ├── Atomic.class
+│       │   │   │   ├── Author.class
+│       │   │   │   ├── Band.class
+│       │   │   │   ├── Beta.class
+│       │   │   │   ├── CE.class
+│       │   │   │   ├── CEComparator.class
+│       │   │   │   ├── CheckGammaM.class
+│       │   │   │   ├── Comment.class
+│       │   │   │   ├── ContRecord.class
+│       │   │   │   ├── convdelta.class
+│       │   │   │   ├── convst.class
+│       │   │   │   ├── DatasetID.class
+│       │   │   │   ├── Decay.class
+│       │   │   │   ├── DecayMode.class
+│       │   │   │   ├── DecayModeString.class
+│       │   │   │   ├── Dose.class
+│       │   │   │   ├── DParticle.class
+│       │   │   │   ├── ECBP.class
+│       │   │   │   ├── Elements.class
+│       │   │   │   ├── ENSDF.class
+│       │   │   │   ├── EPE.class
+│       │   │   │   ├── FindValue.class
+│       │   │   │   ├── Gamma.class
+│       │   │   │   ├── GammaPath.class
+│       │   │   │   ├── History.class
+│       │   │   │   ├── ICC.class
+│       │   │   │   ├── ICCEstimator.class
+│       │   │   │   ├── JPI.class
+│       │   │   │   ├── JPIComparator.class
+│       │   │   │   ├── Level.class
+│       │   │   │   ├── MirdElement.class
+│       │   │   │   ├── MJPi.class
+│       │   │   │   ├── MUL.class
+│       │   │   │   ├── Normal.class
+│       │   │   │   ├── Nucleus.class
+│       │   │   │   ├── Parent.class
+│       │   │   │   ├── QValue$QV.class
+│       │   │   │   ├── QValue.class
+│       │   │   │   ├── RadList.class
+│       │   │   │   ├── Record.class
+│       │   │   │   ├── RecordComparator.class
+│       │   │   │   ├── SDS.class
+│       │   │   │   ├── SDS2XDX$1.class
+│       │   │   │   ├── SDS2XDX.class
+│       │   │   │   ├── SingleJPi.class
+│       │   │   │   ├── Spline.class
+│       │   │   │   ├── Sum.class
+│       │   │   │   ├── T12.class
+│       │   │   │   ├── TableRecord.class
+│       │   │   │   ├── WebSpecChar.class
+│       │   │   │   ├── X2SMIRD.class
+│       │   │   │   ├── XDX2SDS.class
+│       │   │   │   └── XRef.class
+│       │   │   ├── json/
+│       │   │   │   ├── MyJSONObject$1.class
+│       │   │   │   └── MyJSONObject.class
+│       │   │   ├── math/
+│       │   │   │   ├── AbstractIntegration.class
+│       │   │   │   ├── DataFitter.class
+│       │   │   │   ├── Fit$1.class
+│       │   │   │   ├── Fit.class
+│       │   │   │   ├── Function1D.class
+│       │   │   │   ├── Function1S.class
+│       │   │   │   ├── Function2D.class
+│       │   │   │   ├── Function2S.class
+│       │   │   │   ├── Integration.class
+│       │   │   │   ├── Matrix.class
+│       │   │   │   ├── MidpointIntegraiton.class
+│       │   │   │   ├── TestFunction.class
+│       │   │   │   ├── TrapezoidalIntegration.class
+│       │   │   │   ├── UserFunction.class
+│       │   │   │   └── Util.class
+│       │   │   ├── nds/
+│       │   │   │   ├── config/
+│       │   │   │   │   ├── Constants.class
+│       │   │   │   │   └── NDSConfig.class
+│       │   │   │   ├── control/
+│       │   │   │   │   ├── Break.class
+│       │   │   │   │   ├── BreakComparator.class
+│       │   │   │   │   ├── DrawingControl.class
+│       │   │   │   │   ├── NDSControl.class
+│       │   │   │   │   └── TableControl.class
+│       │   │   │   ├── ensdf/
+│       │   │   │   │   ├── BaseNSR$SearchParameter.class
+│       │   │   │   │   ├── BaseNSR.class
+│       │   │   │   │   ├── DSIDMatcher.class
+│       │   │   │   │   ├── EnsdfConfig$EntryInfo.class
+│       │   │   │   │   ├── EnsdfConfig.class
+│       │   │   │   │   ├── EnsdfFieldInterfaces$EnsdfGetterD.class
+│       │   │   │   │   ├── EnsdfFieldInterfaces$EnsdfGetterS.class
+│       │   │   │   │   ├── EnsdfFieldInterfaces.class
+│       │   │   │   │   ├── EnsdfLine.class
+│       │   │   │   │   ├── EnsdfReferences$KeyComparator.class
+│       │   │   │   │   ├── EnsdfReferences.class
+│       │   │   │   │   ├── EnsdfTableData.class
+│       │   │   │   │   ├── EnsdfUtil$1.class
+│       │   │   │   │   ├── EnsdfUtil$2.class
+│       │   │   │   │   ├── EnsdfUtil.class
+│       │   │   │   │   ├── MassChain$DocumentRecords.class
+│       │   │   │   │   ├── MassChain$DRComparator.class
+│       │   │   │   │   ├── MassChain.class
+│       │   │   │   │   └── UserDictionary.class
+│       │   │   │   ├── latex/
+│       │   │   │   │   ├── AtomicTableMaker.class
+│       │   │   │   │   ├── ComFlag.class
+│       │   │   │   │   ├── DecayTableMaker.class
+│       │   │   │   │   ├── DelayedTableMaker.class
+│       │   │   │   │   ├── DPComparator.class
+│       │   │   │   │   ├── FlagSet.class
+│       │   │   │   │   ├── Footnotes.class
+│       │   │   │   │   ├── GammaTableMaker.class
+│       │   │   │   │   ├── GComparator.class
+│       │   │   │   │   ├── LatexWriter.class
+│       │   │   │   │   ├── LevelTableMaker.class
+│       │   │   │   │   ├── MComparator.class
+│       │   │   │   │   ├── TableMaker$StringMax.class
+│       │   │   │   │   ├── TableMaker.class
+│       │   │   │   │   ├── TablePanel.class
+│       │   │   │   │   └── Translator.class
+│       │   │   │   ├── util/
+│       │   │   │   │   ├── numanl.class
+│       │   │   │   │   ├── Str.class
+│       │   │   │   │   ├── Word.class
+│       │   │   │   │   └── Word_bk.class
+│       │   │   │   └── .DS_Store
+│       │   │   ├── test/
+│       │   │   │   ├── SDS2XDX1.class
+│       │   │   │   ├── SDS2XDXCalculator.class
+│       │   │   │   ├── Test.class
+│       │   │   │   └── Test1.class
+│       │   │   ├── ui/
+│       │   │   │   ├── BrowseButton$1.class
+│       │   │   │   ├── BrowseButton$2.class
+│       │   │   │   ├── BrowseButton$3.class
+│       │   │   │   ├── BrowseButton.class
+│       │   │   │   ├── CustomTextPane$1.class
+│       │   │   │   ├── CustomTextPane.class
+│       │   │   │   ├── RestrictedFileSystemView$FileSystemRoot.class
+│       │   │   │   ├── RestrictedFileSystemView.class
+│       │   │   │   ├── TextDisplayFrame$1.class
+│       │   │   │   ├── TextDisplayFrame.class
+│       │   │   │   ├── WrapColumnFactory.class
+│       │   │   │   ├── WrapEditorKit.class
+│       │   │   │   └── WrapLabelView.class
+│       │   │   ├── util/
+│       │   │   │   └── DateUtil.class
+│       │   │   └── .DS_Store
+│       │   ├── META-INF/
+│       │   │   ├── maven/
+│       │   │   │   ├── com.googlecode.json-simple/
+│       │   │   │   │   └── json-simple/
+│       │   │   │   │       ├── pom.properties
+│       │   │   │   │       └── pom.xml
+│       │   │   │   ├── commons-io/
+│       │   │   │   │   └── commons-io/
+│       │   │   │   │       ├── pom.properties
+│       │   │   │   │       └── pom.xml
+│       │   │   │   ├── org.apache.commons/
+│       │   │   │   │   └── commons-math3/
+│       │   │   │   │       ├── pom.properties
+│       │   │   │   │       └── pom.xml
+│       │   │   │   └── org.freehep/
+│       │   │   │       ├── freehep-fminuit/
+│       │   │   │       │   ├── pom.properties
+│       │   │   │       │   └── pom.xml
+│       │   │   │       └── freehep-jminuit/
+│       │   │   │           ├── pom.properties
+│       │   │   │           └── pom.xml
+│       │   │   ├── nar/
+│       │   │   │   └── org.freehep/
+│       │   │   │       └── freehep-fminuit/
+│       │   │   │           └── nar.properties
+│       │   │   ├── versions/
+│       │   │   │   └── 9/
+│       │   │   │       └── module-info.class
+│       │   │   ├── LICENSE.txt
+│       │   │   ├── MANIFEST.MF
+│       │   │   └── NOTICE.txt
+│       │   ├── org/
+│       │   │   ├── apache/
+│       │   │   │   └── commons/
+│       │   │   │       ├── io/
+│       │   │   │       │   ├── build/
+│       │   │   │       │   │   ├── AbstractOrigin$ByteArrayOrigin.class
+│       │   │   │       │   │   ├── AbstractOrigin$CharSequenceOrigin.class
+│       │   │   │       │   │   ├── AbstractOrigin$FileOrigin.class
+│       │   │   │       │   │   ├── AbstractOrigin$InputStreamOrigin.class
+│       │   │   │       │   │   ├── AbstractOrigin$OutputStreamOrigin.class
+│       │   │   │       │   │   ├── AbstractOrigin$PathOrigin.class
+│       │   │   │       │   │   ├── AbstractOrigin$ReaderOrigin.class
+│       │   │   │       │   │   ├── AbstractOrigin$URIOrigin.class
+│       │   │   │       │   │   ├── AbstractOrigin$WriterOrigin.class
+│       │   │   │       │   │   ├── AbstractOrigin.class
+│       │   │   │       │   │   ├── AbstractOriginSupplier.class
+│       │   │   │       │   │   ├── AbstractStreamBuilder.class
+│       │   │   │       │   │   ├── AbstractSupplier.class
+│       │   │   │       │   │   └── package-info.class
+│       │   │   │       │   ├── channels/
+│       │   │   │       │   │   ├── FileChannels.class
+│       │   │   │       │   │   └── package-info.class
+│       │   │   │       │   ├── charset/
+│       │   │   │       │   │   ├── CharsetDecoders.class
+│       │   │   │       │   │   ├── CharsetEncoders.class
+│       │   │   │       │   │   └── package-info.class
+│       │   │   │       │   ├── comparator/
+│       │   │   │       │   │   ├── AbstractFileComparator.class
+│       │   │   │       │   │   ├── CompositeFileComparator.class
+│       │   │   │       │   │   ├── DefaultFileComparator.class
+│       │   │   │       │   │   ├── DirectoryFileComparator.class
+│       │   │   │       │   │   ├── ExtensionFileComparator.class
+│       │   │   │       │   │   ├── LastModifiedFileComparator.class
+│       │   │   │       │   │   ├── NameFileComparator.class
+│       │   │   │       │   │   ├── package-info.class
+│       │   │   │       │   │   ├── PathFileComparator.class
+│       │   │   │       │   │   ├── ReverseFileComparator.class
+│       │   │   │       │   │   └── SizeFileComparator.class
+│       │   │   │       │   ├── file/
+│       │   │   │       │   │   ├── attribute/
+│       │   │   │       │   │   │   ├── FileTimes.class
+│       │   │   │       │   │   │   └── package-info.class
+│       │   │   │       │   │   ├── spi/
+│       │   │   │       │   │   │   ├── FileSystemProviders.class
+│       │   │   │       │   │   │   └── package-info.class
+│       │   │   │       │   │   ├── AccumulatorPathVisitor.class
+│       │   │   │       │   │   ├── CleaningPathVisitor.class
+│       │   │   │       │   │   ├── CopyDirectoryVisitor.class
+│       │   │   │       │   │   ├── Counters$1.class
+│       │   │   │       │   │   ├── Counters$AbstractPathCounters.class
+│       │   │   │       │   │   ├── Counters$BigIntegerCounter.class
+│       │   │   │       │   │   ├── Counters$BigIntegerPathCounters.class
+│       │   │   │       │   │   ├── Counters$Counter.class
+│       │   │   │       │   │   ├── Counters$LongCounter.class
+│       │   │   │       │   │   ├── Counters$LongPathCounters.class
+│       │   │   │       │   │   ├── Counters$NoopCounter.class
+│       │   │   │       │   │   ├── Counters$NoopPathCounters.class
+│       │   │   │       │   │   ├── Counters$PathCounters.class
+│       │   │   │       │   │   ├── Counters.class
+│       │   │   │       │   │   ├── CountingPathVisitor.class
+│       │   │   │       │   │   ├── DeleteOption.class
+│       │   │   │       │   │   ├── DeletingPathVisitor.class
+│       │   │   │       │   │   ├── DirectoryStreamFilter.class
+│       │   │   │       │   │   ├── FilesUncheck.class
+│       │   │   │       │   │   ├── NoopPathVisitor.class
+│       │   │   │       │   │   ├── package-info.class
+│       │   │   │       │   │   ├── PathFilter.class
+│       │   │   │       │   │   ├── PathUtils$1.class
+│       │   │   │       │   │   ├── PathUtils$RelativeSortedPaths.class
+│       │   │   │       │   │   ├── PathUtils.class
+│       │   │   │       │   │   ├── PathVisitor.class
+│       │   │   │       │   │   ├── SimplePathVisitor.class
+│       │   │   │       │   │   └── StandardDeleteOption.class
+│       │   │   │       │   ├── filefilter/
+│       │   │   │       │   │   ├── AbstractFileFilter.class
+│       │   │   │       │   │   ├── AgeFileFilter.class
+│       │   │   │       │   │   ├── AndFileFilter.class
+│       │   │   │       │   │   ├── CanExecuteFileFilter.class
+│       │   │   │       │   │   ├── CanReadFileFilter.class
+│       │   │   │       │   │   ├── CanWriteFileFilter.class
+│       │   │   │       │   │   ├── ConditionalFileFilter.class
+│       │   │   │       │   │   ├── DelegateFileFilter.class
+│       │   │   │       │   │   ├── DirectoryFileFilter.class
+│       │   │   │       │   │   ├── EmptyFileFilter.class
+│       │   │   │       │   │   ├── FalseFileFilter.class
+│       │   │   │       │   │   ├── FileEqualsFileFilter.class
+│       │   │   │       │   │   ├── FileFileFilter.class
+│       │   │   │       │   │   ├── FileFilterUtils.class
+│       │   │   │       │   │   ├── HiddenFileFilter.class
+│       │   │   │       │   │   ├── IOFileFilter.class
+│       │   │   │       │   │   ├── MagicNumberFileFilter.class
+│       │   │   │       │   │   ├── NameFileFilter.class
+│       │   │   │       │   │   ├── NotFileFilter.class
+│       │   │   │       │   │   ├── OrFileFilter.class
+│       │   │   │       │   │   ├── package-info.class
+│       │   │   │       │   │   ├── PathEqualsFileFilter.class
+│       │   │   │       │   │   ├── PathMatcherFileFilter.class
+│       │   │   │       │   │   ├── PathVisitorFileFilter.class
+│       │   │   │       │   │   ├── PrefixFileFilter.class
+│       │   │   │       │   │   ├── RegexFileFilter.class
+│       │   │   │       │   │   ├── SizeFileFilter.class
+│       │   │   │       │   │   ├── SuffixFileFilter.class
+│       │   │   │       │   │   ├── SymbolicLinkFileFilter.class
+│       │   │   │       │   │   ├── TrueFileFilter.class
+│       │   │   │       │   │   ├── WildcardFileFilter$1.class
+│       │   │   │       │   │   ├── WildcardFileFilter$Builder.class
+│       │   │   │       │   │   ├── WildcardFileFilter.class
+│       │   │   │       │   │   └── WildcardFilter.class
+│       │   │   │       │   ├── function/
+│       │   │   │       │   │   ├── Constants.class
+│       │   │   │       │   │   ├── Erase.class
+│       │   │   │       │   │   ├── IOBaseStream.class
+│       │   │   │       │   │   ├── IOBaseStreamAdapter.class
+│       │   │   │       │   │   ├── IOBiConsumer.class
+│       │   │   │       │   │   ├── IOBiFunction.class
+│       │   │   │       │   │   ├── IOBinaryOperator.class
+│       │   │   │       │   │   ├── IOComparator.class
+│       │   │   │       │   │   ├── IOConsumer.class
+│       │   │   │       │   │   ├── IOFunction.class
+│       │   │   │       │   │   ├── IOIntSupplier.class
+│       │   │   │       │   │   ├── IOIterator.class
+│       │   │   │       │   │   ├── IOIteratorAdapter.class
+│       │   │   │       │   │   ├── IOLongSupplier.class
+│       │   │   │       │   │   ├── IOPredicate.class
+│       │   │   │       │   │   ├── IOQuadFunction.class
+│       │   │   │       │   │   ├── IORunnable.class
+│       │   │   │       │   │   ├── IOSpliterator.class
+│       │   │   │       │   │   ├── IOSpliteratorAdapter.class
+│       │   │   │       │   │   ├── IOStream$1.class
+│       │   │   │       │   │   ├── IOStream.class
+│       │   │   │       │   │   ├── IOStreamAdapter.class
+│       │   │   │       │   │   ├── IOStreams.class
+│       │   │   │       │   │   ├── IOSupplier.class
+│       │   │   │       │   │   ├── IOTriConsumer.class
+│       │   │   │       │   │   ├── IOTriFunction.class
+│       │   │   │       │   │   ├── IOUnaryOperator.class
+│       │   │   │       │   │   ├── package-info.class
+│       │   │   │       │   │   ├── Uncheck.class
+│       │   │   │       │   │   ├── UncheckedIOBaseStream.class
+│       │   │   │       │   │   ├── UncheckedIOIterator.class
+│       │   │   │       │   │   └── UncheckedIOSpliterator.class
+│       │   │   │       │   ├── input/
+│       │   │   │       │   │   ├── buffer/
+│       │   │   │       │   │   │   ├── CircularBufferInputStream.class
+│       │   │   │       │   │   │   ├── CircularByteBuffer.class
+│       │   │   │       │   │   │   ├── package-info.class
+│       │   │   │       │   │   │   └── PeekableInputStream.class
+│       │   │   │       │   │   ├── AbstractCharacterFilterReader.class
+│       │   │   │       │   │   ├── AutoCloseInputStream$Builder.class
+│       │   │   │       │   │   ├── AutoCloseInputStream.class
+│       │   │   │       │   │   ├── BOMInputStream$Builder.class
+│       │   │   │       │   │   ├── BOMInputStream.class
+│       │   │   │       │   │   ├── BoundedInputStream.class
+│       │   │   │       │   │   ├── BoundedReader.class
+│       │   │   │       │   │   ├── BrokenInputStream.class
+│       │   │   │       │   │   ├── BrokenReader.class
+│       │   │   │       │   │   ├── BufferedFileChannelInputStream$Builder.class
+│       │   │   │       │   │   ├── BufferedFileChannelInputStream.class
+│       │   │   │       │   │   ├── ByteBufferCleaner$1.class
+│       │   │   │       │   │   ├── ByteBufferCleaner$Cleaner.class
+│       │   │   │       │   │   ├── ByteBufferCleaner$Java8Cleaner.class
+│       │   │   │       │   │   ├── ByteBufferCleaner$Java9Cleaner.class
+│       │   │   │       │   │   ├── ByteBufferCleaner.class
+│       │   │   │       │   │   ├── CharacterFilterReader.class
+│       │   │   │       │   │   ├── CharacterSetFilterReader.class
+│       │   │   │       │   │   ├── CharSequenceInputStream$1.class
+│       │   │   │       │   │   ├── CharSequenceInputStream$Builder.class
+│       │   │   │       │   │   ├── CharSequenceInputStream.class
+│       │   │   │       │   │   ├── CharSequenceReader.class
+│       │   │   │       │   │   ├── CircularInputStream.class
+│       │   │   │       │   │   ├── ClassLoaderObjectInputStream.class
+│       │   │   │       │   │   ├── ClosedInputStream.class
+│       │   │   │       │   │   ├── ClosedReader.class
+│       │   │   │       │   │   ├── CloseShieldInputStream.class
+│       │   │   │       │   │   ├── CloseShieldReader.class
+│       │   │   │       │   │   ├── CountingInputStream.class
+│       │   │   │       │   │   ├── DemuxInputStream.class
+│       │   │   │       │   │   ├── InfiniteCircularInputStream.class
+│       │   │   │       │   │   ├── MarkShieldInputStream.class
+│       │   │   │       │   │   ├── MemoryMappedFileInputStream$1.class
+│       │   │   │       │   │   ├── MemoryMappedFileInputStream$Builder.class
+│       │   │   │       │   │   ├── MemoryMappedFileInputStream.class
+│       │   │   │       │   │   ├── MessageDigestCalculatingInputStream$Builder.class
+│       │   │   │       │   │   ├── MessageDigestCalculatingInputStream$MessageDigestMaintainingObserver.class
+│       │   │   │       │   │   ├── MessageDigestCalculatingInputStream.class
+│       │   │   │       │   │   ├── MessageDigestInputStream$1.class
+│       │   │   │       │   │   ├── MessageDigestInputStream$Builder.class
+│       │   │   │       │   │   ├── MessageDigestInputStream$MessageDigestMaintainingObserver.class
+│       │   │   │       │   │   ├── MessageDigestInputStream.class
+│       │   │   │       │   │   ├── NullInputStream.class
+│       │   │   │       │   │   ├── NullReader.class
+│       │   │   │       │   │   ├── ObservableInputStream$Observer.class
+│       │   │   │       │   │   ├── ObservableInputStream.class
+│       │   │   │       │   │   ├── package-info.class
+│       │   │   │       │   │   ├── ProxyInputStream.class
+│       │   │   │       │   │   ├── ProxyReader.class
+│       │   │   │       │   │   ├── QueueInputStream$1.class
+│       │   │   │       │   │   ├── QueueInputStream$Builder.class
+│       │   │   │       │   │   ├── QueueInputStream.class
+│       │   │   │       │   │   ├── RandomAccessFileInputStream$Builder.class
+│       │   │   │       │   │   ├── RandomAccessFileInputStream.class
+│       │   │   │       │   │   ├── ReadAheadInputStream$1.class
+│       │   │   │       │   │   ├── ReadAheadInputStream$Builder.class
+│       │   │   │       │   │   ├── ReadAheadInputStream.class
+│       │   │   │       │   │   ├── ReaderInputStream$Builder.class
+│       │   │   │       │   │   ├── ReaderInputStream.class
+│       │   │   │       │   │   ├── ReversedLinesFileReader$1.class
+│       │   │   │       │   │   ├── ReversedLinesFileReader$Builder.class
+│       │   │   │       │   │   ├── ReversedLinesFileReader$FilePart.class
+│       │   │   │       │   │   ├── ReversedLinesFileReader.class
+│       │   │   │       │   │   ├── SequenceReader.class
+│       │   │   │       │   │   ├── SwappedDataInputStream.class
+│       │   │   │       │   │   ├── TaggedInputStream.class
+│       │   │   │       │   │   ├── TaggedReader.class
+│       │   │   │       │   │   ├── Tailer$1.class
+│       │   │   │       │   │   ├── Tailer$Builder.class
+│       │   │   │       │   │   ├── Tailer$RandomAccessFileBridge.class
+│       │   │   │       │   │   ├── Tailer$RandomAccessResourceBridge.class
+│       │   │   │       │   │   ├── Tailer$Tailable.class
+│       │   │   │       │   │   ├── Tailer$TailablePath.class
+│       │   │   │       │   │   ├── Tailer.class
+│       │   │   │       │   │   ├── TailerListener.class
+│       │   │   │       │   │   ├── TailerListenerAdapter.class
+│       │   │   │       │   │   ├── TeeInputStream.class
+│       │   │   │       │   │   ├── TeeReader.class
+│       │   │   │       │   │   ├── TimestampedObserver.class
+│       │   │   │       │   │   ├── UncheckedBufferedReader$1.class
+│       │   │   │       │   │   ├── UncheckedBufferedReader$Builder.class
+│       │   │   │       │   │   ├── UncheckedBufferedReader.class
+│       │   │   │       │   │   ├── UncheckedFilterInputStream$1.class
+│       │   │   │       │   │   ├── UncheckedFilterInputStream$Builder.class
+│       │   │   │       │   │   ├── UncheckedFilterInputStream.class
+│       │   │   │       │   │   ├── UncheckedFilterReader$1.class
+│       │   │   │       │   │   ├── UncheckedFilterReader$Builder.class
+│       │   │   │       │   │   ├── UncheckedFilterReader.class
+│       │   │   │       │   │   ├── UnixLineEndingInputStream.class
+│       │   │   │       │   │   ├── UnsupportedOperationExceptions.class
+│       │   │   │       │   │   ├── UnsynchronizedBufferedInputStream$1.class
+│       │   │   │       │   │   ├── UnsynchronizedBufferedInputStream$Builder.class
+│       │   │   │       │   │   ├── UnsynchronizedBufferedInputStream.class
+│       │   │   │       │   │   ├── UnsynchronizedByteArrayInputStream$Builder.class
+│       │   │   │       │   │   ├── UnsynchronizedByteArrayInputStream.class
+│       │   │   │       │   │   ├── UnsynchronizedFilterInputStream$Builder.class
+│       │   │   │       │   │   ├── UnsynchronizedFilterInputStream.class
+│       │   │   │       │   │   ├── WindowsLineEndingInputStream.class
+│       │   │   │       │   │   ├── XmlStreamReader$Builder.class
+│       │   │   │       │   │   ├── XmlStreamReader.class
+│       │   │   │       │   │   └── XmlStreamReaderException.class
+│       │   │   │       │   ├── monitor/
+│       │   │   │       │   │   ├── FileAlterationListener.class
+│       │   │   │       │   │   ├── FileAlterationListenerAdaptor.class
+│       │   │   │       │   │   ├── FileAlterationMonitor.class
+│       │   │   │       │   │   ├── FileAlterationObserver$1.class
+│       │   │   │       │   │   ├── FileAlterationObserver.class
+│       │   │   │       │   │   ├── FileEntry.class
+│       │   │   │       │   │   ├── package-info.class
+│       │   │   │       │   │   └── SerializableFileTime.class
+│       │   │   │       │   ├── output/
+│       │   │   │       │   │   ├── AbstractByteArrayOutputStream$InputStreamConstructor.class
+│       │   │   │       │   │   ├── AbstractByteArrayOutputStream.class
+│       │   │   │       │   │   ├── AppendableOutputStream.class
+│       │   │   │       │   │   ├── AppendableWriter.class
+│       │   │   │       │   │   ├── BrokenOutputStream.class
+│       │   │   │       │   │   ├── BrokenWriter.class
+│       │   │   │       │   │   ├── ByteArrayOutputStream.class
+│       │   │   │       │   │   ├── ChunkedOutputStream$Builder.class
+│       │   │   │       │   │   ├── ChunkedOutputStream.class
+│       │   │   │       │   │   ├── ChunkedWriter.class
+│       │   │   │       │   │   ├── ClosedOutputStream.class
+│       │   │   │       │   │   ├── ClosedWriter.class
+│       │   │   │       │   │   ├── CloseShieldOutputStream.class
+│       │   │   │       │   │   ├── CloseShieldWriter.class
+│       │   │   │       │   │   ├── CountingOutputStream.class
+│       │   │   │       │   │   ├── DeferredFileOutputStream$1.class
+│       │   │   │       │   │   ├── DeferredFileOutputStream$Builder.class
+│       │   │   │       │   │   ├── DeferredFileOutputStream.class
+│       │   │   │       │   │   ├── DemuxOutputStream.class
+│       │   │   │       │   │   ├── FileWriterWithEncoding$1.class
+│       │   │   │       │   │   ├── FileWriterWithEncoding$Builder.class
+│       │   │   │       │   │   ├── FileWriterWithEncoding.class
+│       │   │   │       │   │   ├── FilterCollectionWriter.class
+│       │   │   │       │   │   ├── LockableFileWriter$Builder.class
+│       │   │   │       │   │   ├── LockableFileWriter.class
+│       │   │   │       │   │   ├── NullAppendable.class
+│       │   │   │       │   │   ├── NullOutputStream.class
+│       │   │   │       │   │   ├── NullPrintStream.class
+│       │   │   │       │   │   ├── NullWriter.class
+│       │   │   │       │   │   ├── package-info.class
+│       │   │   │       │   │   ├── ProxyCollectionWriter.class
+│       │   │   │       │   │   ├── ProxyOutputStream.class
+│       │   │   │       │   │   ├── ProxyWriter.class
+│       │   │   │       │   │   ├── QueueOutputStream.class
+│       │   │   │       │   │   ├── StringBuilderWriter.class
+│       │   │   │       │   │   ├── TaggedOutputStream.class
+│       │   │   │       │   │   ├── TaggedWriter.class
+│       │   │   │       │   │   ├── TeeOutputStream.class
+│       │   │   │       │   │   ├── TeeWriter.class
+│       │   │   │       │   │   ├── ThresholdingOutputStream.class
+│       │   │   │       │   │   ├── UncheckedAppendable.class
+│       │   │   │       │   │   ├── UncheckedAppendableImpl.class
+│       │   │   │       │   │   ├── UncheckedFilterOutputStream$1.class
+│       │   │   │       │   │   ├── UncheckedFilterOutputStream$Builder.class
+│       │   │   │       │   │   ├── UncheckedFilterOutputStream.class
+│       │   │   │       │   │   ├── UncheckedFilterWriter$1.class
+│       │   │   │       │   │   ├── UncheckedFilterWriter$Builder.class
+│       │   │   │       │   │   ├── UncheckedFilterWriter.class
+│       │   │   │       │   │   ├── UnsynchronizedByteArrayOutputStream$Builder.class
+│       │   │   │       │   │   ├── UnsynchronizedByteArrayOutputStream.class
+│       │   │   │       │   │   ├── WriterOutputStream$Builder.class
+│       │   │   │       │   │   ├── WriterOutputStream.class
+│       │   │   │       │   │   ├── XmlStreamWriter$1.class
+│       │   │   │       │   │   ├── XmlStreamWriter$Builder.class
+│       │   │   │       │   │   └── XmlStreamWriter.class
+│       │   │   │       │   ├── serialization/
+│       │   │   │       │   │   ├── ClassNameMatcher.class
+│       │   │   │       │   │   ├── FullClassNameMatcher.class
+│       │   │   │       │   │   ├── package-info.class
+│       │   │   │       │   │   ├── RegexpClassNameMatcher.class
+│       │   │   │       │   │   ├── ValidatingObjectInputStream.class
+│       │   │   │       │   │   └── WildcardClassNameMatcher.class
+│       │   │   │       │   ├── ByteOrderMark.class
+│       │   │   │       │   ├── ByteOrderParser.class
+│       │   │   │       │   ├── Charsets.class
+│       │   │   │       │   ├── CloseableURLConnection.class
+│       │   │   │       │   ├── CopyUtils.class
+│       │   │   │       │   ├── DirectoryWalker$CancelException.class
+│       │   │   │       │   ├── DirectoryWalker.class
+│       │   │   │       │   ├── EndianUtils.class
+│       │   │   │       │   ├── FileCleaner.class
+│       │   │   │       │   ├── FileCleaningTracker$Reaper.class
+│       │   │   │       │   ├── FileCleaningTracker$Tracker.class
+│       │   │   │       │   ├── FileCleaningTracker.class
+│       │   │   │       │   ├── FileDeleteStrategy$ForceFileDeleteStrategy.class
+│       │   │   │       │   ├── FileDeleteStrategy.class
+│       │   │   │       │   ├── FileExistsException.class
+│       │   │   │       │   ├── FilenameUtils.class
+│       │   │   │       │   ├── FileSystem.class
+│       │   │   │       │   ├── FileSystemUtils.class
+│       │   │   │       │   ├── FileUtils.class
+│       │   │   │       │   ├── HexDump.class
+│       │   │   │       │   ├── IO.class
+│       │   │   │       │   ├── IOCase.class
+│       │   │   │       │   ├── IOExceptionList.class
+│       │   │   │       │   ├── IOExceptionWithCause.class
+│       │   │   │       │   ├── IOIndexedException.class
+│       │   │   │       │   ├── IOUtils.class
+│       │   │   │       │   ├── LineIterator.class
+│       │   │   │       │   ├── package-info.class
+│       │   │   │       │   ├── RandomAccessFileMode.class
+│       │   │   │       │   ├── RandomAccessFiles.class
+│       │   │   │       │   ├── StandardLineSeparator.class
+│       │   │   │       │   ├── StreamIterator.class
+│       │   │   │       │   ├── TaggedIOException.class
+│       │   │   │       │   ├── ThreadMonitor.class
+│       │   │   │       │   ├── ThreadUtils.class
+│       │   │   │       │   └── UncheckedIOExceptions.class
+│       │   │   │       └── math3/
+│       │   │   │           ├── analysis/
+│       │   │   │           │   ├── differentiation/
+│       │   │   │           │   │   ├── DerivativeStructure$1.class
+│       │   │   │           │   │   ├── DerivativeStructure$DataTransferObject.class
+│       │   │   │           │   │   ├── DerivativeStructure.class
+│       │   │   │           │   │   ├── DSCompiler.class
+│       │   │   │           │   │   ├── FiniteDifferencesDifferentiator$1.class
+│       │   │   │           │   │   ├── FiniteDifferencesDifferentiator$2.class
+│       │   │   │           │   │   ├── FiniteDifferencesDifferentiator$3.class
+│       │   │   │           │   │   ├── FiniteDifferencesDifferentiator.class
+│       │   │   │           │   │   ├── GradientFunction.class
+│       │   │   │           │   │   ├── JacobianFunction.class
+│       │   │   │           │   │   ├── MultivariateDifferentiableFunction.class
+│       │   │   │           │   │   ├── MultivariateDifferentiableVectorFunction.class
+│       │   │   │           │   │   ├── SparseGradient$1.class
+│       │   │   │           │   │   ├── SparseGradient.class
+│       │   │   │           │   │   ├── UnivariateDifferentiableFunction.class
+│       │   │   │           │   │   ├── UnivariateDifferentiableMatrixFunction.class
+│       │   │   │           │   │   ├── UnivariateDifferentiableVectorFunction.class
+│       │   │   │           │   │   ├── UnivariateFunctionDifferentiator.class
+│       │   │   │           │   │   ├── UnivariateMatrixFunctionDifferentiator.class
+│       │   │   │           │   │   └── UnivariateVectorFunctionDifferentiator.class
+│       │   │   │           │   ├── function/
+│       │   │   │           │   │   ├── Abs.class
+│       │   │   │           │   │   ├── Acos.class
+│       │   │   │           │   │   ├── Acosh.class
+│       │   │   │           │   │   ├── Add.class
+│       │   │   │           │   │   ├── Asin.class
+│       │   │   │           │   │   ├── Asinh.class
+│       │   │   │           │   │   ├── Atan.class
+│       │   │   │           │   │   ├── Atan2.class
+│       │   │   │           │   │   ├── Atanh.class
+│       │   │   │           │   │   ├── Cbrt.class
+│       │   │   │           │   │   ├── Ceil.class
+│       │   │   │           │   │   ├── Constant.class
+│       │   │   │           │   │   ├── Cos.class
+│       │   │   │           │   │   ├── Cosh.class
+│       │   │   │           │   │   ├── Divide.class
+│       │   │   │           │   │   ├── Exp.class
+│       │   │   │           │   │   ├── Expm1.class
+│       │   │   │           │   │   ├── Floor.class
+│       │   │   │           │   │   ├── Gaussian$Parametric.class
+│       │   │   │           │   │   ├── Gaussian.class
+│       │   │   │           │   │   ├── HarmonicOscillator$Parametric.class
+│       │   │   │           │   │   ├── HarmonicOscillator.class
+│       │   │   │           │   │   ├── Identity.class
+│       │   │   │           │   │   ├── Inverse.class
+│       │   │   │           │   │   ├── Log.class
+│       │   │   │           │   │   ├── Log10.class
+│       │   │   │           │   │   ├── Log1p.class
+│       │   │   │           │   │   ├── Logistic$Parametric.class
+│       │   │   │           │   │   ├── Logistic.class
+│       │   │   │           │   │   ├── Logit$Parametric.class
+│       │   │   │           │   │   ├── Logit.class
+│       │   │   │           │   │   ├── Max.class
+│       │   │   │           │   │   ├── Min.class
+│       │   │   │           │   │   ├── Minus.class
+│       │   │   │           │   │   ├── Multiply.class
+│       │   │   │           │   │   ├── Pow.class
+│       │   │   │           │   │   ├── Power.class
+│       │   │   │           │   │   ├── Rint.class
+│       │   │   │           │   │   ├── Sigmoid$Parametric.class
+│       │   │   │           │   │   ├── Sigmoid.class
+│       │   │   │           │   │   ├── Signum.class
+│       │   │   │           │   │   ├── Sin.class
+│       │   │   │           │   │   ├── Sinc.class
+│       │   │   │           │   │   ├── Sinh.class
+│       │   │   │           │   │   ├── Sqrt.class
+│       │   │   │           │   │   ├── StepFunction.class
+│       │   │   │           │   │   ├── Subtract.class
+│       │   │   │           │   │   ├── Tan.class
+│       │   │   │           │   │   ├── Tanh.class
+│       │   │   │           │   │   └── Ulp.class
+│       │   │   │           │   ├── integration/
+│       │   │   │           │   │   ├── gauss/
+│       │   │   │           │   │   │   ├── BaseRuleFactory.class
+│       │   │   │           │   │   │   ├── GaussIntegrator.class
+│       │   │   │           │   │   │   ├── GaussIntegratorFactory.class
+│       │   │   │           │   │   │   ├── HermiteRuleFactory.class
+│       │   │   │           │   │   │   ├── LegendreHighPrecisionRuleFactory.class
+│       │   │   │           │   │   │   ├── LegendreRuleFactory.class
+│       │   │   │           │   │   │   └── SymmetricGaussIntegrator.class
+│       │   │   │           │   │   ├── BaseAbstractUnivariateIntegrator.class
+│       │   │   │           │   │   ├── IterativeLegendreGaussIntegrator$1.class
+│       │   │   │           │   │   ├── IterativeLegendreGaussIntegrator.class
+│       │   │   │           │   │   ├── LegendreGaussIntegrator.class
+│       │   │   │           │   │   ├── MidPointIntegrator.class
+│       │   │   │           │   │   ├── RombergIntegrator.class
+│       │   │   │           │   │   ├── SimpsonIntegrator.class
+│       │   │   │           │   │   ├── TrapezoidIntegrator.class
+│       │   │   │           │   │   └── UnivariateIntegrator.class
+│       │   │   │           │   ├── interpolation/
+│       │   │   │           │   │   ├── AkimaSplineInterpolator.class
+│       │   │   │           │   │   ├── BicubicFunction.class
+│       │   │   │           │   │   ├── BicubicInterpolatingFunction.class
+│       │   │   │           │   │   ├── BicubicInterpolator$1.class
+│       │   │   │           │   │   ├── BicubicInterpolator.class
+│       │   │   │           │   │   ├── BicubicSplineFunction$1.class
+│       │   │   │           │   │   ├── BicubicSplineFunction$2.class
+│       │   │   │           │   │   ├── BicubicSplineFunction$3.class
+│       │   │   │           │   │   ├── BicubicSplineFunction$4.class
+│       │   │   │           │   │   ├── BicubicSplineFunction$5.class
+│       │   │   │           │   │   ├── BicubicSplineFunction.class
+│       │   │   │           │   │   ├── BicubicSplineInterpolatingFunction.class
+│       │   │   │           │   │   ├── BicubicSplineInterpolator.class
+│       │   │   │           │   │   ├── BivariateGridInterpolator.class
+│       │   │   │           │   │   ├── DividedDifferenceInterpolator.class
+│       │   │   │           │   │   ├── FieldHermiteInterpolator.class
+│       │   │   │           │   │   ├── HermiteInterpolator.class
+│       │   │   │           │   │   ├── InterpolatingMicrosphere$Facet.class
+│       │   │   │           │   │   ├── InterpolatingMicrosphere$FacetData.class
+│       │   │   │           │   │   ├── InterpolatingMicrosphere.class
+│       │   │   │           │   │   ├── InterpolatingMicrosphere2D.class
+│       │   │   │           │   │   ├── LinearInterpolator.class
+│       │   │   │           │   │   ├── LoessInterpolator.class
+│       │   │   │           │   │   ├── MicrosphereInterpolatingFunction$MicrosphereSurfaceElement.class
+│       │   │   │           │   │   ├── MicrosphereInterpolatingFunction.class
+│       │   │   │           │   │   ├── MicrosphereInterpolator.class
+│       │   │   │           │   │   ├── MicrosphereProjectionInterpolator$1.class
+│       │   │   │           │   │   ├── MicrosphereProjectionInterpolator.class
+│       │   │   │           │   │   ├── MultivariateInterpolator.class
+│       │   │   │           │   │   ├── NevilleInterpolator.class
+│       │   │   │           │   │   ├── PiecewiseBicubicSplineInterpolatingFunction.class
+│       │   │   │           │   │   ├── PiecewiseBicubicSplineInterpolator.class
+│       │   │   │           │   │   ├── SmoothingPolynomialBicubicSplineInterpolator.class
+│       │   │   │           │   │   ├── SplineInterpolator.class
+│       │   │   │           │   │   ├── TricubicFunction.class
+│       │   │   │           │   │   ├── TricubicInterpolatingFunction.class
+│       │   │   │           │   │   ├── TricubicInterpolator$1.class
+│       │   │   │           │   │   ├── TricubicInterpolator.class
+│       │   │   │           │   │   ├── TricubicSplineFunction.class
+│       │   │   │           │   │   ├── TricubicSplineInterpolatingFunction.class
+│       │   │   │           │   │   ├── TricubicSplineInterpolator.class
+│       │   │   │           │   │   ├── TrivariateGridInterpolator.class
+│       │   │   │           │   │   ├── UnivariateInterpolator.class
+│       │   │   │           │   │   ├── UnivariatePeriodicInterpolator$1.class
+│       │   │   │           │   │   └── UnivariatePeriodicInterpolator.class
+│       │   │   │           │   ├── polynomials/
+│       │   │   │           │   │   ├── PolynomialFunction$Parametric.class
+│       │   │   │           │   │   ├── PolynomialFunction.class
+│       │   │   │           │   │   ├── PolynomialFunctionLagrangeForm.class
+│       │   │   │           │   │   ├── PolynomialFunctionNewtonForm.class
+│       │   │   │           │   │   ├── PolynomialSplineFunction.class
+│       │   │   │           │   │   ├── PolynomialsUtils$1.class
+│       │   │   │           │   │   ├── PolynomialsUtils$2.class
+│       │   │   │           │   │   ├── PolynomialsUtils$3.class
+│       │   │   │           │   │   ├── PolynomialsUtils$4.class
+│       │   │   │           │   │   ├── PolynomialsUtils$5.class
+│       │   │   │           │   │   ├── PolynomialsUtils$JacobiKey.class
+│       │   │   │           │   │   ├── PolynomialsUtils$RecurrenceCoefficientsGenerator.class
+│       │   │   │           │   │   └── PolynomialsUtils.class
+│       │   │   │           │   ├── solvers/
+│       │   │   │           │   │   ├── AbstractDifferentiableUnivariateSolver.class
+│       │   │   │           │   │   ├── AbstractPolynomialSolver.class
+│       │   │   │           │   │   ├── AbstractUnivariateDifferentiableSolver.class
+│       │   │   │           │   │   ├── AbstractUnivariateSolver.class
+│       │   │   │           │   │   ├── AllowedSolution.class
+│       │   │   │           │   │   ├── BaseAbstractUnivariateSolver.class
+│       │   │   │           │   │   ├── BaseSecantSolver$1.class
+│       │   │   │           │   │   ├── BaseSecantSolver$Method.class
+│       │   │   │           │   │   ├── BaseSecantSolver.class
+│       │   │   │           │   │   ├── BaseUnivariateSolver.class
+│       │   │   │           │   │   ├── BisectionSolver.class
+│       │   │   │           │   │   ├── BracketedRealFieldUnivariateSolver.class
+│       │   │   │           │   │   ├── BracketedUnivariateSolver.class
+│       │   │   │           │   │   ├── BracketingNthOrderBrentSolver$1.class
+│       │   │   │           │   │   ├── BracketingNthOrderBrentSolver.class
+│       │   │   │           │   │   ├── BrentSolver.class
+│       │   │   │           │   │   ├── DifferentiableUnivariateSolver.class
+│       │   │   │           │   │   ├── FieldBracketingNthOrderBrentSolver$1.class
+│       │   │   │           │   │   ├── FieldBracketingNthOrderBrentSolver.class
+│       │   │   │           │   │   ├── IllinoisSolver.class
+│       │   │   │           │   │   ├── LaguerreSolver$1.class
+│       │   │   │           │   │   ├── LaguerreSolver$ComplexSolver.class
+│       │   │   │           │   │   ├── LaguerreSolver.class
+│       │   │   │           │   │   ├── MullerSolver.class
+│       │   │   │           │   │   ├── MullerSolver2.class
+│       │   │   │           │   │   ├── NewtonRaphsonSolver.class
+│       │   │   │           │   │   ├── NewtonSolver.class
+│       │   │   │           │   │   ├── PegasusSolver.class
+│       │   │   │           │   │   ├── PolynomialSolver.class
+│       │   │   │           │   │   ├── RegulaFalsiSolver.class
+│       │   │   │           │   │   ├── RiddersSolver.class
+│       │   │   │           │   │   ├── SecantSolver.class
+│       │   │   │           │   │   ├── UnivariateDifferentiableSolver.class
+│       │   │   │           │   │   ├── UnivariateSolver.class
+│       │   │   │           │   │   └── UnivariateSolverUtils.class
+│       │   │   │           │   ├── BivariateFunction.class
+│       │   │   │           │   ├── DifferentiableMultivariateFunction.class
+│       │   │   │           │   ├── DifferentiableMultivariateVectorFunction.class
+│       │   │   │           │   ├── DifferentiableUnivariateFunction.class
+│       │   │   │           │   ├── DifferentiableUnivariateMatrixFunction.class
+│       │   │   │           │   ├── DifferentiableUnivariateVectorFunction.class
+│       │   │   │           │   ├── FunctionUtils$1.class
+│       │   │   │           │   ├── FunctionUtils$10.class
+│       │   │   │           │   ├── FunctionUtils$11.class
+│       │   │   │           │   ├── FunctionUtils$12.class
+│       │   │   │           │   ├── FunctionUtils$13.class
+│       │   │   │           │   ├── FunctionUtils$14$1.class
+│       │   │   │           │   ├── FunctionUtils$14.class
+│       │   │   │           │   ├── FunctionUtils$15.class
+│       │   │   │           │   ├── FunctionUtils$16$1.class
+│       │   │   │           │   ├── FunctionUtils$16$2.class
+│       │   │   │           │   ├── FunctionUtils$16.class
+│       │   │   │           │   ├── FunctionUtils$17.class
+│       │   │   │           │   ├── FunctionUtils$18$1.class
+│       │   │   │           │   ├── FunctionUtils$18.class
+│       │   │   │           │   ├── FunctionUtils$19.class
+│       │   │   │           │   ├── FunctionUtils$2.class
+│       │   │   │           │   ├── FunctionUtils$3$1.class
+│       │   │   │           │   ├── FunctionUtils$3.class
+│       │   │   │           │   ├── FunctionUtils$4.class
+│       │   │   │           │   ├── FunctionUtils$5.class
+│       │   │   │           │   ├── FunctionUtils$6$1.class
+│       │   │   │           │   ├── FunctionUtils$6.class
+│       │   │   │           │   ├── FunctionUtils$7.class
+│       │   │   │           │   ├── FunctionUtils$8.class
+│       │   │   │           │   ├── FunctionUtils$9$1.class
+│       │   │   │           │   ├── FunctionUtils$9.class
+│       │   │   │           │   ├── FunctionUtils.class
+│       │   │   │           │   ├── MultivariateFunction.class
+│       │   │   │           │   ├── MultivariateMatrixFunction.class
+│       │   │   │           │   ├── MultivariateVectorFunction.class
+│       │   │   │           │   ├── ParametricUnivariateFunction.class
+│       │   │   │           │   ├── RealFieldUnivariateFunction.class
+│       │   │   │           │   ├── TrivariateFunction.class
+│       │   │   │           │   ├── UnivariateFunction.class
+│       │   │   │           │   ├── UnivariateMatrixFunction.class
+│       │   │   │           │   └── UnivariateVectorFunction.class
+│       │   │   │           ├── complex/
+│       │   │   │           │   ├── Complex.class
+│       │   │   │           │   ├── ComplexField$1.class
+│       │   │   │           │   ├── ComplexField$LazyHolder.class
+│       │   │   │           │   ├── ComplexField.class
+│       │   │   │           │   ├── ComplexFormat.class
+│       │   │   │           │   ├── ComplexUtils.class
+│       │   │   │           │   ├── Quaternion.class
+│       │   │   │           │   └── RootsOfUnity.class
+│       │   │   │           ├── dfp/
+│       │   │   │           │   ├── BracketingNthOrderBrentSolverDFP$1.class
+│       │   │   │           │   ├── BracketingNthOrderBrentSolverDFP.class
+│       │   │   │           │   ├── Dfp$1.class
+│       │   │   │           │   ├── Dfp.class
+│       │   │   │           │   ├── DfpDec$1.class
+│       │   │   │           │   ├── DfpDec.class
+│       │   │   │           │   ├── DfpField$RoundingMode.class
+│       │   │   │           │   ├── DfpField.class
+│       │   │   │           │   ├── DfpMath.class
+│       │   │   │           │   └── UnivariateDfpFunction.class
+│       │   │   │           ├── distribution/
+│       │   │   │           │   ├── fitting/
+│       │   │   │           │   │   ├── MultivariateNormalMixtureExpectationMaximization$DataRow.class
+│       │   │   │           │   │   └── MultivariateNormalMixtureExpectationMaximization.class
+│       │   │   │           │   ├── AbstractIntegerDistribution.class
+│       │   │   │           │   ├── AbstractMultivariateRealDistribution.class
+│       │   │   │           │   ├── AbstractRealDistribution$1.class
+│       │   │   │           │   ├── AbstractRealDistribution.class
+│       │   │   │           │   ├── BetaDistribution$ChengBetaSampler.class
+│       │   │   │           │   ├── BetaDistribution.class
+│       │   │   │           │   ├── BinomialDistribution.class
+│       │   │   │           │   ├── CauchyDistribution.class
+│       │   │   │           │   ├── ChiSquaredDistribution.class
+│       │   │   │           │   ├── ConstantRealDistribution.class
+│       │   │   │           │   ├── EnumeratedDistribution.class
+│       │   │   │           │   ├── EnumeratedIntegerDistribution.class
+│       │   │   │           │   ├── EnumeratedRealDistribution.class
+│       │   │   │           │   ├── ExponentialDistribution.class
+│       │   │   │           │   ├── FDistribution.class
+│       │   │   │           │   ├── GammaDistribution.class
+│       │   │   │           │   ├── GeometricDistribution.class
+│       │   │   │           │   ├── GumbelDistribution.class
+│       │   │   │           │   ├── HypergeometricDistribution.class
+│       │   │   │           │   ├── IntegerDistribution.class
+│       │   │   │           │   ├── KolmogorovSmirnovDistribution.class
+│       │   │   │           │   ├── LaplaceDistribution.class
+│       │   │   │           │   ├── LevyDistribution.class
+│       │   │   │           │   ├── LogisticDistribution.class
+│       │   │   │           │   ├── LogNormalDistribution.class
+│       │   │   │           │   ├── MixtureMultivariateNormalDistribution.class
+│       │   │   │           │   ├── MixtureMultivariateRealDistribution.class
+│       │   │   │           │   ├── MultivariateNormalDistribution.class
+│       │   │   │           │   ├── MultivariateRealDistribution.class
+│       │   │   │           │   ├── NakagamiDistribution.class
+│       │   │   │           │   ├── NormalDistribution.class
+│       │   │   │           │   ├── ParetoDistribution.class
+│       │   │   │           │   ├── PascalDistribution.class
+│       │   │   │           │   ├── PoissonDistribution.class
+│       │   │   │           │   ├── RealDistribution.class
+│       │   │   │           │   ├── SaddlePointExpansion.class
+│       │   │   │           │   ├── TDistribution.class
+│       │   │   │           │   ├── TriangularDistribution.class
+│       │   │   │           │   ├── UniformIntegerDistribution.class
+│       │   │   │           │   ├── UniformRealDistribution.class
+│       │   │   │           │   ├── WeibullDistribution.class
+│       │   │   │           │   ├── ZipfDistribution$ZipfRejectionInversionSampler.class
+│       │   │   │           │   └── ZipfDistribution.class
+│       │   │   │           ├── exception/
+│       │   │   │           │   ├── util/
+│       │   │   │           │   │   ├── ArgUtils.class
+│       │   │   │           │   │   ├── DummyLocalizable.class
+│       │   │   │           │   │   ├── ExceptionContext.class
+│       │   │   │           │   │   ├── ExceptionContextProvider.class
+│       │   │   │           │   │   ├── Localizable.class
+│       │   │   │           │   │   └── LocalizedFormats.class
+│       │   │   │           │   ├── ConvergenceException.class
+│       │   │   │           │   ├── DimensionMismatchException.class
+│       │   │   │           │   ├── InsufficientDataException.class
+│       │   │   │           │   ├── MathArithmeticException.class
+│       │   │   │           │   ├── MathIllegalArgumentException.class
+│       │   │   │           │   ├── MathIllegalNumberException.class
+│       │   │   │           │   ├── MathIllegalStateException.class
+│       │   │   │           │   ├── MathInternalError.class
+│       │   │   │           │   ├── MathParseException.class
+│       │   │   │           │   ├── MathRuntimeException.class
+│       │   │   │           │   ├── MathUnsupportedOperationException.class
+│       │   │   │           │   ├── MaxCountExceededException.class
+│       │   │   │           │   ├── MultiDimensionMismatchException.class
+│       │   │   │           │   ├── NoBracketingException.class
+│       │   │   │           │   ├── NoDataException.class
+│       │   │   │           │   ├── NonMonotonicSequenceException.class
+│       │   │   │           │   ├── NotANumberException.class
+│       │   │   │           │   ├── NotFiniteNumberException.class
+│       │   │   │           │   ├── NotPositiveException.class
+│       │   │   │           │   ├── NotStrictlyPositiveException.class
+│       │   │   │           │   ├── NullArgumentException.class
+│       │   │   │           │   ├── NumberIsTooLargeException.class
+│       │   │   │           │   ├── NumberIsTooSmallException.class
+│       │   │   │           │   ├── OutOfRangeException.class
+│       │   │   │           │   ├── TooManyEvaluationsException.class
+│       │   │   │           │   ├── TooManyIterationsException.class
+│       │   │   │           │   └── ZeroException.class
+│       │   │   │           ├── filter/
+│       │   │   │           │   ├── DefaultMeasurementModel.class
+│       │   │   │           │   ├── DefaultProcessModel.class
+│       │   │   │           │   ├── KalmanFilter.class
+│       │   │   │           │   ├── MeasurementModel.class
+│       │   │   │           │   └── ProcessModel.class
+│       │   │   │           ├── fitting/
+│       │   │   │           │   ├── leastsquares/
+│       │   │   │           │   │   ├── AbstractEvaluation.class
+│       │   │   │           │   │   ├── DenseWeightedEvaluation.class
+│       │   │   │           │   │   ├── EvaluationRmsChecker.class
+│       │   │   │           │   │   ├── GaussNewtonOptimizer$1.class
+│       │   │   │           │   │   ├── GaussNewtonOptimizer$Decomposition$1.class
+│       │   │   │           │   │   ├── GaussNewtonOptimizer$Decomposition$2.class
+│       │   │   │           │   │   ├── GaussNewtonOptimizer$Decomposition$3.class
+│       │   │   │           │   │   ├── GaussNewtonOptimizer$Decomposition$4.class
+│       │   │   │           │   │   ├── GaussNewtonOptimizer$Decomposition.class
+│       │   │   │           │   │   ├── GaussNewtonOptimizer.class
+│       │   │   │           │   │   ├── LeastSquaresAdapter.class
+│       │   │   │           │   │   ├── LeastSquaresBuilder.class
+│       │   │   │           │   │   ├── LeastSquaresFactory$1.class
+│       │   │   │           │   │   ├── LeastSquaresFactory$2.class
+│       │   │   │           │   │   ├── LeastSquaresFactory$3.class
+│       │   │   │           │   │   ├── LeastSquaresFactory$4.class
+│       │   │   │           │   │   ├── LeastSquaresFactory$LocalLeastSquaresProblem$LazyUnweightedEvaluation.class
+│       │   │   │           │   │   ├── LeastSquaresFactory$LocalLeastSquaresProblem$UnweightedEvaluation.class
+│       │   │   │           │   │   ├── LeastSquaresFactory$LocalLeastSquaresProblem.class
+│       │   │   │           │   │   ├── LeastSquaresFactory$LocalValueAndJacobianFunction.class
+│       │   │   │           │   │   ├── LeastSquaresFactory.class
+│       │   │   │           │   │   ├── LeastSquaresOptimizer$Optimum.class
+│       │   │   │           │   │   ├── LeastSquaresOptimizer.class
+│       │   │   │           │   │   ├── LeastSquaresProblem$Evaluation.class
+│       │   │   │           │   │   ├── LeastSquaresProblem.class
+│       │   │   │           │   │   ├── LevenbergMarquardtOptimizer$InternalData.class
+│       │   │   │           │   │   ├── LevenbergMarquardtOptimizer.class
+│       │   │   │           │   │   ├── MultivariateJacobianFunction.class
+│       │   │   │           │   │   ├── OptimumImpl.class
+│       │   │   │           │   │   ├── ParameterValidator.class
+│       │   │   │           │   │   └── ValueAndJacobianFunction.class
+│       │   │   │           │   ├── AbstractCurveFitter$TheoreticalValuesFunction$1.class
+│       │   │   │           │   ├── AbstractCurveFitter$TheoreticalValuesFunction$2.class
+│       │   │   │           │   ├── AbstractCurveFitter$TheoreticalValuesFunction.class
+│       │   │   │           │   ├── AbstractCurveFitter.class
+│       │   │   │           │   ├── CurveFitter$TheoreticalValuesFunction$1.class
+│       │   │   │           │   ├── CurveFitter$TheoreticalValuesFunction$2.class
+│       │   │   │           │   ├── CurveFitter$TheoreticalValuesFunction.class
+│       │   │   │           │   ├── CurveFitter.class
+│       │   │   │           │   ├── GaussianCurveFitter$1.class
+│       │   │   │           │   ├── GaussianCurveFitter$ParameterGuesser$1.class
+│       │   │   │           │   ├── GaussianCurveFitter$ParameterGuesser.class
+│       │   │   │           │   ├── GaussianCurveFitter.class
+│       │   │   │           │   ├── GaussianFitter$1.class
+│       │   │   │           │   ├── GaussianFitter$ParameterGuesser$1.class
+│       │   │   │           │   ├── GaussianFitter$ParameterGuesser.class
+│       │   │   │           │   ├── GaussianFitter.class
+│       │   │   │           │   ├── HarmonicCurveFitter$ParameterGuesser.class
+│       │   │   │           │   ├── HarmonicCurveFitter.class
+│       │   │   │           │   ├── HarmonicFitter$ParameterGuesser.class
+│       │   │   │           │   ├── HarmonicFitter.class
+│       │   │   │           │   ├── PolynomialCurveFitter.class
+│       │   │   │           │   ├── PolynomialFitter.class
+│       │   │   │           │   ├── SimpleCurveFitter.class
+│       │   │   │           │   ├── WeightedObservedPoint.class
+│       │   │   │           │   └── WeightedObservedPoints.class
+│       │   │   │           ├── fraction/
+│       │   │   │           │   ├── AbstractFormat.class
+│       │   │   │           │   ├── BigFraction.class
+│       │   │   │           │   ├── BigFractionField$1.class
+│       │   │   │           │   ├── BigFractionField$LazyHolder.class
+│       │   │   │           │   ├── BigFractionField.class
+│       │   │   │           │   ├── BigFractionFormat.class
+│       │   │   │           │   ├── Fraction.class
+│       │   │   │           │   ├── FractionConversionException.class
+│       │   │   │           │   ├── FractionField$1.class
+│       │   │   │           │   ├── FractionField$LazyHolder.class
+│       │   │   │           │   ├── FractionField.class
+│       │   │   │           │   ├── FractionFormat.class
+│       │   │   │           │   ├── ProperBigFractionFormat.class
+│       │   │   │           │   └── ProperFractionFormat.class
+│       │   │   │           ├── genetics/
+│       │   │   │           │   ├── AbstractListChromosome.class
+│       │   │   │           │   ├── BinaryChromosome.class
+│       │   │   │           │   ├── BinaryMutation.class
+│       │   │   │           │   ├── Chromosome.class
+│       │   │   │           │   ├── ChromosomePair.class
+│       │   │   │           │   ├── CrossoverPolicy.class
+│       │   │   │           │   ├── CycleCrossover.class
+│       │   │   │           │   ├── ElitisticListPopulation.class
+│       │   │   │           │   ├── Fitness.class
+│       │   │   │           │   ├── FixedElapsedTime.class
+│       │   │   │           │   ├── FixedGenerationCount.class
+│       │   │   │           │   ├── GeneticAlgorithm.class
+│       │   │   │           │   ├── InvalidRepresentationException.class
+│       │   │   │           │   ├── ListPopulation.class
+│       │   │   │           │   ├── MutationPolicy.class
+│       │   │   │           │   ├── NPointCrossover.class
+│       │   │   │           │   ├── OnePointCrossover.class
+│       │   │   │           │   ├── OrderedCrossover.class
+│       │   │   │           │   ├── PermutationChromosome.class
+│       │   │   │           │   ├── Population.class
+│       │   │   │           │   ├── RandomKey.class
+│       │   │   │           │   ├── RandomKeyMutation.class
+│       │   │   │           │   ├── SelectionPolicy.class
+│       │   │   │           │   ├── StoppingCondition.class
+│       │   │   │           │   ├── TournamentSelection$1.class
+│       │   │   │           │   ├── TournamentSelection.class
+│       │   │   │           │   └── UniformCrossover.class
+│       │   │   │           ├── geometry/
+│       │   │   │           │   ├── enclosing/
+│       │   │   │           │   │   ├── Encloser.class
+│       │   │   │           │   │   ├── EnclosingBall.class
+│       │   │   │           │   │   ├── SupportBallGenerator.class
+│       │   │   │           │   │   └── WelzlEncloser.class
+│       │   │   │           │   ├── euclidean/
+│       │   │   │           │   │   ├── oned/
+│       │   │   │           │   │   │   ├── Euclidean1D$1.class
+│       │   │   │           │   │   │   ├── Euclidean1D$LazyHolder.class
+│       │   │   │           │   │   │   ├── Euclidean1D$NoSubSpaceException.class
+│       │   │   │           │   │   │   ├── Euclidean1D.class
+│       │   │   │           │   │   │   ├── Interval.class
+│       │   │   │           │   │   │   ├── IntervalsSet$SubIntervalsIterator.class
+│       │   │   │           │   │   │   ├── IntervalsSet.class
+│       │   │   │           │   │   │   ├── OrientedPoint.class
+│       │   │   │           │   │   │   ├── SubOrientedPoint.class
+│       │   │   │           │   │   │   ├── Vector1D.class
+│       │   │   │           │   │   │   └── Vector1DFormat.class
+│       │   │   │           │   │   ├── threed/
+│       │   │   │           │   │   │   ├── CardanEulerSingularityException.class
+│       │   │   │           │   │   │   ├── Euclidean3D$1.class
+│       │   │   │           │   │   │   ├── Euclidean3D$LazyHolder.class
+│       │   │   │           │   │   │   ├── Euclidean3D.class
+│       │   │   │           │   │   │   ├── FieldRotation.class
+│       │   │   │           │   │   │   ├── FieldVector3D.class
+│       │   │   │           │   │   │   ├── Line.class
+│       │   │   │           │   │   │   ├── NotARotationMatrixException.class
+│       │   │   │           │   │   │   ├── OutlineExtractor$BoundaryProjector.class
+│       │   │   │           │   │   │   ├── OutlineExtractor.class
+│       │   │   │           │   │   │   ├── Plane.class
+│       │   │   │           │   │   │   ├── PolyhedronsSet$FacetsContributionVisitor.class
+│       │   │   │           │   │   │   ├── PolyhedronsSet$RotationTransform.class
+│       │   │   │           │   │   │   ├── PolyhedronsSet$TranslationTransform.class
+│       │   │   │           │   │   │   ├── PolyhedronsSet.class
+│       │   │   │           │   │   │   ├── Rotation.class
+│       │   │   │           │   │   │   ├── RotationConvention.class
+│       │   │   │           │   │   │   ├── RotationOrder.class
+│       │   │   │           │   │   │   ├── Segment.class
+│       │   │   │           │   │   │   ├── SphereGenerator.class
+│       │   │   │           │   │   │   ├── SphericalCoordinates$DataTransferObject.class
+│       │   │   │           │   │   │   ├── SphericalCoordinates.class
+│       │   │   │           │   │   │   ├── SubLine.class
+│       │   │   │           │   │   │   ├── SubPlane.class
+│       │   │   │           │   │   │   ├── Vector3D.class
+│       │   │   │           │   │   │   └── Vector3DFormat.class
+│       │   │   │           │   │   └── twod/
+│       │   │   │           │   │       ├── hull/
+│       │   │   │           │   │       │   ├── AbstractConvexHullGenerator2D.class
+│       │   │   │           │   │       │   ├── AklToussaintHeuristic.class
+│       │   │   │           │   │       │   ├── ConvexHull2D.class
+│       │   │   │           │   │       │   ├── ConvexHullGenerator2D.class
+│       │   │   │           │   │       │   ├── MonotoneChain$1.class
+│       │   │   │           │   │       │   └── MonotoneChain.class
+│       │   │   │           │   │       ├── DiskGenerator.class
+│       │   │   │           │   │       ├── Euclidean2D$1.class
+│       │   │   │           │   │       ├── Euclidean2D$LazyHolder.class
+│       │   │   │           │   │       ├── Euclidean2D.class
+│       │   │   │           │   │       ├── Line$1.class
+│       │   │   │           │   │       ├── Line$LineTransform.class
+│       │   │   │           │   │       ├── Line.class
+│       │   │   │           │   │       ├── NestedLoops.class
+│       │   │   │           │   │       ├── PolygonsSet$1.class
+│       │   │   │           │   │       ├── PolygonsSet$ComparableSegment.class
+│       │   │   │           │   │       ├── PolygonsSet$ConnectableSegment.class
+│       │   │   │           │   │       ├── PolygonsSet$Edge.class
+│       │   │   │           │   │       ├── PolygonsSet$SegmentsBuilder.class
+│       │   │   │           │   │       ├── PolygonsSet$Vertex.class
+│       │   │   │           │   │       ├── PolygonsSet.class
+│       │   │   │           │   │       ├── Segment.class
+│       │   │   │           │   │       ├── SubLine.class
+│       │   │   │           │   │       ├── Vector2D.class
+│       │   │   │           │   │       └── Vector2DFormat.class
+│       │   │   │           │   ├── hull/
+│       │   │   │           │   │   ├── ConvexHull.class
+│       │   │   │           │   │   └── ConvexHullGenerator.class
+│       │   │   │           │   ├── partitioning/
+│       │   │   │           │   │   ├── utilities/
+│       │   │   │           │   │   │   ├── AVLTree$1.class
+│       │   │   │           │   │   │   ├── AVLTree$Node.class
+│       │   │   │           │   │   │   ├── AVLTree$Skew.class
+│       │   │   │           │   │   │   ├── AVLTree.class
+│       │   │   │           │   │   │   └── OrderedTuple.class
+│       │   │   │           │   │   ├── AbstractRegion$1.class
+│       │   │   │           │   │   ├── AbstractRegion$2.class
+│       │   │   │           │   │   ├── AbstractRegion$3.class
+│       │   │   │           │   │   ├── AbstractRegion$BoundaryBuilder.class
+│       │   │   │           │   │   ├── AbstractRegion$Sides.class
+│       │   │   │           │   │   ├── AbstractRegion.class
+│       │   │   │           │   │   ├── AbstractSubHyperplane.class
+│       │   │   │           │   │   ├── BoundaryAttribute.class
+│       │   │   │           │   │   ├── BoundaryBuilder.class
+│       │   │   │           │   │   ├── BoundaryProjection.class
+│       │   │   │           │   │   ├── BoundaryProjector.class
+│       │   │   │           │   │   ├── BoundarySizeVisitor.class
+│       │   │   │           │   │   ├── BSPTree$1.class
+│       │   │   │           │   │   ├── BSPTree$2.class
+│       │   │   │           │   │   ├── BSPTree$LeafMerger.class
+│       │   │   │           │   │   ├── BSPTree$VanishingCutHandler.class
+│       │   │   │           │   │   ├── BSPTree.class
+│       │   │   │           │   │   ├── BSPTreeVisitor$Order.class
+│       │   │   │           │   │   ├── BSPTreeVisitor.class
+│       │   │   │           │   │   ├── Characterization$1.class
+│       │   │   │           │   │   ├── Characterization.class
+│       │   │   │           │   │   ├── Embedding.class
+│       │   │   │           │   │   ├── Hyperplane.class
+│       │   │   │           │   │   ├── InsideFinder$1.class
+│       │   │   │           │   │   ├── InsideFinder.class
+│       │   │   │           │   │   ├── NodesSet.class
+│       │   │   │           │   │   ├── Region$Location.class
+│       │   │   │           │   │   ├── Region.class
+│       │   │   │           │   │   ├── RegionFactory$1.class
+│       │   │   │           │   │   ├── RegionFactory$DifferenceMerger.class
+│       │   │   │           │   │   ├── RegionFactory$IntersectionMerger.class
+│       │   │   │           │   │   ├── RegionFactory$NodesCleaner.class
+│       │   │   │           │   │   ├── RegionFactory$UnionMerger.class
+│       │   │   │           │   │   ├── RegionFactory$VanishingToLeaf.class
+│       │   │   │           │   │   ├── RegionFactory$XorMerger.class
+│       │   │   │           │   │   ├── RegionFactory.class
+│       │   │   │           │   │   ├── Side.class
+│       │   │   │           │   │   ├── SubHyperplane$SplitSubHyperplane.class
+│       │   │   │           │   │   ├── SubHyperplane.class
+│       │   │   │           │   │   └── Transform.class
+│       │   │   │           │   ├── spherical/
+│       │   │   │           │   │   ├── oned/
+│       │   │   │           │   │   │   ├── Arc.class
+│       │   │   │           │   │   │   ├── ArcsSet$1.class
+│       │   │   │           │   │   │   ├── ArcsSet$InconsistentStateAt2PiWrapping.class
+│       │   │   │           │   │   │   ├── ArcsSet$Split.class
+│       │   │   │           │   │   │   ├── ArcsSet$SubArcsIterator.class
+│       │   │   │           │   │   │   ├── ArcsSet.class
+│       │   │   │           │   │   │   ├── LimitAngle.class
+│       │   │   │           │   │   │   ├── S1Point.class
+│       │   │   │           │   │   │   ├── Sphere1D$1.class
+│       │   │   │           │   │   │   ├── Sphere1D$LazyHolder.class
+│       │   │   │           │   │   │   ├── Sphere1D$NoSubSpaceException.class
+│       │   │   │           │   │   │   ├── Sphere1D.class
+│       │   │   │           │   │   │   └── SubLimitAngle.class
+│       │   │   │           │   │   └── twod/
+│       │   │   │           │   │       ├── Circle$1.class
+│       │   │   │           │   │       ├── Circle$CircleTransform.class
+│       │   │   │           │   │       ├── Circle.class
+│       │   │   │           │   │       ├── Edge.class
+│       │   │   │           │   │       ├── EdgesBuilder.class
+│       │   │   │           │   │       ├── PropertiesComputer.class
+│       │   │   │           │   │       ├── S2Point.class
+│       │   │   │           │   │       ├── Sphere2D$1.class
+│       │   │   │           │   │       ├── Sphere2D$LazyHolder.class
+│       │   │   │           │   │       ├── Sphere2D.class
+│       │   │   │           │   │       ├── SphericalPolygonsSet.class
+│       │   │   │           │   │       ├── SubCircle.class
+│       │   │   │           │   │       └── Vertex.class
+│       │   │   │           │   ├── Point.class
+│       │   │   │           │   ├── Space.class
+│       │   │   │           │   ├── Vector.class
+│       │   │   │           │   └── VectorFormat.class
+│       │   │   │           ├── linear/
+│       │   │   │           │   ├── AbstractFieldMatrix$1.class
+│       │   │   │           │   ├── AbstractFieldMatrix$2.class
+│       │   │   │           │   ├── AbstractFieldMatrix$3.class
+│       │   │   │           │   ├── AbstractFieldMatrix.class
+│       │   │   │           │   ├── AbstractRealMatrix$1.class
+│       │   │   │           │   ├── AbstractRealMatrix$2.class
+│       │   │   │           │   ├── AbstractRealMatrix$3.class
+│       │   │   │           │   ├── AbstractRealMatrix$4.class
+│       │   │   │           │   ├── AbstractRealMatrix$5.class
+│       │   │   │           │   ├── AbstractRealMatrix.class
+│       │   │   │           │   ├── AnyMatrix.class
+│       │   │   │           │   ├── Array2DRowFieldMatrix.class
+│       │   │   │           │   ├── Array2DRowRealMatrix.class
+│       │   │   │           │   ├── ArrayFieldVector.class
+│       │   │   │           │   ├── ArrayRealVector.class
+│       │   │   │           │   ├── BiDiagonalTransformer.class
+│       │   │   │           │   ├── BlockFieldMatrix.class
+│       │   │   │           │   ├── BlockRealMatrix.class
+│       │   │   │           │   ├── CholeskyDecomposition$1.class
+│       │   │   │           │   ├── CholeskyDecomposition$Solver.class
+│       │   │   │           │   ├── CholeskyDecomposition.class
+│       │   │   │           │   ├── ConjugateGradient.class
+│       │   │   │           │   ├── DecompositionSolver.class
+│       │   │   │           │   ├── DefaultFieldMatrixChangingVisitor.class
+│       │   │   │           │   ├── DefaultFieldMatrixPreservingVisitor.class
+│       │   │   │           │   ├── DefaultIterativeLinearSolverEvent.class
+│       │   │   │           │   ├── DefaultRealMatrixChangingVisitor.class
+│       │   │   │           │   ├── DefaultRealMatrixPreservingVisitor.class
+│       │   │   │           │   ├── DiagonalMatrix.class
+│       │   │   │           │   ├── EigenDecomposition$1.class
+│       │   │   │           │   ├── EigenDecomposition$Solver.class
+│       │   │   │           │   ├── EigenDecomposition.class
+│       │   │   │           │   ├── FieldDecompositionSolver.class
+│       │   │   │           │   ├── FieldLUDecomposition$1.class
+│       │   │   │           │   ├── FieldLUDecomposition$Solver.class
+│       │   │   │           │   ├── FieldLUDecomposition.class
+│       │   │   │           │   ├── FieldMatrix.class
+│       │   │   │           │   ├── FieldMatrixChangingVisitor.class
+│       │   │   │           │   ├── FieldMatrixPreservingVisitor.class
+│       │   │   │           │   ├── FieldVector.class
+│       │   │   │           │   ├── FieldVectorChangingVisitor.class
+│       │   │   │           │   ├── FieldVectorPreservingVisitor.class
+│       │   │   │           │   ├── HessenbergTransformer.class
+│       │   │   │           │   ├── IllConditionedOperatorException.class
+│       │   │   │           │   ├── IterativeLinearSolver.class
+│       │   │   │           │   ├── IterativeLinearSolverEvent.class
+│       │   │   │           │   ├── JacobiPreconditioner$1.class
+│       │   │   │           │   ├── JacobiPreconditioner.class
+│       │   │   │           │   ├── LUDecomposition$1.class
+│       │   │   │           │   ├── LUDecomposition$Solver.class
+│       │   │   │           │   ├── LUDecomposition.class
+│       │   │   │           │   ├── MatrixDimensionMismatchException.class
+│       │   │   │           │   ├── MatrixUtils$BigFractionMatrixConverter.class
+│       │   │   │           │   ├── MatrixUtils$FractionMatrixConverter.class
+│       │   │   │           │   ├── MatrixUtils.class
+│       │   │   │           │   ├── NonPositiveDefiniteMatrixException.class
+│       │   │   │           │   ├── NonPositiveDefiniteOperatorException.class
+│       │   │   │           │   ├── NonSelfAdjointOperatorException.class
+│       │   │   │           │   ├── NonSquareMatrixException.class
+│       │   │   │           │   ├── NonSquareOperatorException.class
+│       │   │   │           │   ├── NonSymmetricMatrixException.class
+│       │   │   │           │   ├── OpenMapRealMatrix.class
+│       │   │   │           │   ├── OpenMapRealVector$OpenMapEntry.class
+│       │   │   │           │   ├── OpenMapRealVector$OpenMapSparseIterator.class
+│       │   │   │           │   ├── OpenMapRealVector.class
+│       │   │   │           │   ├── PreconditionedIterativeLinearSolver.class
+│       │   │   │           │   ├── QRDecomposition$1.class
+│       │   │   │           │   ├── QRDecomposition$Solver.class
+│       │   │   │           │   ├── QRDecomposition.class
+│       │   │   │           │   ├── RealLinearOperator.class
+│       │   │   │           │   ├── RealMatrix.class
+│       │   │   │           │   ├── RealMatrixChangingVisitor.class
+│       │   │   │           │   ├── RealMatrixFormat.class
+│       │   │   │           │   ├── RealMatrixPreservingVisitor.class
+│       │   │   │           │   ├── RealVector$1.class
+│       │   │   │           │   ├── RealVector$2$1.class
+│       │   │   │           │   ├── RealVector$2$2.class
+│       │   │   │           │   ├── RealVector$2$UnmodifiableEntry.class
+│       │   │   │           │   ├── RealVector$2.class
+│       │   │   │           │   ├── RealVector$Entry.class
+│       │   │   │           │   ├── RealVector$SparseEntryIterator.class
+│       │   │   │           │   ├── RealVector.class
+│       │   │   │           │   ├── RealVectorChangingVisitor.class
+│       │   │   │           │   ├── RealVectorFormat.class
+│       │   │   │           │   ├── RealVectorPreservingVisitor.class
+│       │   │   │           │   ├── RectangularCholeskyDecomposition.class
+│       │   │   │           │   ├── RRQRDecomposition$1.class
+│       │   │   │           │   ├── RRQRDecomposition$Solver.class
+│       │   │   │           │   ├── RRQRDecomposition.class
+│       │   │   │           │   ├── SchurTransformer$1.class
+│       │   │   │           │   ├── SchurTransformer$ShiftInfo.class
+│       │   │   │           │   ├── SchurTransformer.class
+│       │   │   │           │   ├── SingularMatrixException.class
+│       │   │   │           │   ├── SingularOperatorException.class
+│       │   │   │           │   ├── SingularValueDecomposition$1.class
+│       │   │   │           │   ├── SingularValueDecomposition$Solver.class
+│       │   │   │           │   ├── SingularValueDecomposition.class
+│       │   │   │           │   ├── SparseFieldMatrix.class
+│       │   │   │           │   ├── SparseFieldVector.class
+│       │   │   │           │   ├── SparseRealMatrix.class
+│       │   │   │           │   ├── SparseRealVector.class
+│       │   │   │           │   ├── SymmLQ$State.class
+│       │   │   │           │   ├── SymmLQ.class
+│       │   │   │           │   └── TriDiagonalTransformer.class
+│       │   │   │           ├── ml/
+│       │   │   │           │   ├── clustering/
+│       │   │   │           │   │   ├── evaluation/
+│       │   │   │           │   │   │   ├── ClusterEvaluator.class
+│       │   │   │           │   │   │   └── SumOfClusterVariances.class
+│       │   │   │           │   │   ├── CentroidCluster.class
+│       │   │   │           │   │   ├── Cluster.class
+│       │   │   │           │   │   ├── Clusterable.class
+│       │   │   │           │   │   ├── Clusterer.class
+│       │   │   │           │   │   ├── DBSCANClusterer$PointStatus.class
+│       │   │   │           │   │   ├── DBSCANClusterer.class
+│       │   │   │           │   │   ├── DoublePoint.class
+│       │   │   │           │   │   ├── FuzzyKMeansClusterer.class
+│       │   │   │           │   │   ├── KMeansPlusPlusClusterer$1.class
+│       │   │   │           │   │   ├── KMeansPlusPlusClusterer$EmptyClusterStrategy.class
+│       │   │   │           │   │   ├── KMeansPlusPlusClusterer.class
+│       │   │   │           │   │   └── MultiKMeansPlusPlusClusterer.class
+│       │   │   │           │   ├── distance/
+│       │   │   │           │   │   ├── CanberraDistance.class
+│       │   │   │           │   │   ├── ChebyshevDistance.class
+│       │   │   │           │   │   ├── DistanceMeasure.class
+│       │   │   │           │   │   ├── EarthMoversDistance.class
+│       │   │   │           │   │   ├── EuclideanDistance.class
+│       │   │   │           │   │   └── ManhattanDistance.class
+│       │   │   │           │   └── neuralnet/
+│       │   │   │           │       ├── oned/
+│       │   │   │           │       │   ├── NeuronString$SerializationProxy.class
+│       │   │   │           │       │   └── NeuronString.class
+│       │   │   │           │       ├── sofm/
+│       │   │   │           │       │   ├── util/
+│       │   │   │           │       │   │   ├── ExponentialDecayFunction.class
+│       │   │   │           │       │   │   └── QuasiSigmoidDecayFunction.class
+│       │   │   │           │       │   ├── KohonenTrainingTask.class
+│       │   │   │           │       │   ├── KohonenUpdateAction.class
+│       │   │   │           │       │   ├── LearningFactorFunction.class
+│       │   │   │           │       │   ├── LearningFactorFunctionFactory$1.class
+│       │   │   │           │       │   ├── LearningFactorFunctionFactory$2.class
+│       │   │   │           │       │   ├── LearningFactorFunctionFactory.class
+│       │   │   │           │       │   ├── NeighbourhoodSizeFunction.class
+│       │   │   │           │       │   ├── NeighbourhoodSizeFunctionFactory$1.class
+│       │   │   │           │       │   ├── NeighbourhoodSizeFunctionFactory$2.class
+│       │   │   │           │       │   └── NeighbourhoodSizeFunctionFactory.class
+│       │   │   │           │       ├── twod/
+│       │   │   │           │       │   ├── util/
+│       │   │   │           │       │   │   ├── HitHistogram.class
+│       │   │   │           │       │   │   ├── LocationFinder$Location.class
+│       │   │   │           │       │   │   ├── LocationFinder.class
+│       │   │   │           │       │   │   ├── MapDataVisualization.class
+│       │   │   │           │       │   │   ├── MapVisualization.class
+│       │   │   │           │       │   │   ├── QuantizationError.class
+│       │   │   │           │       │   │   ├── SmoothedDataHistogram.class
+│       │   │   │           │       │   │   ├── TopographicErrorHistogram.class
+│       │   │   │           │       │   │   └── UnifiedDistanceMatrix.class
+│       │   │   │           │       │   ├── NeuronSquareMesh2D$1.class
+│       │   │   │           │       │   ├── NeuronSquareMesh2D$HorizontalDirection.class
+│       │   │   │           │       │   ├── NeuronSquareMesh2D$SerializationProxy.class
+│       │   │   │           │       │   ├── NeuronSquareMesh2D$VerticalDirection.class
+│       │   │   │           │       │   └── NeuronSquareMesh2D.class
+│       │   │   │           │       ├── FeatureInitializer.class
+│       │   │   │           │       ├── FeatureInitializerFactory$1.class
+│       │   │   │           │       ├── FeatureInitializerFactory$2.class
+│       │   │   │           │       ├── FeatureInitializerFactory.class
+│       │   │   │           │       ├── MapUtils$PairNeuronDouble$1.class
+│       │   │   │           │       ├── MapUtils$PairNeuronDouble.class
+│       │   │   │           │       ├── MapUtils.class
+│       │   │   │           │       ├── Network$NeuronIdentifierComparator.class
+│       │   │   │           │       ├── Network$SerializationProxy.class
+│       │   │   │           │       ├── Network.class
+│       │   │   │           │       ├── Neuron$SerializationProxy.class
+│       │   │   │           │       ├── Neuron.class
+│       │   │   │           │       ├── SquareNeighbourhood.class
+│       │   │   │           │       └── UpdateAction.class
+│       │   │   │           ├── ode/
+│       │   │   │           │   ├── events/
+│       │   │   │           │   │   ├── Action.class
+│       │   │   │           │   │   ├── EventFilter.class
+│       │   │   │           │   │   ├── EventHandler$Action.class
+│       │   │   │           │   │   ├── EventHandler.class
+│       │   │   │           │   │   ├── EventState$1.class
+│       │   │   │           │   │   ├── EventState$LocalMaxCountExceededException.class
+│       │   │   │           │   │   ├── EventState.class
+│       │   │   │           │   │   ├── FieldEventHandler.class
+│       │   │   │           │   │   ├── FieldEventState$1.class
+│       │   │   │           │   │   ├── FieldEventState.class
+│       │   │   │           │   │   ├── FilterType$1.class
+│       │   │   │           │   │   ├── FilterType$2.class
+│       │   │   │           │   │   ├── FilterType$3.class
+│       │   │   │           │   │   ├── FilterType.class
+│       │   │   │           │   │   ├── Transformer$1.class
+│       │   │   │           │   │   ├── Transformer$2.class
+│       │   │   │           │   │   ├── Transformer$3.class
+│       │   │   │           │   │   ├── Transformer$4.class
+│       │   │   │           │   │   ├── Transformer$5.class
+│       │   │   │           │   │   └── Transformer.class
+│       │   │   │           │   ├── nonstiff/
+│       │   │   │           │   │   ├── AdamsBashforthFieldIntegrator.class
+│       │   │   │           │   │   ├── AdamsBashforthIntegrator.class
+│       │   │   │           │   │   ├── AdamsFieldIntegrator.class
+│       │   │   │           │   │   ├── AdamsFieldStepInterpolator.class
+│       │   │   │           │   │   ├── AdamsIntegrator.class
+│       │   │   │           │   │   ├── AdamsMoultonFieldIntegrator$Corrector.class
+│       │   │   │           │   │   ├── AdamsMoultonFieldIntegrator.class
+│       │   │   │           │   │   ├── AdamsMoultonIntegrator$Corrector.class
+│       │   │   │           │   │   ├── AdamsMoultonIntegrator.class
+│       │   │   │           │   │   ├── AdamsNordsieckFieldTransformer.class
+│       │   │   │           │   │   ├── AdamsNordsieckTransformer.class
+│       │   │   │           │   │   ├── AdaptiveStepsizeFieldIntegrator.class
+│       │   │   │           │   │   ├── AdaptiveStepsizeIntegrator.class
+│       │   │   │           │   │   ├── ClassicalRungeKuttaFieldIntegrator.class
+│       │   │   │           │   │   ├── ClassicalRungeKuttaFieldStepInterpolator.class
+│       │   │   │           │   │   ├── ClassicalRungeKuttaIntegrator.class
+│       │   │   │           │   │   ├── ClassicalRungeKuttaStepInterpolator.class
+│       │   │   │           │   │   ├── DormandPrince54FieldIntegrator.class
+│       │   │   │           │   │   ├── DormandPrince54FieldStepInterpolator.class
+│       │   │   │           │   │   ├── DormandPrince54Integrator.class
+│       │   │   │           │   │   ├── DormandPrince54StepInterpolator.class
+│       │   │   │           │   │   ├── DormandPrince853FieldIntegrator.class
+│       │   │   │           │   │   ├── DormandPrince853FieldStepInterpolator.class
+│       │   │   │           │   │   ├── DormandPrince853Integrator.class
+│       │   │   │           │   │   ├── DormandPrince853StepInterpolator.class
+│       │   │   │           │   │   ├── EmbeddedRungeKuttaFieldIntegrator.class
+│       │   │   │           │   │   ├── EmbeddedRungeKuttaIntegrator.class
+│       │   │   │           │   │   ├── EulerFieldIntegrator.class
+│       │   │   │           │   │   ├── EulerFieldStepInterpolator.class
+│       │   │   │           │   │   ├── EulerIntegrator.class
+│       │   │   │           │   │   ├── EulerStepInterpolator.class
+│       │   │   │           │   │   ├── FieldButcherArrayProvider.class
+│       │   │   │           │   │   ├── GillFieldIntegrator.class
+│       │   │   │           │   │   ├── GillFieldStepInterpolator.class
+│       │   │   │           │   │   ├── GillIntegrator.class
+│       │   │   │           │   │   ├── GillStepInterpolator.class
+│       │   │   │           │   │   ├── GraggBulirschStoerIntegrator.class
+│       │   │   │           │   │   ├── GraggBulirschStoerStepInterpolator.class
+│       │   │   │           │   │   ├── HighamHall54FieldIntegrator.class
+│       │   │   │           │   │   ├── HighamHall54FieldStepInterpolator.class
+│       │   │   │           │   │   ├── HighamHall54Integrator.class
+│       │   │   │           │   │   ├── HighamHall54StepInterpolator.class
+│       │   │   │           │   │   ├── LutherFieldIntegrator.class
+│       │   │   │           │   │   ├── LutherFieldStepInterpolator.class
+│       │   │   │           │   │   ├── LutherIntegrator.class
+│       │   │   │           │   │   ├── LutherStepInterpolator.class
+│       │   │   │           │   │   ├── MidpointFieldIntegrator.class
+│       │   │   │           │   │   ├── MidpointFieldStepInterpolator.class
+│       │   │   │           │   │   ├── MidpointIntegrator.class
+│       │   │   │           │   │   ├── MidpointStepInterpolator.class
+│       │   │   │           │   │   ├── RungeKuttaFieldIntegrator.class
+│       │   │   │           │   │   ├── RungeKuttaFieldStepInterpolator.class
+│       │   │   │           │   │   ├── RungeKuttaIntegrator.class
+│       │   │   │           │   │   ├── RungeKuttaStepInterpolator.class
+│       │   │   │           │   │   ├── ThreeEighthesFieldIntegrator.class
+│       │   │   │           │   │   ├── ThreeEighthesFieldStepInterpolator.class
+│       │   │   │           │   │   ├── ThreeEighthesIntegrator.class
+│       │   │   │           │   │   └── ThreeEighthesStepInterpolator.class
+│       │   │   │           │   ├── sampling/
+│       │   │   │           │   │   ├── AbstractFieldStepInterpolator.class
+│       │   │   │           │   │   ├── AbstractStepInterpolator.class
+│       │   │   │           │   │   ├── DummyStepHandler$1.class
+│       │   │   │           │   │   ├── DummyStepHandler$LazyHolder.class
+│       │   │   │           │   │   ├── DummyStepHandler.class
+│       │   │   │           │   │   ├── FieldFixedStepHandler.class
+│       │   │   │           │   │   ├── FieldStepHandler.class
+│       │   │   │           │   │   ├── FieldStepInterpolator.class
+│       │   │   │           │   │   ├── FieldStepNormalizer.class
+│       │   │   │           │   │   ├── FixedStepHandler.class
+│       │   │   │           │   │   ├── NordsieckStepInterpolator.class
+│       │   │   │           │   │   ├── StepHandler.class
+│       │   │   │           │   │   ├── StepInterpolator.class
+│       │   │   │           │   │   ├── StepNormalizer.class
+│       │   │   │           │   │   ├── StepNormalizerBounds.class
+│       │   │   │           │   │   └── StepNormalizerMode.class
+│       │   │   │           │   ├── AbstractFieldIntegrator$1.class
+│       │   │   │           │   ├── AbstractFieldIntegrator.class
+│       │   │   │           │   ├── AbstractIntegrator$1.class
+│       │   │   │           │   ├── AbstractIntegrator.class
+│       │   │   │           │   ├── AbstractParameterizable.class
+│       │   │   │           │   ├── ContinuousOutputFieldModel.class
+│       │   │   │           │   ├── ContinuousOutputModel.class
+│       │   │   │           │   ├── EquationsMapper.class
+│       │   │   │           │   ├── ExpandableStatefulODE$SecondaryComponent.class
+│       │   │   │           │   ├── ExpandableStatefulODE.class
+│       │   │   │           │   ├── FieldEquationsMapper.class
+│       │   │   │           │   ├── FieldExpandableODE.class
+│       │   │   │           │   ├── FieldODEState.class
+│       │   │   │           │   ├── FieldODEStateAndDerivative.class
+│       │   │   │           │   ├── FieldSecondaryEquations.class
+│       │   │   │           │   ├── FirstOrderConverter.class
+│       │   │   │           │   ├── FirstOrderDifferentialEquations.class
+│       │   │   │           │   ├── FirstOrderFieldDifferentialEquations.class
+│       │   │   │           │   ├── FirstOrderFieldIntegrator.class
+│       │   │   │           │   ├── FirstOrderIntegrator.class
+│       │   │   │           │   ├── JacobianMatrices$1.class
+│       │   │   │           │   ├── JacobianMatrices$JacobiansSecondaryEquations.class
+│       │   │   │           │   ├── JacobianMatrices$MainStateJacobianWrapper.class
+│       │   │   │           │   ├── JacobianMatrices$MismatchedEquations.class
+│       │   │   │           │   ├── JacobianMatrices.class
+│       │   │   │           │   ├── MainStateJacobianProvider.class
+│       │   │   │           │   ├── MultistepFieldIntegrator$FieldNordsieckInitializer.class
+│       │   │   │           │   ├── MultistepFieldIntegrator$InitializationCompletedMarkerException.class
+│       │   │   │           │   ├── MultistepFieldIntegrator.class
+│       │   │   │           │   ├── MultistepIntegrator$1.class
+│       │   │   │           │   ├── MultistepIntegrator$InitializationCompletedMarkerException.class
+│       │   │   │           │   ├── MultistepIntegrator$NordsieckInitializer.class
+│       │   │   │           │   ├── MultistepIntegrator$NordsieckTransformer.class
+│       │   │   │           │   ├── MultistepIntegrator.class
+│       │   │   │           │   ├── ODEIntegrator.class
+│       │   │   │           │   ├── ParameterConfiguration.class
+│       │   │   │           │   ├── Parameterizable.class
+│       │   │   │           │   ├── ParameterizedODE.class
+│       │   │   │           │   ├── ParameterizedWrapper.class
+│       │   │   │           │   ├── ParameterJacobianProvider.class
+│       │   │   │           │   ├── ParameterJacobianWrapper.class
+│       │   │   │           │   ├── SecondaryEquations.class
+│       │   │   │           │   ├── SecondOrderDifferentialEquations.class
+│       │   │   │           │   ├── SecondOrderIntegrator.class
+│       │   │   │           │   └── UnknownParameterException.class
+│       │   │   │           ├── optim/
+│       │   │   │           │   ├── linear/
+│       │   │   │           │   │   ├── LinearConstraint.class
+│       │   │   │           │   │   ├── LinearConstraintSet.class
+│       │   │   │           │   │   ├── LinearObjectiveFunction.class
+│       │   │   │           │   │   ├── LinearOptimizer.class
+│       │   │   │           │   │   ├── NoFeasibleSolutionException.class
+│       │   │   │           │   │   ├── NonNegativeConstraint.class
+│       │   │   │           │   │   ├── PivotSelectionRule.class
+│       │   │   │           │   │   ├── Relationship$1.class
+│       │   │   │           │   │   ├── Relationship.class
+│       │   │   │           │   │   ├── SimplexSolver.class
+│       │   │   │           │   │   ├── SimplexTableau.class
+│       │   │   │           │   │   ├── SolutionCallback.class
+│       │   │   │           │   │   └── UnboundedSolutionException.class
+│       │   │   │           │   ├── nonlinear/
+│       │   │   │           │   │   ├── scalar/
+│       │   │   │           │   │   │   ├── gradient/
+│       │   │   │           │   │   │   │   ├── NonLinearConjugateGradientOptimizer$1.class
+│       │   │   │           │   │   │   │   ├── NonLinearConjugateGradientOptimizer$BracketingStep.class
+│       │   │   │           │   │   │   │   ├── NonLinearConjugateGradientOptimizer$Formula.class
+│       │   │   │           │   │   │   │   ├── NonLinearConjugateGradientOptimizer$IdentityPreconditioner.class
+│       │   │   │           │   │   │   │   ├── NonLinearConjugateGradientOptimizer.class
+│       │   │   │           │   │   │   │   └── Preconditioner.class
+│       │   │   │           │   │   │   ├── noderiv/
+│       │   │   │           │   │   │   │   ├── AbstractSimplex.class
+│       │   │   │           │   │   │   │   ├── BOBYQAOptimizer$PathIsExploredException.class
+│       │   │   │           │   │   │   │   ├── BOBYQAOptimizer.class
+│       │   │   │           │   │   │   │   ├── CMAESOptimizer$DoubleIndex.class
+│       │   │   │           │   │   │   │   ├── CMAESOptimizer$FitnessFunction.class
+│       │   │   │           │   │   │   │   ├── CMAESOptimizer$PopulationSize.class
+│       │   │   │           │   │   │   │   ├── CMAESOptimizer$Sigma.class
+│       │   │   │           │   │   │   │   ├── CMAESOptimizer$ValuePenaltyPair.class
+│       │   │   │           │   │   │   │   ├── CMAESOptimizer.class
+│       │   │   │           │   │   │   │   ├── MultiDirectionalSimplex.class
+│       │   │   │           │   │   │   │   ├── NelderMeadSimplex.class
+│       │   │   │           │   │   │   │   ├── PowellOptimizer.class
+│       │   │   │           │   │   │   │   ├── SimplexOptimizer$1.class
+│       │   │   │           │   │   │   │   ├── SimplexOptimizer$2.class
+│       │   │   │           │   │   │   │   └── SimplexOptimizer.class
+│       │   │   │           │   │   │   ├── GoalType.class
+│       │   │   │           │   │   │   ├── GradientMultivariateOptimizer.class
+│       │   │   │           │   │   │   ├── LeastSquaresConverter.class
+│       │   │   │           │   │   │   ├── LineSearch$1.class
+│       │   │   │           │   │   │   ├── LineSearch.class
+│       │   │   │           │   │   │   ├── MultiStartMultivariateOptimizer$1.class
+│       │   │   │           │   │   │   ├── MultiStartMultivariateOptimizer.class
+│       │   │   │           │   │   │   ├── MultivariateFunctionMappingAdapter$1.class
+│       │   │   │           │   │   │   ├── MultivariateFunctionMappingAdapter$LowerBoundMapper.class
+│       │   │   │           │   │   │   ├── MultivariateFunctionMappingAdapter$LowerUpperBoundMapper.class
+│       │   │   │           │   │   │   ├── MultivariateFunctionMappingAdapter$Mapper.class
+│       │   │   │           │   │   │   ├── MultivariateFunctionMappingAdapter$NoBoundsMapper.class
+│       │   │   │           │   │   │   ├── MultivariateFunctionMappingAdapter$UpperBoundMapper.class
+│       │   │   │           │   │   │   ├── MultivariateFunctionMappingAdapter.class
+│       │   │   │           │   │   │   ├── MultivariateFunctionPenaltyAdapter.class
+│       │   │   │           │   │   │   ├── MultivariateOptimizer.class
+│       │   │   │           │   │   │   ├── ObjectiveFunction.class
+│       │   │   │           │   │   │   └── ObjectiveFunctionGradient.class
+│       │   │   │           │   │   └── vector/
+│       │   │   │           │   │       ├── jacobian/
+│       │   │   │           │   │       │   ├── AbstractLeastSquaresOptimizer.class
+│       │   │   │           │   │       │   ├── GaussNewtonOptimizer.class
+│       │   │   │           │   │       │   └── LevenbergMarquardtOptimizer.class
+│       │   │   │           │   │       ├── JacobianMultivariateVectorOptimizer.class
+│       │   │   │           │   │       ├── ModelFunction.class
+│       │   │   │           │   │       ├── ModelFunctionJacobian.class
+│       │   │   │           │   │       ├── MultiStartMultivariateVectorOptimizer$1.class
+│       │   │   │           │   │       ├── MultiStartMultivariateVectorOptimizer.class
+│       │   │   │           │   │       ├── MultivariateVectorOptimizer.class
+│       │   │   │           │   │       ├── Target.class
+│       │   │   │           │   │       └── Weight.class
+│       │   │   │           │   ├── univariate/
+│       │   │   │           │   │   ├── BracketFinder.class
+│       │   │   │           │   │   ├── BrentOptimizer.class
+│       │   │   │           │   │   ├── MultiStartUnivariateOptimizer$1.class
+│       │   │   │           │   │   ├── MultiStartUnivariateOptimizer.class
+│       │   │   │           │   │   ├── SearchInterval.class
+│       │   │   │           │   │   ├── SimpleUnivariateValueChecker.class
+│       │   │   │           │   │   ├── UnivariateObjectiveFunction.class
+│       │   │   │           │   │   ├── UnivariateOptimizer.class
+│       │   │   │           │   │   └── UnivariatePointValuePair.class
+│       │   │   │           │   ├── AbstractConvergenceChecker.class
+│       │   │   │           │   ├── AbstractOptimizationProblem$1.class
+│       │   │   │           │   ├── AbstractOptimizationProblem$MaxEvalCallback.class
+│       │   │   │           │   ├── AbstractOptimizationProblem$MaxIterCallback.class
+│       │   │   │           │   ├── AbstractOptimizationProblem.class
+│       │   │   │           │   ├── BaseMultiStartMultivariateOptimizer.class
+│       │   │   │           │   ├── BaseMultivariateOptimizer.class
+│       │   │   │           │   ├── BaseOptimizer$1.class
+│       │   │   │           │   ├── BaseOptimizer$MaxEvalCallback.class
+│       │   │   │           │   ├── BaseOptimizer$MaxIterCallback.class
+│       │   │   │           │   ├── BaseOptimizer.class
+│       │   │   │           │   ├── ConvergenceChecker.class
+│       │   │   │           │   ├── InitialGuess.class
+│       │   │   │           │   ├── MaxEval.class
+│       │   │   │           │   ├── MaxIter.class
+│       │   │   │           │   ├── OptimizationData.class
+│       │   │   │           │   ├── OptimizationProblem.class
+│       │   │   │           │   ├── PointValuePair$DataTransferObject.class
+│       │   │   │           │   ├── PointValuePair.class
+│       │   │   │           │   ├── PointVectorValuePair$DataTransferObject.class
+│       │   │   │           │   ├── PointVectorValuePair.class
+│       │   │   │           │   ├── SimpleBounds.class
+│       │   │   │           │   ├── SimplePointChecker.class
+│       │   │   │           │   ├── SimpleValueChecker.class
+│       │   │   │           │   └── SimpleVectorValueChecker.class
+│       │   │   │           ├── optimization/
+│       │   │   │           │   ├── direct/
+│       │   │   │           │   │   ├── AbstractSimplex.class
+│       │   │   │           │   │   ├── BaseAbstractMultivariateOptimizer.class
+│       │   │   │           │   │   ├── BaseAbstractMultivariateSimpleBoundsOptimizer.class
+│       │   │   │           │   │   ├── BaseAbstractMultivariateVectorOptimizer.class
+│       │   │   │           │   │   ├── BOBYQAOptimizer$PathIsExploredException.class
+│       │   │   │           │   │   ├── BOBYQAOptimizer.class
+│       │   │   │           │   │   ├── CMAESOptimizer$DoubleIndex.class
+│       │   │   │           │   │   ├── CMAESOptimizer$FitnessFunction.class
+│       │   │   │           │   │   ├── CMAESOptimizer$PopulationSize.class
+│       │   │   │           │   │   ├── CMAESOptimizer$Sigma.class
+│       │   │   │           │   │   ├── CMAESOptimizer.class
+│       │   │   │           │   │   ├── MultiDirectionalSimplex.class
+│       │   │   │           │   │   ├── MultivariateFunctionMappingAdapter$LowerBoundMapper.class
+│       │   │   │           │   │   ├── MultivariateFunctionMappingAdapter$LowerUpperBoundMapper.class
+│       │   │   │           │   │   ├── MultivariateFunctionMappingAdapter$Mapper.class
+│       │   │   │           │   │   ├── MultivariateFunctionMappingAdapter$NoBoundsMapper.class
+│       │   │   │           │   │   ├── MultivariateFunctionMappingAdapter$UpperBoundMapper.class
+│       │   │   │           │   │   ├── MultivariateFunctionMappingAdapter.class
+│       │   │   │           │   │   ├── MultivariateFunctionPenaltyAdapter.class
+│       │   │   │           │   │   ├── NelderMeadSimplex.class
+│       │   │   │           │   │   ├── PowellOptimizer$LineSearch$1.class
+│       │   │   │           │   │   ├── PowellOptimizer$LineSearch.class
+│       │   │   │           │   │   ├── PowellOptimizer.class
+│       │   │   │           │   │   ├── SimplexOptimizer$1.class
+│       │   │   │           │   │   ├── SimplexOptimizer$2.class
+│       │   │   │           │   │   └── SimplexOptimizer.class
+│       │   │   │           │   ├── fitting/
+│       │   │   │           │   │   ├── CurveFitter$OldTheoreticalValuesFunction$1.class
+│       │   │   │           │   │   ├── CurveFitter$OldTheoreticalValuesFunction.class
+│       │   │   │           │   │   ├── CurveFitter$TheoreticalValuesFunction.class
+│       │   │   │           │   │   ├── CurveFitter.class
+│       │   │   │           │   │   ├── GaussianFitter$1.class
+│       │   │   │           │   │   ├── GaussianFitter$ParameterGuesser$1.class
+│       │   │   │           │   │   ├── GaussianFitter$ParameterGuesser.class
+│       │   │   │           │   │   ├── GaussianFitter.class
+│       │   │   │           │   │   ├── HarmonicFitter$ParameterGuesser.class
+│       │   │   │           │   │   ├── HarmonicFitter.class
+│       │   │   │           │   │   ├── PolynomialFitter.class
+│       │   │   │           │   │   └── WeightedObservedPoint.class
+│       │   │   │           │   ├── general/
+│       │   │   │           │   │   ├── AbstractDifferentiableOptimizer.class
+│       │   │   │           │   │   ├── AbstractLeastSquaresOptimizer.class
+│       │   │   │           │   │   ├── AbstractScalarDifferentiableOptimizer.class
+│       │   │   │           │   │   ├── ConjugateGradientFormula.class
+│       │   │   │           │   │   ├── GaussNewtonOptimizer.class
+│       │   │   │           │   │   ├── LevenbergMarquardtOptimizer.class
+│       │   │   │           │   │   ├── NonLinearConjugateGradientOptimizer$IdentityPreconditioner.class
+│       │   │   │           │   │   ├── NonLinearConjugateGradientOptimizer$LineSearchFunction.class
+│       │   │   │           │   │   ├── NonLinearConjugateGradientOptimizer.class
+│       │   │   │           │   │   └── Preconditioner.class
+│       │   │   │           │   ├── linear/
+│       │   │   │           │   │   ├── AbstractLinearOptimizer.class
+│       │   │   │           │   │   ├── LinearConstraint.class
+│       │   │   │           │   │   ├── LinearObjectiveFunction.class
+│       │   │   │           │   │   ├── LinearOptimizer.class
+│       │   │   │           │   │   ├── NoFeasibleSolutionException.class
+│       │   │   │           │   │   ├── Relationship$1.class
+│       │   │   │           │   │   ├── Relationship.class
+│       │   │   │           │   │   ├── SimplexSolver.class
+│       │   │   │           │   │   ├── SimplexTableau.class
+│       │   │   │           │   │   └── UnboundedSolutionException.class
+│       │   │   │           │   ├── univariate/
+│       │   │   │           │   │   ├── BaseAbstractUnivariateOptimizer.class
+│       │   │   │           │   │   ├── BaseUnivariateOptimizer.class
+│       │   │   │           │   │   ├── BracketFinder.class
+│       │   │   │           │   │   ├── BrentOptimizer.class
+│       │   │   │           │   │   ├── SimpleUnivariateValueChecker.class
+│       │   │   │           │   │   ├── UnivariateMultiStartOptimizer$1.class
+│       │   │   │           │   │   ├── UnivariateMultiStartOptimizer.class
+│       │   │   │           │   │   ├── UnivariateOptimizer.class
+│       │   │   │           │   │   └── UnivariatePointValuePair.class
+│       │   │   │           │   ├── AbstractConvergenceChecker.class
+│       │   │   │           │   ├── BaseMultivariateMultiStartOptimizer$1.class
+│       │   │   │           │   ├── BaseMultivariateMultiStartOptimizer.class
+│       │   │   │           │   ├── BaseMultivariateOptimizer.class
+│       │   │   │           │   ├── BaseMultivariateSimpleBoundsOptimizer.class
+│       │   │   │           │   ├── BaseMultivariateVectorMultiStartOptimizer$1.class
+│       │   │   │           │   ├── BaseMultivariateVectorMultiStartOptimizer.class
+│       │   │   │           │   ├── BaseMultivariateVectorOptimizer.class
+│       │   │   │           │   ├── BaseOptimizer.class
+│       │   │   │           │   ├── ConvergenceChecker.class
+│       │   │   │           │   ├── DifferentiableMultivariateMultiStartOptimizer.class
+│       │   │   │           │   ├── DifferentiableMultivariateOptimizer.class
+│       │   │   │           │   ├── DifferentiableMultivariateVectorMultiStartOptimizer.class
+│       │   │   │           │   ├── DifferentiableMultivariateVectorOptimizer.class
+│       │   │   │           │   ├── GoalType.class
+│       │   │   │           │   ├── InitialGuess.class
+│       │   │   │           │   ├── LeastSquaresConverter.class
+│       │   │   │           │   ├── MultivariateDifferentiableMultiStartOptimizer.class
+│       │   │   │           │   ├── MultivariateDifferentiableOptimizer.class
+│       │   │   │           │   ├── MultivariateDifferentiableVectorMultiStartOptimizer.class
+│       │   │   │           │   ├── MultivariateDifferentiableVectorOptimizer.class
+│       │   │   │           │   ├── MultivariateMultiStartOptimizer.class
+│       │   │   │           │   ├── MultivariateOptimizer.class
+│       │   │   │           │   ├── OptimizationData.class
+│       │   │   │           │   ├── PointValuePair$DataTransferObject.class
+│       │   │   │           │   ├── PointValuePair.class
+│       │   │   │           │   ├── PointVectorValuePair$DataTransferObject.class
+│       │   │   │           │   ├── PointVectorValuePair.class
+│       │   │   │           │   ├── SimpleBounds.class
+│       │   │   │           │   ├── SimplePointChecker.class
+│       │   │   │           │   ├── SimpleValueChecker.class
+│       │   │   │           │   ├── SimpleVectorValueChecker.class
+│       │   │   │           │   ├── Target.class
+│       │   │   │           │   └── Weight.class
+│       │   │   │           ├── primes/
+│       │   │   │           │   ├── PollardRho.class
+│       │   │   │           │   ├── Primes.class
+│       │   │   │           │   └── SmallPrimes.class
+│       │   │   │           ├── random/
+│       │   │   │           │   ├── AbstractRandomGenerator.class
+│       │   │   │           │   ├── AbstractWell.class
+│       │   │   │           │   ├── BitsStreamGenerator.class
+│       │   │   │           │   ├── CorrelatedRandomVectorGenerator.class
+│       │   │   │           │   ├── EmpiricalDistribution$1.class
+│       │   │   │           │   ├── EmpiricalDistribution$ArrayDataAdapter.class
+│       │   │   │           │   ├── EmpiricalDistribution$DataAdapter.class
+│       │   │   │           │   ├── EmpiricalDistribution$StreamDataAdapter.class
+│       │   │   │           │   ├── EmpiricalDistribution.class
+│       │   │   │           │   ├── GaussianRandomGenerator.class
+│       │   │   │           │   ├── HaltonSequenceGenerator.class
+│       │   │   │           │   ├── ISAACRandom.class
+│       │   │   │           │   ├── JDKRandomGenerator.class
+│       │   │   │           │   ├── MersenneTwister.class
+│       │   │   │           │   ├── NormalizedRandomGenerator.class
+│       │   │   │           │   ├── RandomAdaptor.class
+│       │   │   │           │   ├── RandomData.class
+│       │   │   │           │   ├── RandomDataGenerator.class
+│       │   │   │           │   ├── RandomDataImpl.class
+│       │   │   │           │   ├── RandomGenerator.class
+│       │   │   │           │   ├── RandomGeneratorFactory$1.class
+│       │   │   │           │   ├── RandomGeneratorFactory.class
+│       │   │   │           │   ├── RandomVectorGenerator.class
+│       │   │   │           │   ├── SobolSequenceGenerator.class
+│       │   │   │           │   ├── StableRandomGenerator.class
+│       │   │   │           │   ├── SynchronizedRandomGenerator.class
+│       │   │   │           │   ├── UncorrelatedRandomVectorGenerator.class
+│       │   │   │           │   ├── UniformRandomGenerator.class
+│       │   │   │           │   ├── UnitSphereRandomVectorGenerator.class
+│       │   │   │           │   ├── ValueServer.class
+│       │   │   │           │   ├── Well1024a.class
+│       │   │   │           │   ├── Well19937a.class
+│       │   │   │           │   ├── Well19937c.class
+│       │   │   │           │   ├── Well44497a.class
+│       │   │   │           │   ├── Well44497b.class
+│       │   │   │           │   └── Well512a.class
+│       │   │   │           ├── special/
+│       │   │   │           │   ├── BesselJ$BesselJResult.class
+│       │   │   │           │   ├── BesselJ.class
+│       │   │   │           │   ├── Beta$1.class
+│       │   │   │           │   ├── Beta.class
+│       │   │   │           │   ├── Erf.class
+│       │   │   │           │   ├── Gamma$1.class
+│       │   │   │           │   └── Gamma.class
+│       │   │   │           ├── stat/
+│       │   │   │           │   ├── clustering/
+│       │   │   │           │   │   ├── Cluster.class
+│       │   │   │           │   │   ├── Clusterable.class
+│       │   │   │           │   │   ├── DBSCANClusterer$PointStatus.class
+│       │   │   │           │   │   ├── DBSCANClusterer.class
+│       │   │   │           │   │   ├── EuclideanDoublePoint.class
+│       │   │   │           │   │   ├── EuclideanIntegerPoint.class
+│       │   │   │           │   │   ├── KMeansPlusPlusClusterer$1.class
+│       │   │   │           │   │   ├── KMeansPlusPlusClusterer$EmptyClusterStrategy.class
+│       │   │   │           │   │   └── KMeansPlusPlusClusterer.class
+│       │   │   │           │   ├── correlation/
+│       │   │   │           │   │   ├── Covariance.class
+│       │   │   │           │   │   ├── KendallsCorrelation$1.class
+│       │   │   │           │   │   ├── KendallsCorrelation.class
+│       │   │   │           │   │   ├── PearsonsCorrelation.class
+│       │   │   │           │   │   ├── SpearmansCorrelation.class
+│       │   │   │           │   │   ├── StorelessBivariateCovariance.class
+│       │   │   │           │   │   └── StorelessCovariance.class
+│       │   │   │           │   ├── descriptive/
+│       │   │   │           │   │   ├── moment/
+│       │   │   │           │   │   │   ├── FirstMoment.class
+│       │   │   │           │   │   │   ├── FourthMoment.class
+│       │   │   │           │   │   │   ├── GeometricMean.class
+│       │   │   │           │   │   │   ├── Kurtosis.class
+│       │   │   │           │   │   │   ├── Mean.class
+│       │   │   │           │   │   │   ├── SecondMoment.class
+│       │   │   │           │   │   │   ├── SemiVariance$Direction.class
+│       │   │   │           │   │   │   ├── SemiVariance.class
+│       │   │   │           │   │   │   ├── Skewness.class
+│       │   │   │           │   │   │   ├── StandardDeviation.class
+│       │   │   │           │   │   │   ├── ThirdMoment.class
+│       │   │   │           │   │   │   ├── Variance.class
+│       │   │   │           │   │   │   ├── VectorialCovariance.class
+│       │   │   │           │   │   │   └── VectorialMean.class
+│       │   │   │           │   │   ├── rank/
+│       │   │   │           │   │   │   ├── Max.class
+│       │   │   │           │   │   │   ├── Median.class
+│       │   │   │           │   │   │   ├── Min.class
+│       │   │   │           │   │   │   ├── Percentile$1.class
+│       │   │   │           │   │   │   ├── Percentile$EstimationType$1.class
+│       │   │   │           │   │   │   ├── Percentile$EstimationType$10.class
+│       │   │   │           │   │   │   ├── Percentile$EstimationType$2.class
+│       │   │   │           │   │   │   ├── Percentile$EstimationType$3.class
+│       │   │   │           │   │   │   ├── Percentile$EstimationType$4.class
+│       │   │   │           │   │   │   ├── Percentile$EstimationType$5.class
+│       │   │   │           │   │   │   ├── Percentile$EstimationType$6.class
+│       │   │   │           │   │   │   ├── Percentile$EstimationType$7.class
+│       │   │   │           │   │   │   ├── Percentile$EstimationType$8.class
+│       │   │   │           │   │   │   ├── Percentile$EstimationType$9.class
+│       │   │   │           │   │   │   ├── Percentile$EstimationType.class
+│       │   │   │           │   │   │   ├── Percentile.class
+│       │   │   │           │   │   │   ├── PSquarePercentile$1.class
+│       │   │   │           │   │   │   ├── PSquarePercentile$FixedCapacityList.class
+│       │   │   │           │   │   │   ├── PSquarePercentile$Marker.class
+│       │   │   │           │   │   │   ├── PSquarePercentile$Markers.class
+│       │   │   │           │   │   │   ├── PSquarePercentile$PSquareMarkers.class
+│       │   │   │           │   │   │   └── PSquarePercentile.class
+│       │   │   │           │   │   ├── summary/
+│       │   │   │           │   │   │   ├── Product.class
+│       │   │   │           │   │   │   ├── Sum.class
+│       │   │   │           │   │   │   ├── SumOfLogs.class
+│       │   │   │           │   │   │   └── SumOfSquares.class
+│       │   │   │           │   │   ├── AbstractStorelessUnivariateStatistic.class
+│       │   │   │           │   │   ├── AbstractUnivariateStatistic.class
+│       │   │   │           │   │   ├── AggregateSummaryStatistics$AggregatingSummaryStatistics.class
+│       │   │   │           │   │   ├── AggregateSummaryStatistics.class
+│       │   │   │           │   │   ├── DescriptiveStatistics.class
+│       │   │   │           │   │   ├── MultivariateSummaryStatistics.class
+│       │   │   │           │   │   ├── StatisticalMultivariateSummary.class
+│       │   │   │           │   │   ├── StatisticalSummary.class
+│       │   │   │           │   │   ├── StatisticalSummaryValues.class
+│       │   │   │           │   │   ├── StorelessUnivariateStatistic.class
+│       │   │   │           │   │   ├── SummaryStatistics.class
+│       │   │   │           │   │   ├── SynchronizedDescriptiveStatistics.class
+│       │   │   │           │   │   ├── SynchronizedMultivariateSummaryStatistics.class
+│       │   │   │           │   │   ├── SynchronizedSummaryStatistics.class
+│       │   │   │           │   │   ├── UnivariateStatistic.class
+│       │   │   │           │   │   └── WeightedEvaluation.class
+│       │   │   │           │   ├── inference/
+│       │   │   │           │   │   ├── AlternativeHypothesis.class
+│       │   │   │           │   │   ├── BinomialTest$1.class
+│       │   │   │           │   │   ├── BinomialTest.class
+│       │   │   │           │   │   ├── ChiSquareTest.class
+│       │   │   │           │   │   ├── GTest.class
+│       │   │   │           │   │   ├── KolmogorovSmirnovTest.class
+│       │   │   │           │   │   ├── MannWhitneyUTest.class
+│       │   │   │           │   │   ├── OneWayAnova$1.class
+│       │   │   │           │   │   ├── OneWayAnova$AnovaStats.class
+│       │   │   │           │   │   ├── OneWayAnova.class
+│       │   │   │           │   │   ├── TestUtils.class
+│       │   │   │           │   │   ├── TTest.class
+│       │   │   │           │   │   └── WilcoxonSignedRankTest.class
+│       │   │   │           │   ├── interval/
+│       │   │   │           │   │   ├── AgrestiCoullInterval.class
+│       │   │   │           │   │   ├── BinomialConfidenceInterval.class
+│       │   │   │           │   │   ├── ClopperPearsonInterval.class
+│       │   │   │           │   │   ├── ConfidenceInterval.class
+│       │   │   │           │   │   ├── IntervalUtils.class
+│       │   │   │           │   │   ├── NormalApproximationInterval.class
+│       │   │   │           │   │   └── WilsonScoreInterval.class
+│       │   │   │           │   ├── ranking/
+│       │   │   │           │   │   ├── NaNStrategy.class
+│       │   │   │           │   │   ├── NaturalRanking$1.class
+│       │   │   │           │   │   ├── NaturalRanking$IntDoublePair.class
+│       │   │   │           │   │   ├── NaturalRanking.class
+│       │   │   │           │   │   ├── RankingAlgorithm.class
+│       │   │   │           │   │   └── TiesStrategy.class
+│       │   │   │           │   ├── regression/
+│       │   │   │           │   │   ├── AbstractMultipleLinearRegression.class
+│       │   │   │           │   │   ├── GLSMultipleLinearRegression.class
+│       │   │   │           │   │   ├── MillerUpdatingRegression.class
+│       │   │   │           │   │   ├── ModelSpecificationException.class
+│       │   │   │           │   │   ├── MultipleLinearRegression.class
+│       │   │   │           │   │   ├── OLSMultipleLinearRegression.class
+│       │   │   │           │   │   ├── RegressionResults.class
+│       │   │   │           │   │   ├── SimpleRegression.class
+│       │   │   │           │   │   └── UpdatingMultipleLinearRegression.class
+│       │   │   │           │   ├── Frequency$1.class
+│       │   │   │           │   ├── Frequency$NaturalComparator.class
+│       │   │   │           │   ├── Frequency.class
+│       │   │   │           │   └── StatUtils.class
+│       │   │   │           ├── transform/
+│       │   │   │           │   ├── DctNormalization.class
+│       │   │   │           │   ├── DftNormalization.class
+│       │   │   │           │   ├── DstNormalization.class
+│       │   │   │           │   ├── FastCosineTransformer.class
+│       │   │   │           │   ├── FastFourierTransformer$1.class
+│       │   │   │           │   ├── FastFourierTransformer$MultiDimensionalComplexMatrix.class
+│       │   │   │           │   ├── FastFourierTransformer.class
+│       │   │   │           │   ├── FastHadamardTransformer.class
+│       │   │   │           │   ├── FastSineTransformer.class
+│       │   │   │           │   ├── RealTransformer.class
+│       │   │   │           │   ├── TransformType.class
+│       │   │   │           │   └── TransformUtils.class
+│       │   │   │           ├── util/
+│       │   │   │           │   ├── ArithmeticUtils.class
+│       │   │   │           │   ├── BigReal.class
+│       │   │   │           │   ├── BigRealField$1.class
+│       │   │   │           │   ├── BigRealField$LazyHolder.class
+│       │   │   │           │   ├── BigRealField.class
+│       │   │   │           │   ├── CentralPivotingStrategy.class
+│       │   │   │           │   ├── Combinations$1.class
+│       │   │   │           │   ├── Combinations$IterationOrder.class
+│       │   │   │           │   ├── Combinations$LexicographicComparator.class
+│       │   │   │           │   ├── Combinations$LexicographicIterator.class
+│       │   │   │           │   ├── Combinations$SingletonIterator.class
+│       │   │   │           │   ├── Combinations.class
+│       │   │   │           │   ├── CombinatoricsUtils.class
+│       │   │   │           │   ├── CompositeFormat.class
+│       │   │   │           │   ├── ContinuedFraction.class
+│       │   │   │           │   ├── Decimal64.class
+│       │   │   │           │   ├── Decimal64Field.class
+│       │   │   │           │   ├── DefaultTransformer.class
+│       │   │   │           │   ├── DoubleArray.class
+│       │   │   │           │   ├── FastMath$CodyWaite.class
+│       │   │   │           │   ├── FastMath$ExpFracTable.class
+│       │   │   │           │   ├── FastMath$ExpIntTable.class
+│       │   │   │           │   ├── FastMath$lnMant.class
+│       │   │   │           │   ├── FastMath$Split.class
+│       │   │   │           │   ├── FastMath.class
+│       │   │   │           │   ├── FastMathCalc.class
+│       │   │   │           │   ├── FastMathLiteralArrays.class
+│       │   │   │           │   ├── Incrementor$1.class
+│       │   │   │           │   ├── Incrementor$2.class
+│       │   │   │           │   ├── Incrementor$MaxCountExceededCallback.class
+│       │   │   │           │   ├── Incrementor.class
+│       │   │   │           │   ├── IntegerSequence$Incrementor$1.class
+│       │   │   │           │   ├── IntegerSequence$Incrementor$MaxCountExceededCallback.class
+│       │   │   │           │   ├── IntegerSequence$Incrementor.class
+│       │   │   │           │   ├── IntegerSequence$Range.class
+│       │   │   │           │   ├── IntegerSequence.class
+│       │   │   │           │   ├── IterationEvent.class
+│       │   │   │           │   ├── IterationListener.class
+│       │   │   │           │   ├── IterationManager$1.class
+│       │   │   │           │   ├── IterationManager.class
+│       │   │   │           │   ├── KthSelector.class
+│       │   │   │           │   ├── MathArrays$1.class
+│       │   │   │           │   ├── MathArrays$2.class
+│       │   │   │           │   ├── MathArrays$3.class
+│       │   │   │           │   ├── MathArrays$Function.class
+│       │   │   │           │   ├── MathArrays$OrderDirection.class
+│       │   │   │           │   ├── MathArrays$PairDoubleInteger.class
+│       │   │   │           │   ├── MathArrays$Position.class
+│       │   │   │           │   ├── MathArrays.class
+│       │   │   │           │   ├── MathUtils.class
+│       │   │   │           │   ├── MedianOf3PivotingStrategy.class
+│       │   │   │           │   ├── MultidimensionalCounter$Iterator.class
+│       │   │   │           │   ├── MultidimensionalCounter.class
+│       │   │   │           │   ├── NumberTransformer.class
+│       │   │   │           │   ├── OpenIntToDoubleHashMap$1.class
+│       │   │   │           │   ├── OpenIntToDoubleHashMap$Iterator.class
+│       │   │   │           │   ├── OpenIntToDoubleHashMap.class
+│       │   │   │           │   ├── OpenIntToFieldHashMap$1.class
+│       │   │   │           │   ├── OpenIntToFieldHashMap$Iterator.class
+│       │   │   │           │   ├── OpenIntToFieldHashMap.class
+│       │   │   │           │   ├── Pair.class
+│       │   │   │           │   ├── PivotingStrategyInterface.class
+│       │   │   │           │   ├── Precision.class
+│       │   │   │           │   ├── RandomPivotingStrategy.class
+│       │   │   │           │   ├── ResizableDoubleArray$1.class
+│       │   │   │           │   ├── ResizableDoubleArray$ExpansionMode.class
+│       │   │   │           │   ├── ResizableDoubleArray.class
+│       │   │   │           │   └── TransformerMap.class
+│       │   │   │           ├── Field.class
+│       │   │   │           ├── FieldElement.class
+│       │   │   │           └── RealFieldElement.class
+│       │   │   ├── freehep/
+│       │   │   │   └── math/
+│       │   │   │       ├── fminuit/
+│       │   │   │       │   ├── class-use/
+│       │   │   │       │   │   ├── FMinuitCommands.html
+│       │   │   │       │   │   └── FMinuitFunction.html
+│       │   │   │       │   ├── FMinuitCommands.class
+│       │   │   │       │   ├── FMinuitCommands.html
+│       │   │   │       │   ├── FMinuitCommands.java
+│       │   │   │       │   ├── FMinuitFunction.class
+│       │   │   │       │   ├── FMinuitFunction.html
+│       │   │   │       │   ├── FMinuitFunction.java
+│       │   │   │       │   ├── package-frame.html
+│       │   │   │       │   ├── package-summary.html
+│       │   │   │       │   ├── package-tree.html
+│       │   │   │       │   └── package-use.html
+│       │   │   │       └── minuit/
+│       │   │   │           ├── AnalyticalGradientCalculator.class
+│       │   │   │           ├── CombinedMinimizer.class
+│       │   │   │           ├── CombinedMinimumBuilder.class
+│       │   │   │           ├── ContoursError.class
+│       │   │   │           ├── DavidonErrorUpdator.class
+│       │   │   │           ├── FCNBase.class
+│       │   │   │           ├── FCNGradientBase.class
+│       │   │   │           ├── FunctionGradient.class
+│       │   │   │           ├── FunctionMinimum$MnAboveMaxEdm.class
+│       │   │   │           ├── FunctionMinimum$MnReachedCallLimit.class
+│       │   │   │           ├── FunctionMinimum.class
+│       │   │   │           ├── GradientCalculator.class
+│       │   │   │           ├── HessianGradientCalculator.class
+│       │   │   │           ├── InitialGradientCalculator.class
+│       │   │   │           ├── MatrixInversionException.class
+│       │   │   │           ├── MinimumBuilder.class
+│       │   │   │           ├── MinimumError$MnHesseFailed.class
+│       │   │   │           ├── MinimumError$MnInvertFailed.class
+│       │   │   │           ├── MinimumError$MnMadePosDef.class
+│       │   │   │           ├── MinimumError$MnNotPosDef.class
+│       │   │   │           ├── MinimumError.class
+│       │   │   │           ├── MinimumErrorUpdator.class
+│       │   │   │           ├── MinimumParameters.class
+│       │   │   │           ├── MinimumSeed.class
+│       │   │   │           ├── MinimumSeedGenerator.class
+│       │   │   │           ├── MinimumState.class
+│       │   │   │           ├── MinosError.class
+│       │   │   │           ├── MinuitParameter.class
+│       │   │   │           ├── MnAlgebraicSymMatrix$1.class
+│       │   │   │           ├── MnAlgebraicSymMatrix$EigenvaluesException.class
+│       │   │   │           ├── MnAlgebraicSymMatrix.class
+│       │   │   │           ├── MnAlgebraicVector.class
+│       │   │   │           ├── MnApplication.class
+│       │   │   │           ├── MnContours.class
+│       │   │   │           ├── MnCovarianceSqueeze.class
+│       │   │   │           ├── MnCross$CrossFcnLimit.class
+│       │   │   │           ├── MnCross$CrossNewMin.class
+│       │   │   │           ├── MnCross$CrossParLimit.class
+│       │   │   │           ├── MnCross.class
+│       │   │   │           ├── MnEigen.class
+│       │   │   │           ├── MnFcn.class
+│       │   │   │           ├── MnFunctionCross.class
+│       │   │   │           ├── MnGlobalCorrelationCoeff.class
+│       │   │   │           ├── MnHesse$MnHesseFailed.class
+│       │   │   │           ├── MnHesse.class
+│       │   │   │           ├── MnLineSearch.class
+│       │   │   │           ├── MnMachinePrecision.class
+│       │   │   │           ├── MnMigrad.class
+│       │   │   │           ├── MnMinimize.class
+│       │   │   │           ├── MnMinos.class
+│       │   │   │           ├── MnParabola.class
+│       │   │   │           ├── MnParabolaFactory.class
+│       │   │   │           ├── MnParabolaPoint.class
+│       │   │   │           ├── MnParameterScan.class
+│       │   │   │           ├── MnPlot.class
+│       │   │   │           ├── MnPosDef.class
+│       │   │   │           ├── MnPrint.class
+│       │   │   │           ├── MnScan.class
+│       │   │   │           ├── MnSeedGenerator.class
+│       │   │   │           ├── MnSimplex.class
+│       │   │   │           ├── MnStrategy.class
+│       │   │   │           ├── MnUserCovariance.class
+│       │   │   │           ├── MnUserFcn.class
+│       │   │   │           ├── MnUserParameters.class
+│       │   │   │           ├── MnUserParameterState.class
+│       │   │   │           ├── MnUserTransformation.class
+│       │   │   │           ├── MnUtils.class
+│       │   │   │           ├── ModularFunctionMinimizer.class
+│       │   │   │           ├── NegativeG2LineSearch.class
+│       │   │   │           ├── Numerical2PGradientCalculator.class
+│       │   │   │           ├── Pair.class
+│       │   │   │           ├── Point.class
+│       │   │   │           ├── ScanBuilder.class
+│       │   │   │           ├── ScanMinimizer.class
+│       │   │   │           ├── SimplexBuilder.class
+│       │   │   │           ├── SimplexMinimizer.class
+│       │   │   │           ├── SimplexParameters.class
+│       │   │   │           ├── SimplexSeedGenerator.class
+│       │   │   │           ├── SinParameterTransformation.class
+│       │   │   │           ├── SqrtLowParameterTransformation.class
+│       │   │   │           ├── SqrtUpParameterTransformation.class
+│       │   │   │           ├── VariableMetricBuilder.class
+│       │   │   │           ├── VariableMetricEDMEstimator.class
+│       │   │   │           └── VariableMetricMinimizer.class
+│       │   │   └── json/
+│       │   │       └── simple/
+│       │   │           ├── parser/
+│       │   │           │   ├── ContainerFactory.class
+│       │   │           │   ├── ContentHandler.class
+│       │   │           │   ├── JSONParser.class
+│       │   │           │   ├── ParseException.class
+│       │   │           │   ├── Yylex.class
+│       │   │           │   └── Yytoken.class
+│       │   │           ├── ItemList.class
+│       │   │           ├── JSONArray.class
+│       │   │           ├── JSONAware.class
+│       │   │           ├── JSONObject.class
+│       │   │           ├── JSONStreamAware.class
+│       │   │           └── JSONValue.class
+│       │   ├── radreport/
+│       │   │   ├── data/
+│       │   │   │   ├── AtomicEntry.class
+│       │   │   │   ├── AtomicTable$AtomicEntry.class
+│       │   │   │   ├── AtomicTable.class
+│       │   │   │   ├── LogftCategory.class
+│       │   │   │   ├── LogftSystematics.class
+│       │   │   │   └── WaveFunctionEntry.class
+│       │   │   ├── decay/
+│       │   │   │   ├── AbstractDecayDataset.class
+│       │   │   │   ├── AbstractRecordWrap.class
+│       │   │   │   ├── DataPoint2D.class
+│       │   │   │   ├── DecayDataset$AbsoluteRI.class
+│       │   │   │   ├── DecayDataset$GetDecayEnergy.class
+│       │   │   │   ├── DecayDataset$GetEAV.class
+│       │   │   │   ├── DecayDataset$UncParser.class
+│       │   │   │   ├── DecayDataset.class
+│       │   │   │   ├── DecayDatasetGroup.class
+│       │   │   │   ├── DecaySpectrum$Integrate.class
+│       │   │   │   ├── DecaySpectrum.class
+│       │   │   │   ├── DecayWrap.class
+│       │   │   │   ├── ENSDFBaseAppRADLIST$DecayIntensity.class
+│       │   │   │   ├── ENSDFBaseAppRADLIST.class
+│       │   │   │   ├── EnsdfWrap.class
+│       │   │   │   ├── GammaWrap.class
+│       │   │   │   ├── LevelWrap.class
+│       │   │   │   ├── RadComparator.class
+│       │   │   │   ├── RADConfig.class
+│       │   │   │   ├── RADControl.class
+│       │   │   │   ├── Radiation.class
+│       │   │   │   ├── RadiationReport.class
+│       │   │   │   └── StringWriter.class
+│       │   │   ├── main/
+│       │   │   │   ├── Main.class
+│       │   │   │   ├── Run.class
+│       │   │   │   ├── Setup.class
+│       │   │   │   └── Test.class
+│       │   │   ├── math/
+│       │   │   │   ├── AbstractIntegration.class
+│       │   │   │   ├── Function1D.class
+│       │   │   │   ├── Function2D.class
+│       │   │   │   ├── Integration.class
+│       │   │   │   ├── MidpointIntegraiton.class
+│       │   │   │   ├── TestFunction.class
+│       │   │   │   ├── TrapezoidalIntegration.class
+│       │   │   │   └── Util.class
+│       │   │   └── ui/
+│       │   │       ├── LogftCalculatorFrame$1.class
+│       │   │       ├── LogftCalculatorFrame$10.class
+│       │   │       ├── LogftCalculatorFrame$11.class
+│       │   │       ├── LogftCalculatorFrame$12.class
+│       │   │       ├── LogftCalculatorFrame$13.class
+│       │   │       ├── LogftCalculatorFrame$2.class
+│       │   │       ├── LogftCalculatorFrame$3.class
+│       │   │       ├── LogftCalculatorFrame$4.class
+│       │   │       ├── LogftCalculatorFrame$5.class
+│       │   │       ├── LogftCalculatorFrame$6.class
+│       │   │       ├── LogftCalculatorFrame$7.class
+│       │   │       ├── LogftCalculatorFrame$8.class
+│       │   │       ├── LogftCalculatorFrame$9.class
+│       │   │       ├── LogftCalculatorFrame$InstructionFrame$1.class
+│       │   │       ├── LogftCalculatorFrame$InstructionFrame.class
+│       │   │       ├── LogftCalculatorFrame.class
+│       │   │       ├── LogftReferenceFrame$1.class
+│       │   │       ├── LogftReferenceFrame.class
+│       │   │       ├── LogftResultFrame$1.class
+│       │   │       ├── LogftResultFrame.class
+│       │   │       ├── MasterFrame$1.class
+│       │   │       ├── MasterFrame$10.class
+│       │   │       ├── MasterFrame$11.class
+│       │   │       ├── MasterFrame$12.class
+│       │   │       ├── MasterFrame$13.class
+│       │   │       ├── MasterFrame$14.class
+│       │   │       ├── MasterFrame$15.class
+│       │   │       ├── MasterFrame$16.class
+│       │   │       ├── MasterFrame$17.class
+│       │   │       ├── MasterFrame$18.class
+│       │   │       ├── MasterFrame$19.class
+│       │   │       ├── MasterFrame$2.class
+│       │   │       ├── MasterFrame$20.class
+│       │   │       ├── MasterFrame$21.class
+│       │   │       ├── MasterFrame$22.class
+│       │   │       ├── MasterFrame$23.class
+│       │   │       ├── MasterFrame$24.class
+│       │   │       ├── MasterFrame$25.class
+│       │   │       ├── MasterFrame$26.class
+│       │   │       ├── MasterFrame$27.class
+│       │   │       ├── MasterFrame$28.class
+│       │   │       ├── MasterFrame$29.class
+│       │   │       ├── MasterFrame$3.class
+│       │   │       ├── MasterFrame$30.class
+│       │   │       ├── MasterFrame$31.class
+│       │   │       ├── MasterFrame$32.class
+│       │   │       ├── MasterFrame$33.class
+│       │   │       ├── MasterFrame$34.class
+│       │   │       ├── MasterFrame$35.class
+│       │   │       ├── MasterFrame$36.class
+│       │   │       ├── MasterFrame$37.class
+│       │   │       ├── MasterFrame$38.class
+│       │   │       ├── MasterFrame$39.class
+│       │   │       ├── MasterFrame$4.class
+│       │   │       ├── MasterFrame$5.class
+│       │   │       ├── MasterFrame$6.class
+│       │   │       ├── MasterFrame$7.class
+│       │   │       ├── MasterFrame$8.class
+│       │   │       ├── MasterFrame$9.class
+│       │   │       ├── MasterFrame.class
+│       │   │       ├── MoreSettingFrame$1.class
+│       │   │       ├── MoreSettingFrame.class
+│       │   │       ├── RestrictedFileSystemView$FileSystemRoot.class
+│       │   │       ├── RestrictedFileSystemView.class
+│       │   │       ├── SimpleLogftCalculatorFrame$1.class
+│       │   │       ├── SimpleLogftCalculatorFrame$10.class
+│       │   │       ├── SimpleLogftCalculatorFrame$11.class
+│       │   │       ├── SimpleLogftCalculatorFrame$12.class
+│       │   │       ├── SimpleLogftCalculatorFrame$13.class
+│       │   │       ├── SimpleLogftCalculatorFrame$14.class
+│       │   │       ├── SimpleLogftCalculatorFrame$15.class
+│       │   │       ├── SimpleLogftCalculatorFrame$16.class
+│       │   │       ├── SimpleLogftCalculatorFrame$17.class
+│       │   │       ├── SimpleLogftCalculatorFrame$18.class
+│       │   │       ├── SimpleLogftCalculatorFrame$19.class
+│       │   │       ├── SimpleLogftCalculatorFrame$2.class
+│       │   │       ├── SimpleLogftCalculatorFrame$20.class
+│       │   │       ├── SimpleLogftCalculatorFrame$21.class
+│       │   │       ├── SimpleLogftCalculatorFrame$22.class
+│       │   │       ├── SimpleLogftCalculatorFrame$23.class
+│       │   │       ├── SimpleLogftCalculatorFrame$24.class
+│       │   │       ├── SimpleLogftCalculatorFrame$25.class
+│       │   │       ├── SimpleLogftCalculatorFrame$26.class
+│       │   │       ├── SimpleLogftCalculatorFrame$27.class
+│       │   │       ├── SimpleLogftCalculatorFrame$28.class
+│       │   │       ├── SimpleLogftCalculatorFrame$29.class
+│       │   │       ├── SimpleLogftCalculatorFrame$3.class
+│       │   │       ├── SimpleLogftCalculatorFrame$30.class
+│       │   │       ├── SimpleLogftCalculatorFrame$31.class
+│       │   │       ├── SimpleLogftCalculatorFrame$32.class
+│       │   │       ├── SimpleLogftCalculatorFrame$33.class
+│       │   │       ├── SimpleLogftCalculatorFrame$4.class
+│       │   │       ├── SimpleLogftCalculatorFrame$5.class
+│       │   │       ├── SimpleLogftCalculatorFrame$6.class
+│       │   │       ├── SimpleLogftCalculatorFrame$7.class
+│       │   │       ├── SimpleLogftCalculatorFrame$8.class
+│       │   │       ├── SimpleLogftCalculatorFrame$9.class
+│       │   │       ├── SimpleLogftCalculatorFrame.class
+│       │   │       ├── UncertaintySettingFrame$1.class
+│       │   │       ├── UncertaintySettingFrame$2.class
+│       │   │       ├── UncertaintySettingFrame$3.class
+│       │   │       ├── UncertaintySettingFrame$4.class
+│       │   │       ├── UncertaintySettingFrame$5.class
+│       │   │       ├── UncertaintySettingFrame$6.class
+│       │   │       ├── UncertaintySettingFrame$7.class
+│       │   │       └── UncertaintySettingFrame.class
+│       │   ├── resources/
+│       │   │   └── inherit.gif
+│       │   ├── .DS_Store
+│       │   ├── all_gs_info.txt
+│       │   ├── allclasses-frame.html
+│       │   ├── allclasses-noframe.html
+│       │   ├── AME2020.dat
+│       │   ├── atomic.txt
+│       │   ├── constant-values.html
+│       │   ├── deprecated-list.html
+│       │   ├── ensdf_dic2.dat
+│       │   ├── help-doc.html
+│       │   ├── index-all.html
+│       │   ├── index.html
+│       │   ├── latex_dic.dat
+│       │   ├── logft.dat
+│       │   ├── logft_categories.txt
+│       │   ├── logft_categories0.txt
+│       │   ├── mass.mas12
+│       │   ├── mass.mas20
+│       │   ├── mass.txt
+│       │   ├── mass16.txt
+│       │   ├── mass16round.txt
+│       │   ├── mass2020.txt
+│       │   ├── massround.mas20
+│       │   ├── nubase2012.mas12
+│       │   ├── nubase2016.txt
+│       │   ├── nubase_1.mas20
+│       │   ├── nubase_4.mas20
+│       │   ├── options
+│       │   ├── overview-tree.html
+│       │   ├── package-list
+│       │   ├── packages
+│       │   ├── precise-mass16.covar
+│       │   ├── precise-mass20.covar
+│       │   ├── rct1-16.txt
+│       │   ├── rct1.mas12
+│       │   ├── rct1.mas20
+│       │   ├── rct2-16.txt
+│       │   ├── rct2.mas12
+│       │   ├── rct2.mas20
+│       │   └── stylesheet.css
+│       ├── references/
+│       │   ├── 1971GO40.pdf
+│       │   ├── 1980DillmanEDISTR.pdf
+│       │   ├── Bambynek1977.pdf
+│       │   └── Martin_and_Blichert-toft1970.pdf
+│       ├── .DS_Store
+│       ├── LICENSE
+│       ├── RadiationReport_09December2025.jar
+│       └── README.md
+├── app_others/
+│   └── nuclear_transition_analyzer/
+│       ├── .venv/ [zawartość pominięta]
+│       ├── examples/
+│       │   └── AI_processing_2_v2.csv
+│       ├── nuclear_transition_analyzer/
+│       │   ├── __pycache__/ [zawartość pominięta]
+│       │   ├── __init__.py
+│       │   ├── analysis.py
+│       │   ├── cli.py
+│       │   ├── data.py
+│       │   ├── physics.py
+│       │   └── spin.py
+│       ├── tests/
+│       │   ├── test_physics.py
+│       │   └── test_spin.py
+│       ├── app.py
+│       ├── pyproject.toml
+│       ├── README.md
+│       └── requirements.txt
+├── app_weisskopf/
+│   ├── old/
+│   │   ├── weisskopf_app.py
+│   │   ├── weisskopf_app_v2.py
+│   │   ├── weisskopf_app_v3.py
+│   │   ├── weisskopf_app_v4.py
+│   │   └── weisskopf_app_v5.py
+│   ├── AI_processing_2_v2.csv
+│   └── weisskopf_app_infer.py
+├── data/
+│   ├── 122Ag-122Cd_2026-08-22_20-57-49/
+│   │   ├── 122Ag_final_evaluated_logft_limits_update.eps
+│   │   ├── 122Ag_final_evaluated_logft_limits_update.txt
+│   │   ├── 122Ag_non_scheme_uncertain_updated.csv
+│   │   ├── analysis_notes.md
+│   │   ├── beta_inputs_122Ag_122Cd.md
+│   │   ├── beta_inputs_122Ag_122Cd.yaml
+│   │   ├── levels_122Cd.csv
+│   │   ├── literature_compare_122Cd.csv
+│   │   ├── non_scheme_gamma_category_summary_122Ag.csv
+│   │   ├── non_scheme_gamma_priority_peaks_122Ag.csv
+│   │   └── transitions_122Ag_122Cd.csv
+│   ├── 122Ag_v1_2026-07-01_10-04-05/
+│   │   ├── 122Ag_non_scheme_uncertain_updated.csv
+│   │   ├── analysis_notes.md
+│   │   ├── analysis_notes_edited.md
+│   │   ├── beta_inputs_122Ag_122Cd.md
+│   │   ├── beta_inputs_122Ag_122Cd.yaml
+│   │   ├── beta_inputs_generated.yaml
+│   │   ├── levels_122Cd.csv
+│   │   ├── levels_edited.csv
+│   │   ├── literature_compare_122Cd.csv
+│   │   ├── non_scheme_gamma_category_summary_122Ag.csv
+│   │   ├── non_scheme_gamma_priority_peaks_122Ag.csv
+│   │   └── transitions_122Ag_122Cd.csv
+│   ├── 122Ag_v2_2026-07-01_12-50-24/
+│   │   ├── 122Ag_non_scheme_uncertain_updated.csv
+│   │   ├── analysis_notes.md
+│   │   ├── analysis_notes_edited.md
+│   │   ├── beta_inputs_122Ag_122Cd.md
+│   │   ├── beta_inputs_122Ag_122Cd.yaml
+│   │   ├── beta_inputs_generated.yaml
+│   │   ├── levels_122Cd.csv
+│   │   ├── levels_edited.csv
+│   │   ├── literature_compare_122Cd.csv
+│   │   ├── non_scheme_gamma_category_summary_122Ag.csv
+│   │   ├── non_scheme_gamma_priority_peaks_122Ag.csv
+│   │   └── transitions_122Ag_122Cd.csv
+│   └── my_project_2026-08-22_17-53-26/
+│       ├── 122Ag_non_scheme_uncertain_updated.csv
+│       ├── analysis_notes.md
+│       ├── analysis_notes_edited.md
+│       ├── beta_inputs_122Ag_122Cd.md
+│       ├── beta_inputs_122Ag_122Cd.yaml
+│       ├── beta_inputs_generated.yaml
+│       ├── levels_122Cd.csv
+│       ├── levels_edited.csv
+│       ├── literature_compare_122Cd.csv
+│       ├── non_scheme_gamma_category_summary_122Ag.csv
+│       ├── non_scheme_gamma_priority_peaks_122Ag.csv
+│       └── transitions_122Ag_122Cd.csv
+├── example_data/
+│   ├── example_1/
+│   │   ├── 122Ag_non_scheme_uncertain_updated.csv
+│   │   ├── analysis_notes.md
+│   │   ├── beta_inputs_122Ag_122Cd.md
+│   │   ├── beta_inputs_122Ag_122Cd.yaml
+│   │   ├── levels_122Cd.csv
+│   │   ├── literature_compare_122Cd.csv
+│   │   ├── non_scheme_gamma_category_summary_122Ag.csv
+│   │   ├── non_scheme_gamma_priority_peaks_122Ag.csv
+│   │   └── transitions_122Ag_122Cd.csv
+│   ├── example_2/
+│   │   ├── 122Ag_non_scheme_uncertain_updated.csv
+│   │   ├── analysis_notes.md
+│   │   ├── beta_inputs_generated.yaml
+│   │   ├── levels_122Cd.csv
+│   │   ├── literature_compare_122Cd.csv
+│   │   ├── non_scheme_gamma_category_summary_122Ag.csv
+│   │   ├── non_scheme_gamma_priority_peaks_122Ag.csv
+│   │   └── transitions_122Ag_122Cd.csv
+│   └── old/
+│       ├── analysis_notes.md
+│       ├── beta_inputs_122Ag_122Cd.md
+│       ├── levels_122Cd.csv
+│       ├── scheme_template_patch_notes.md
+│       └── scheme_template_updated_data_block.txt
+├── outputs/
+│   ├── 122Ag-122Cd_2026-08-22_20-57-49/
+│   ├── 122Ag_v1_2026-07-01_10-04-05/
+│   ├── 122Ag_v2_2026-07-01_12-50-24/
+│   └── my_project_2026-08-22_17-53-26/
+├── templates/
+│   └── scheme_template.eps
+├── tests/
+│   └── test_loader_smoke.py
+├── .gitignore
+├── CHANGES_SUMMARY.md
+├── main.py
+├── project_tree.py
+├── pyproject.toml
+├── README.md
+├── REFACTORING_SUMMARY.md
+├── requirements.txt
+├── SETTINGS_REFACTOR_SUMMARY.md
+└── test_autoload.py

@@ -36,10 +36,11 @@ def _fmt_q_display(beta_inputs: BetaInputs) -> str:
 
 
 def _fmt_level_line(level: Level, abf: str, logft: str, dashed: int = 0, color: int = 0) -> str:
+    # Swap order: show logft first (left) and intensity/abf second
     jpi = f"({level.jpi})" if level.jpi else '()'
     e_string = f"({level.e_level_keV:.2f})"
     t12 = '()' if level.t12_s in (None, 0) else f"({level.t12_s})"
-    return f"({abf})\t({logft})\t\t\t{e_string}\t\t{jpi}\t\t{level.e_level_keV:.2f}\t{t12}\t\t{dashed}\t{color}\tlevel"
+    return f"({logft})\t({abf})\t\t\t{e_string}\t\t{jpi}\t\t{level.e_level_keV:.2f}\t{t12}\t\t{dashed}\t{color}\tlevel"
 
 
 def _fmt_trans_label(tr: Transition) -> str:

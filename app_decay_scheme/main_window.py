@@ -16,7 +16,7 @@ from .abf import compute_abf
 from .beta_inputs import dump_beta_inputs_to_text
 from .eps_template import EpsTemplateEngine
 from .loaders import ProjectDataLoader
-from .logft import compute_logft
+from app_logft.logft_calc import compute_logft
 from .preview import render_eps_to_png, find_ghostscript_executable
 from .periodic_table import complete_from_symbol, complete_from_z, z_from_symbol, symbol_from_z
 
@@ -136,12 +136,18 @@ class MainWindow(QMainWindow):
             print(f'Auto-load template failed: {exc}')
     
     def load_input_folder(self):
-        """Load input data from user-selected folder and create project folder."""
-        folder = QFileDialog.getExistingDirectory(self, 'Select input data folder')
-        if not folder:
+        """Load input data from ODS/XLSX file, convert to CSV, and create project folder."""
+        # Select ODS or XLSX file
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            'Select ODS or XLSX file with decay data',
+            '',
+            'Data files (*.ods *.xlsx *.xlsm);;All files (*)'
+        )
+        if not file_path:
             return
         
-        self.input_folder = Path(folder)
+        ods_file = Path(file_path)
         
         # Ask for project name
         project_name, ok = QInputDialog.getText(
@@ -158,10 +164,13 @@ class MainWindow(QMainWindow):
         # Create project folder in data/ with timestamp
         try:
             self.project_folder = self._create_project_folder(project_name)
-            self._copy_input_files_to_project()
+            
+            # Convert ODS/XLSX to CSV files in project folder
+            self._convert_spreadsheet_to_csv(ods_file, self.project_folder)
+            
             self._create_output_folder()
             
-            # Load project from copied folder
+            # Load project from CSV files
             loader = ProjectDataLoader()
             self.project = loader.load_project(self.project_folder)
             self._populate_ui_from_project()
@@ -173,12 +182,21 @@ class MainWindow(QMainWindow):
             QMessageBox.information(
                 self,
                 'Project Loaded',
-                f'Project created at:\n{self.project_folder}\n\nFiles copied successfully.'
+                f'Project created at:\n{self.project_folder}\n\nSpreadsheet converted to CSV files successfully.'
             )
         except Exception as exc:
             QMessageBox.critical(self, 'Error', f'Failed to load project:\n{exc}')
             self.project_folder = None
             self.input_folder = None
+    
+    def _convert_spreadsheet_to_csv(self, ods_xlsx_file: Path, output_folder: Path):
+        """Convert ODS/XLSX spreadsheet to CSV files in output folder."""
+        try:
+            from export_sheets_to_csv import export_workbook
+            export_workbook(ods_xlsx_file, output_folder, verbose=True)
+            print(f'Converted {ods_xlsx_file.name} to CSV files in {output_folder}')
+        except Exception as exc:
+            raise RuntimeError(f'Failed to convert spreadsheet: {exc}')
     
     def _create_project_folder(self, project_name: str) -> Path:
         """Create project folder in data/ with timestamp."""
@@ -193,17 +211,6 @@ class MainWindow(QMainWindow):
         print(f'Created project folder: {project_path}')
         
         return project_path
-    
-    def _copy_input_files_to_project(self):
-        """Copy all files from input folder to project folder."""
-        if self.input_folder is None or self.project_folder is None:
-            raise ValueError('Input or project folder not set')
-        
-        for src_file in self.input_folder.glob('*'):
-            if src_file.is_file():
-                dst_file = self.project_folder / src_file.name
-                shutil.copy2(src_file, dst_file)
-                print(f'Copied: {src_file.name}')
     
     def _create_output_folder(self):
         """Create output folder with same name as project folder."""
@@ -1106,10 +1113,11 @@ class MainWindow(QMainWindow):
                 table.setItem(i, j, QTableWidgetItem(v))
 
     def _fill_logft_table(self, rows):
-        cols = ['level_id','e_level_keV','level_jpi','parent_state_id','parent_jpi','endpoint_keV','branch_percent','classification','logft']
+        # Show logft column before intensity (branch percent)
+        cols = ['level_id','e_level_keV','level_jpi','parent_state_id','parent_jpi','endpoint_keV','logft','branch_percent','classification']
         self.logft_table.setColumnCount(len(cols)); self.logft_table.setHorizontalHeaderLabels(cols); self.logft_table.setRowCount(len(rows))
         for i, r in enumerate(rows):
-            vals = [r.level_id, f'{r.e_level_keV:.2f}', r.level_jpi, r.parent_state_id, r.parent_jpi, f'{r.endpoint_keV:.2f}', f'{r.branch_percent:.4f}', r.classification, '' if r.logft is None else f'{r.logft:.4f}']
+            vals = [r.level_id, f'{r.e_level_keV:.2f}', r.level_jpi, r.parent_state_id, r.parent_jpi, f'{r.endpoint_keV:.2f}', '' if r.logft is None else f'{r.logft:.4f}', f'{r.branch_percent:.4f}', r.classification]
             for j, v in enumerate(vals):
                 self.logft_table.setItem(i, j, QTableWidgetItem(v))
 
@@ -1134,12 +1142,22 @@ class MainWindow(QMainWindow):
                 logft = compute_logft(self.project.levels, abf_with, self.project.beta_inputs)
             abf_map = {r.level_id: ('' if r.e_level_keV == 0 else f'{r.abf_clipped:.3f}') for r in abf_with}
             logft_map = {}
+            # Build single-display logft per level. If multiple computed values exist
+            # (typically due to ambiguous parent/spin), show only the largest value
+            # and prefix with '<' to indicate an upper-limit/ambiguity (e.g. '<5.60').
+            temp_vals: dict[str, list[float]] = {}
             for row in logft:
-                label = '' if row.logft is None else f'{row.logft:.2f}'
-                if row.level_id in logft_map and label:
-                    logft_map[row.level_id] = f"{logft_map[row.level_id]}/{label}" if logft_map[row.level_id] else label
-                elif label:
-                    logft_map[row.level_id] = label
+                if row.logft is None:
+                    continue
+                temp_vals.setdefault(row.level_id, []).append(float(row.logft))
+            for lvl, vals in temp_vals.items():
+                if not vals:
+                    continue
+                if len(vals) == 1:
+                    logft_map[lvl] = f'{vals[0]:.2f}'
+                else:
+                    maxv = max(vals)
+                    logft_map[lvl] = f'<{maxv:.2f}'
             text = engine.render(self.project.beta_inputs, self.project.levels, self.project.transitions, 
                                  render_settings=self.project.render_settings,
                                  abf_map=abf_map, logft_map=logft_map)
