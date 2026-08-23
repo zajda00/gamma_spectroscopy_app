@@ -7,6 +7,7 @@ from PySide6.QtCore import Qt
 
 from app_nndc.nndc_client import NNDCData, NNDCClient
 from app_nndc.ui_widgets import create_nndc_fetch_button
+from app_decay_scheme.main_window import MainWindow
 
 
 @pytest.fixture
@@ -158,6 +159,28 @@ def test_nndc_partial_data():
     # Verify only q_beta was filled
     assert qbeta_field.text() == "5000.00"
     assert t12_field.text() == ""  # Not filled
+
+
+def test_nndc_sep_energy_callback_uses_dsn_dsp_fields(qapp):
+    """Ensure separation-energy callback fills Sn/Sp values and uncertainties from dsn/dsp."""
+    dummy = MainWindow.__new__(MainWindow)
+    dummy.sep_energy_type_combo = Mock()
+    dummy.sep_energy_type_combo.currentText.return_value = 'n'
+    dummy.sn_edit = QLineEdit()
+    dummy.serr_edit = QLineEdit()
+    dummy.on_input_changed = Mock()
+
+    data = NNDCData(sn_keV=4770.0, dsn_keV=40.0, sp_keV=12210.0, dsp_keV=40.0)
+    MainWindow._on_nndc_sep_energy_fetched(dummy, data)
+
+    assert dummy.sn_edit.text() == '4770.0'
+    assert dummy.serr_edit.text() == '40.0'
+
+    dummy.sep_energy_type_combo.currentText.return_value = 'p'
+    MainWindow._on_nndc_sep_energy_fetched(dummy, data)
+    assert dummy.sn_edit.text() == '12210.0'
+    assert dummy.serr_edit.text() == '40.0'
+    assert dummy.on_input_changed.call_count == 2
 
 
 if __name__ == '__main__':

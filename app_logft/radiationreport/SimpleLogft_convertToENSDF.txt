@@ -1,0 +1,221 @@
+    1472: invokestatic  #1410               // Method ensdfparser/nds/ensdf/EnsdfUtil.replaceEnergyOfRecordLine:(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+    1475: astore        15
+    1477: goto          1524
+    1480: new           #250                // class java/lang/StringBuilder
+    1483: dup
+    1484: ldc_w         #1420               // String E=
+    1487: invokespecial #254                // Method java/lang/StringBuilder."<init>":(Ljava/lang/String;)V
+    1490: aload         9
+    1492: invokevirtual #1416               // Method ensdfparser/ensdf/SDS2XDX.s:()Ljava/lang/String;
+    1495: invokevirtual #260                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    1498: ldc_w         #1367               // String
+    1501: invokevirtual #260                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    1504: aload         9
+    1506: invokevirtual #1418               // Method ensdfparser/ensdf/SDS2XDX.ds:()Ljava/lang/String;
+    1509: invokevirtual #260                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    1512: invokevirtual #264                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+    1515: astore        21
+    1517: aload         21
+    1519: invokevirtual #1106               // Method java/lang/String.trim:()Ljava/lang/String;
+    1522: astore        21
+    1524: aload_0
+    1525: getfield      #166                // Field jps:Ljava/lang/String;
+    1528: invokevirtual #1093               // Method java/lang/String.length:()I
+    1531: ifle          1545
+    1534: aload         15
+    1536: aload_0
+    1537: getfield      #166                // Field jps:Ljava/lang/String;
+    1540: invokestatic  #1422               // Method ensdfparser/nds/ensdf/EnsdfUtil.replaceJPIOfLevelLine:(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+    1543: astore        15
+    1545: aload         6
+    1547: ifnull        1740
+    1550: aload         6
+    1552: invokevirtual #1416               // Method ensdfparser/ensdf/SDS2XDX.s:()Ljava/lang/String;
+    1555: invokevirtual #1093               // Method java/lang/String.length:()I
+    1558: aload_0
+    1559: getfield      #158                // Field tunit:Ljava/lang/String;
+    1562: invokevirtual #1093               // Method java/lang/String.length:()I
+    1565: iadd
+    1566: iconst_1
+    1567: iadd
+    1568: istore        22
+    1570: iload         22
+    1572: bipush        10
+    1574: if_icmpgt     1614
+    1577: aload         6
+    1579: invokevirtual #1418               // Method ensdfparser/ensdf/SDS2XDX.ds:()Ljava/lang/String;
+    1582: invokevirtual #1093               // Method java/lang/String.length:()I
+    1585: bipush        6
+    1587: if_icmpgt     1614
+    1590: aload         15
+    1592: aload         6
+    1594: invokevirtual #1416               // Method ensdfparser/ensdf/SDS2XDX.s:()Ljava/lang/String;
+    1597: aload         6
+    1599: invokevirtual #1418               // Method ensdfparser/ensdf/SDS2XDX.ds:()Ljava/lang/String;
+    1602: aload_0
+    1603: getfield      #158                // Field tunit:Ljava/lang/String;
+    1606: invokestatic  #1425               // Method ensdfparser/nds/ensdf/EnsdfUtil.replaceHalflifeOfLevelLine:(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+    1609: astore        15
+    1611: goto          1740
+    1614: aload         21
+    1616: invokevirtual #1087               // Method java/lang/String.isEmpty:()Z
+    1619: ifeq          1675
+    1622: new           #250                // class java/lang/StringBuilder
+    1625: dup
+    1626: ldc_w         #1429               // String T=
+    1629: invokespecial #254                // Method java/lang/StringBuilder."<init>":(Ljava/lang/String;)V
+    1632: aload         6
+    1634: invokevirtual #1416               // Method ensdfparser/ensdf/SDS2XDX.s:()Ljava/lang/String;
+    1637: invokevirtual #260                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    1640: ldc_w         #1367               // String
+    1643: invokevirtual #260                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    1646: aload_0
+    1647: getfield      #158                // Field tunit:Ljava/lang/String;
+    1650: invokevirtual #260                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    1653: ldc_w         #1367               // String
+    1656: invokevirtual #260                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    1659: aload         6
+    1661: invokevirtual #1418               // Method ensdfparser/ensdf/SDS2XDX.ds:()Ljava/lang/String;
+    1664: invokevirtual #260                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    1667: invokevirtual #264                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+    1670: astore        21
+    1672: goto          1733
+    1675: new           #250                // class java/lang/StringBuilder
+    1678: dup
+    1679: aload         21
+    1681: invokestatic  #1116               // Method java/lang/String.valueOf:(Ljava/lang/Object;)Ljava/lang/String;
+    1684: invokespecial #254                // Method java/lang/StringBuilder."<init>":(Ljava/lang/String;)V
+    1687: ldc_w         #1431               // String $T=
+    1690: invokevirtual #260                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    1693: aload         6
+    1695: invokevirtual #1416               // Method ensdfparser/ensdf/SDS2XDX.s:()Ljava/lang/String;
+    1698: invokevirtual #260                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    1701: ldc_w         #1367               // String
+    1704: invokevirtual #260                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    1707: aload_0
+    1708: getfield      #158                // Field tunit:Ljava/lang/String;
+    1711: invokevirtual #260                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    1714: ldc_w         #1367               // String
+    1717: invokevirtual #260                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    1720: aload         6
+    1722: invokevirtual #1418               // Method ensdfparser/ensdf/SDS2XDX.ds:()Ljava/lang/String;
+    1725: invokevirtual #260                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    1728: invokevirtual #264                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+    1731: astore        21
+    1733: aload         21
+    1735: invokevirtual #1106               // Method java/lang/String.trim:()Ljava/lang/String;
+    1738: astore        21
+    1740: iload_1
+    1741: ifeq          1772
+    1744: aload_0
+    1745: getfield      #140                // Field isBetaMinus:Z
+    1748: ifeq          1763
+    1751: aload_0
+    1752: getfield      #148                // Field pNUCID:Ljava/lang/String;
+    1755: invokestatic  #1433               // Method ame/base/AMEConfig.getQBFromAME:(Ljava/lang/String;)Lensdfparser/ensdf/SDS2XDX;
+    1758: astore        7
+    1760: goto          1772
+    1763: aload_0
+    1764: getfield      #148                // Field pNUCID:Ljava/lang/String;
+    1767: invokestatic  #1436               // Method ame/base/AMEConfig.getQECFromAME:(Ljava/lang/String;)Lensdfparser/ensdf/SDS2XDX;
+    1770: astore        7
+    1772: aload         7
+    1774: ifnull        1930
+    1777: aload         15
+    1779: invokevirtual #1093               // Method java/lang/String.length:()I
+    1782: ifle          1930
+    1785: aload         7
+    1787: invokevirtual #1416               // Method ensdfparser/ensdf/SDS2XDX.s:()Ljava/lang/String;
+    1790: invokevirtual #1093               // Method java/lang/String.length:()I
+    1793: bipush        10
+    1795: if_icmpgt     1830
+    1798: aload         7
+    1800: invokevirtual #1418               // Method ensdfparser/ensdf/SDS2XDX.ds:()Ljava/lang/String;
+    1803: invokevirtual #1093               // Method java/lang/String.length:()I
+    1806: iconst_2
+    1807: if_icmpgt     1830
+    1810: aload         15
+    1812: aload         7
+    1814: invokevirtual #1416               // Method ensdfparser/ensdf/SDS2XDX.s:()Ljava/lang/String;
+    1817: aload         7
+    1819: invokevirtual #1418               // Method ensdfparser/ensdf/SDS2XDX.ds:()Ljava/lang/String;
+    1822: invokestatic  #1439               // Method ensdfparser/nds/ensdf/EnsdfUtil.replaceC2SOfLevelLine:(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+    1825: astore        15
+    1827: goto          1930
+    1830: aload         21
+    1832: invokevirtual #1087               // Method java/lang/String.isEmpty:()Z
+    1835: ifeq          1878
+    1838: new           #250                // class java/lang/StringBuilder
+    1841: dup
+    1842: ldc_w         #1442               // String QP=
+    1845: invokespecial #254                // Method java/lang/StringBuilder."<init>":(Ljava/lang/String;)V
+    1848: aload         7
+    1850: invokevirtual #1416               // Method ensdfparser/ensdf/SDS2XDX.s:()Ljava/lang/String;
+    1853: invokevirtual #260                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    1856: ldc_w         #1367               // String
+    1859: invokevirtual #260                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    1862: aload         7
+    1864: invokevirtual #1418               // Method ensdfparser/ensdf/SDS2XDX.ds:()Ljava/lang/String;
+    1867: invokevirtual #260                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    1870: invokevirtual #264                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+    1873: astore        21
+    1875: goto          1923
+    1878: new           #250                // class java/lang/StringBuilder
+    1881: dup
+    1882: aload         21
+    1884: invokestatic  #1116               // Method java/lang/String.valueOf:(Ljava/lang/Object;)Ljava/lang/String;
+    1887: invokespecial #254                // Method java/lang/StringBuilder."<init>":(Ljava/lang/String;)V
+    1890: ldc_w         #1444               // String $QP=
+    1893: invokevirtual #260                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    1896: aload         7
+    1898: invokevirtual #1416               // Method ensdfparser/ensdf/SDS2XDX.s:()Ljava/lang/String;
+    1901: invokevirtual #260                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    1904: ldc_w         #1367               // String
+    1907: invokevirtual #260                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    1910: aload         7
+    1912: invokevirtual #1418               // Method ensdfparser/ensdf/SDS2XDX.ds:()Ljava/lang/String;
+    1915: invokevirtual #260                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    1918: invokevirtual #264                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+    1921: astore        21
+    1923: aload         21
+    1925: invokevirtual #1106               // Method java/lang/String.trim:()Ljava/lang/String;
+    1928: astore        21
+    1930: aload         21
+    1932: invokevirtual #1087               // Method java/lang/String.isEmpty:()Z
+    1935: ifne          1970
+    1938: aload_0
+    1939: getfield      #148                // Field pNUCID:Ljava/lang/String;
+    1942: ldc_w         #1446               // String 2 P
+    1945: invokestatic  #1359               // Method ensdfparser/nds/util/Str.makeENSDFLinePrefix:(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+    1948: astore_3
+    1949: new           #250                // class java/lang/StringBuilder
+    1952: dup
+    1953: aload_3
+    1954: invokestatic  #1116               // Method java/lang/String.valueOf:(Ljava/lang/Object;)Ljava/lang/String;
+    1957: invokespecial #254                // Method java/lang/StringBuilder."<init>":(Ljava/lang/String;)V
+    1960: aload         21
+    1962: invokevirtual #260                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    1965: invokevirtual #264                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+    1968: astore        21
+    1970: aload         15
+    1972: invokevirtual #1087               // Method java/lang/String.isEmpty:()Z
+    1975: ifeq          1986
+    1978: aload_0
+    1979: ldc_w         #1448               // String Error: something wrong with inputs for parent nuclide
+    1982: invokestatic  #928                // Method javax/swing/JOptionPane.showMessageDialog:(Ljava/awt/Component;Ljava/lang/Object;)V
+    1985: return
+    1986: aload_0
+    1987: getfield      #150                // Field dNUCID:Ljava/lang/String;
+    1990: ldc_w         #1450               // String   N
+    1993: invokestatic  #1359               // Method ensdfparser/nds/util/Str.makeENSDFLinePrefix:(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+    1996: astore_3
+    1997: new           #250                // class java/lang/StringBuilder
+    2000: dup
+    2001: aload_3
+    2002: invokestatic  #1116               // Method java/lang/String.valueOf:(Ljava/lang/Object;)Ljava/lang/String;
+    2005: invokespecial #254                // Method java/lang/StringBuilder."<init>":(Ljava/lang/String;)V
+    2008: ldc_w         #1367               // String
+    2011: bipush        71
+    2013: invokestatic  #1406               // Method ensdfparser/nds/util/Str.repeat:(Ljava/lang/String;I)Ljava/lang/String;
+    2016: invokevirtual #260                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    2019: invokevirtual #264                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;

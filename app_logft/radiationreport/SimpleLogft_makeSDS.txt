@@ -1,0 +1,221 @@
+     190: iload         22
+     192: if_icmple     199
+     195: iload         23
+     197: istore        22
+     199: aload         7
+     201: invokevirtual #1778               // Method ensdfparser/ensdf/Decay.DIES:()Ljava/lang/String;
+     204: invokestatic  #1775               // Method ensdfparser/nds/util/Str.isInteger:(Ljava/lang/String;)Z
+     207: ifeq          270
+     210: aload         7
+     212: invokevirtual #1778               // Method ensdfparser/ensdf/Decay.DIES:()Ljava/lang/String;
+     215: invokevirtual #1093               // Method java/lang/String.length:()I
+     218: iconst_2
+     219: if_icmpne     235
+     222: aload         7
+     224: invokevirtual #1778               // Method ensdfparser/ensdf/Decay.DIES:()Ljava/lang/String;
+     227: invokestatic  #1303               // Method java/lang/Integer.parseInt:(Ljava/lang/String;)I
+     230: istore        24
+     232: goto          259
+     235: aload         7
+     237: invokevirtual #1778               // Method ensdfparser/ensdf/Decay.DIES:()Ljava/lang/String;
+     240: invokevirtual #1093               // Method java/lang/String.length:()I
+     243: iconst_1
+     244: if_icmpne     254
+     247: bipush        9
+     249: istore        24
+     251: goto          259
+     254: getstatic     #1764               // Field radreport/decay/RADControl.errorLimit:I
+     257: istore        24
+     259: iload         24
+     261: iload         22
+     263: if_icmple     270
+     266: iload         24
+     268: istore        22
+     270: aload         7
+     272: invokevirtual #1779               // Method ensdfparser/ensdf/Decay.DITS:()Ljava/lang/String;
+     275: invokestatic  #1775               // Method ensdfparser/nds/util/Str.isInteger:(Ljava/lang/String;)Z
+     278: ifeq          352
+     281: aload         7
+     283: invokevirtual #1779               // Method ensdfparser/ensdf/Decay.DITS:()Ljava/lang/String;
+     286: invokevirtual #1093               // Method java/lang/String.length:()I
+     289: iconst_2
+     290: if_icmpne     306
+     293: aload         7
+     295: invokevirtual #1779               // Method ensdfparser/ensdf/Decay.DITS:()Ljava/lang/String;
+     298: invokestatic  #1303               // Method java/lang/Integer.parseInt:(Ljava/lang/String;)I
+     301: istore        25
+     303: goto          330
+     306: aload         7
+     308: invokevirtual #1779               // Method ensdfparser/ensdf/Decay.DITS:()Ljava/lang/String;
+     311: invokevirtual #1093               // Method java/lang/String.length:()I
+     314: iconst_1
+     315: if_icmpne     325
+     318: bipush        9
+     320: istore        25
+     322: goto          330
+     325: getstatic     #1764               // Field radreport/decay/RADControl.errorLimit:I
+     328: istore        25
+     330: iload         25
+     332: iload         22
+     334: if_icmple     341
+     337: iload         25
+     339: istore        22
+     341: iload         25
+     343: istore        24
+     345: iload         25
+     347: istore        23
+     349: goto          477
+     352: aload         7
+     354: invokevirtual #1780               // Method ensdfparser/ensdf/Decay.ITS:()Ljava/lang/String;
+     357: invokevirtual #1087               // Method java/lang/String.isEmpty:()Z
+     360: ifeq          477
+     363: new           #1321               // class ensdfparser/ensdf/SDS2XDX
+     366: dup
+     367: aload         7
+     369: invokevirtual #1781               // Method ensdfparser/ensdf/Decay.RIS:()Ljava/lang/String;
+     372: aload         7
+     374: invokevirtual #1774               // Method ensdfparser/ensdf/Decay.DRIS:()Ljava/lang/String;
+     377: invokespecial #1782               // Method ensdfparser/ensdf/SDS2XDX."<init>":(Ljava/lang/String;Ljava/lang/String;)V
+     380: astore        26
+     382: new           #1321               // class ensdfparser/ensdf/SDS2XDX
+     385: dup
+     386: aload         7
+     388: invokevirtual #1785               // Method ensdfparser/ensdf/Decay.IES:()Ljava/lang/String;
+     391: aload         7
+     393: invokevirtual #1778               // Method ensdfparser/ensdf/Decay.DIES:()Ljava/lang/String;
+     396: invokespecial #1782               // Method ensdfparser/ensdf/SDS2XDX."<init>":(Ljava/lang/String;Ljava/lang/String;)V
+     399: astore        27
+     401: aload         26
+     403: aload         27
+     405: iconst_1
+     406: invokevirtual #1786               // Method ensdfparser/ensdf/SDS2XDX.add:(Lensdfparser/ensdf/SDS2XDX;Z)Lensdfparser/ensdf/SDS2XDX;
+     409: astore        28
+     411: aload         28
+     413: invokevirtual #1418               // Method ensdfparser/ensdf/SDS2XDX.ds:()Ljava/lang/String;
+     416: astore        29
+     418: aload         29
+     420: invokestatic  #1775               // Method ensdfparser/nds/util/Str.isInteger:(Ljava/lang/String;)Z
+     423: ifeq          466
+     426: aload         29
+     428: invokevirtual #1093               // Method java/lang/String.length:()I
+     431: iconst_2
+     432: if_icmpne     445
+     435: aload         29
+     437: invokestatic  #1303               // Method java/lang/Integer.parseInt:(Ljava/lang/String;)I
+     440: istore        25
+     442: goto          466
+     445: aload         29
+     447: invokevirtual #1093               // Method java/lang/String.length:()I
+     450: iconst_1
+     451: if_icmpne     461
+     454: bipush        9
+     456: istore        25
+     458: goto          466
+     461: getstatic     #1764               // Field radreport/decay/RADControl.errorLimit:I
+     464: istore        25
+     466: iload         25
+     468: iload         22
+     470: if_icmpge     477
+     473: iload         22
+     475: istore        25
+     477: iload         22
+     479: getstatic     #1764               // Field radreport/decay/RADControl.errorLimit:I
+     482: if_icmple     490
+     485: getstatic     #1764               // Field radreport/decay/RADControl.errorLimit:I
+     488: istore        22
+     490: iload         23
+     492: ifgt          499
+     495: iload         22
+     497: istore        23
+     499: iload         24
+     501: ifgt          508
+     504: iload         22
+     506: istore        24
+     508: iload         25
+     510: ifgt          517
+     513: iload         22
+     515: istore        25
+     517: aload_1
+     518: invokevirtual #1698               // Method radreport/decay/DecaySpectrum.calcIBeta:()Lensdfparser/calc/XDX;
+     521: getfield      #1575               // Field ensdfparser/calc/XDX.x:D
+     524: ldc2_w        #1789               // double 0.001d
+     527: dcmpl
+     528: ifge          553
+     531: aload_1
+     532: invokevirtual #1698               // Method radreport/decay/DecaySpectrum.calcIBeta:()Lensdfparser/calc/XDX;
+     535: getfield      #1575               // Field ensdfparser/calc/XDX.x:D
+     538: ldc2_w        #1789               // double 0.001d
+     541: aload_1
+     542: invokevirtual #1791               // Method radreport/decay/DecaySpectrum.decayIT:()Lensdfparser/calc/XDX;
+     545: getfield      #1575               // Field ensdfparser/calc/XDX.x:D
+     548: dmul
+     549: dcmpl
+     550: iflt          577
+     553: aload_0
+     554: aload_1
+     555: invokevirtual #1698               // Method radreport/decay/DecaySpectrum.calcIBeta:()Lensdfparser/calc/XDX;
+     558: iload         23
+     560: invokevirtual #1794               // Method makeSDS:(Lensdfparser/calc/XDX;I)[Ljava/lang/String;
+     563: astore        18
+     565: aload         18
+     567: iconst_0
+     568: aaload
+     569: astore        9
+     571: aload         18
+     573: iconst_1
+     574: aaload
+     575: astore        10
+     577: aload_1
+     578: invokevirtual #1703               // Method radreport/decay/DecaySpectrum.calcIEC:()Lensdfparser/calc/XDX;
+     581: getfield      #1575               // Field ensdfparser/calc/XDX.x:D
+     584: ldc2_w        #1798               // double 1.0E-4d
+     587: dcmpl
+     588: ifge          613
+     591: aload_1
+     592: invokevirtual #1703               // Method radreport/decay/DecaySpectrum.calcIEC:()Lensdfparser/calc/XDX;
+     595: getfield      #1575               // Field ensdfparser/calc/XDX.x:D
+     598: ldc2_w        #1789               // double 0.001d
+     601: aload_1
+     602: invokevirtual #1791               // Method radreport/decay/DecaySpectrum.decayIT:()Lensdfparser/calc/XDX;
+     605: getfield      #1575               // Field ensdfparser/calc/XDX.x:D
+     608: dmul
+     609: dcmpl
+     610: iflt          637
+     613: aload_0
+     614: aload_1
+     615: invokevirtual #1703               // Method radreport/decay/DecaySpectrum.calcIEC:()Lensdfparser/calc/XDX;
+     618: iload         24
+     620: invokevirtual #1794               // Method makeSDS:(Lensdfparser/calc/XDX;I)[Ljava/lang/String;
+     623: astore        18
+     625: aload         18
+     627: iconst_0
+     628: aaload
+     629: astore        11
+     631: aload         18
+     633: iconst_1
+     634: aaload
+     635: astore        12
+     637: aload         7
+     639: invokevirtual #1780               // Method ensdfparser/ensdf/Decay.ITS:()Ljava/lang/String;
+     642: invokevirtual #1093               // Method java/lang/String.length:()I
+     645: ifne          672
+     648: aload_0
+     649: aload_1
+     650: invokevirtual #1791               // Method radreport/decay/DecaySpectrum.decayIT:()Lensdfparser/calc/XDX;
+     653: iload         25
+     655: invokevirtual #1794               // Method makeSDS:(Lensdfparser/calc/XDX;I)[Ljava/lang/String;
+     658: astore        18
+     660: aload         18
+     662: iconst_0
+     663: aaload
+     664: astore        13
+     666: aload         18
+     668: iconst_1
+     669: aaload
+     670: astore        14
+     672: new           #250                // class java/lang/StringBuilder
+     675: dup
+     676: aload         7
+     678: invokevirtual #1778               // Method ensdfparser/ensdf/Decay.DIES:()Ljava/lang/String;
+     681: invokestatic  #1116               // Method java/lang/String.valueOf:(Ljava/lang/Object;)Ljava/lang/String;
+     684: invokespecial #254                // Method java/lang/StringBuilder."<init>":(Ljava/lang/String;)V

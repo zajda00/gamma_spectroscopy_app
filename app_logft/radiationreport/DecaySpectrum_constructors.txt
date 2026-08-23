@@ -1,0 +1,181 @@
+
+  private boolean isNonUnique;
+
+  private ensdfparser.ensdf.JPI deltaJPI;
+
+  int factor;
+
+  private double precisionRombBeta;
+
+  private double precisionFermiBeta;
+
+  private double precisionRombIB;
+
+  private double precisionFermiIB;
+
+  private double precisionRombOpenIB;
+
+  private double precisionIBStrenFunc;
+
+  private double precisionIBfromEC;
+
+  private boolean calculateIBFromEC;
+
+  private boolean hasCalculatedBeta;
+
+  private boolean hasInputFeeding;
+
+  private ensdfparser.ensdf.Decay decay;
+
+  private double maxE1S;
+
+  private double maxE2S;
+
+  private double maxE2P;
+
+  private double maxE3P;
+
+  private double beK;
+
+  private double r_gL1gK_SQ;
+
+  private java.lang.String indent;
+
+  private java.lang.String message;
+
+  private radreport.math.Function1D Fermi;
+
+  private radreport.math.Function1D wFermi;
+
+  private ensdfparser.calc.XDX pT12;
+
+  private ensdfparser.calc.XDX fTotal;
+
+  private ensdfparser.calc.XDX fB;
+
+  private ensdfparser.calc.XDX fEC;
+
+  private ensdfparser.calc.XDX fK;
+
+  private ensdfparser.calc.XDX fL;
+
+  private ensdfparser.calc.XDX fMNO;
+
+  private ensdfparser.calc.XDX ft;
+
+  private ensdfparser.calc.XDX logf;
+
+  private ensdfparser.calc.XDX logft;
+
+  private ensdfparser.calc.XDX rEC2BP;
+
+  private ensdfparser.calc.XDX rK2ECBP;
+
+  private ensdfparser.calc.XDX rL2ECBP;
+
+  private ensdfparser.calc.XDX rMNO2ECBP;
+
+  private ensdfparser.calc.XDX calcIBeta;
+
+  private ensdfparser.calc.XDX calcIEC;
+
+  private boolean hasIT;
+
+  private boolean hasIB;
+
+  private boolean hasIE;
+
+  private ensdfparser.calc.XDX AIB;
+
+  private ensdfparser.calc.XDX AIE;
+
+  private ensdfparser.calc.XDX AIT;
+
+  private ensdfparser.calc.XDX decayIT;
+
+  private ensdfparser.calc.XDX decayBR;
+
+  private radreport.decay.DecaySpectrum spec0;
+
+  private boolean isRecursive;
+
+  public radreport.decay.DecaySpectrum(int, int, double, java.lang.String, ensdfparser.ensdf.Parent, ensdfparser.ensdf.Decay);
+    Code:
+       0: aload_0
+       1: iload_1
+       2: iload_2
+       3: dload_3
+       4: dconst_0
+       5: aload         5
+       7: aload         6
+       9: aload         7
+      11: invokespecial #128                // Method "<init>":(IIDDLjava/lang/String;Lensdfparser/ensdf/Parent;Lensdfparser/ensdf/Decay;)V
+      14: return
+
+  public radreport.decay.DecaySpectrum(int, int, double, double, java.lang.String, ensdfparser.ensdf.Parent, ensdfparser.ensdf.Decay);
+    Code:
+       0: aload_0
+       1: invokespecial #137                // Method java/lang/Object."<init>":()V
+       4: aload_0
+       5: ldc           #140                // String
+       7: putfield      #142                // Field name:Ljava/lang/String;
+      10: aload_0
+      11: new           #144                // class java/util/Vector
+      14: dup
+      15: invokespecial #146                // Method java/util/Vector."<init>":()V
+      18: putfield      #147                // Field data:Ljava/util/Vector;
+      21: aload_0
+      22: new           #144                // class java/util/Vector
+      25: dup
+      26: invokespecial #146                // Method java/util/Vector."<init>":()V
+      29: putfield      #149                // Field calculatedFermiV:Ljava/util/Vector;
+      32: aload_0
+      33: new           #144                // class java/util/Vector
+      36: dup
+      37: invokespecial #146                // Method java/util/Vector."<init>":()V
+      40: putfield      #151                // Field calculatedIBStrenFuncV:Ljava/util/Vector;
+      43: aload_0
+      44: new           #144                // class java/util/Vector
+      47: dup
+      48: invokespecial #146                // Method java/util/Vector."<init>":()V
+      51: putfield      #153                // Field alternativeSpecsV:Ljava/util/Vector;
+      54: aload_0
+      55: invokestatic  #155                // Method ensdfparser/calc/XDX.ZERO:()Lensdfparser/calc/XDX;
+      58: putfield      #161                // Field averageTotalEnergy:Lensdfparser/calc/XDX;
+      61: aload_0
+      62: invokestatic  #155                // Method ensdfparser/calc/XDX.ZERO:()Lensdfparser/calc/XDX;
+      65: putfield      #163                // Field totalArea:Lensdfparser/calc/XDX;
+      68: aload_0
+      69: iconst_0
+      70: newarray       float
+      72: putfield      #165                // Field gridE:[F
+      75: aload_0
+      76: iconst_0
+      77: newarray       double
+      79: putfield      #167                // Field E:[D
+      82: aload_0
+      83: iconst_0
+      84: anewarray     #156                // class ensdfparser/calc/XDX
+      87: putfield      #169                // Field area:[Lensdfparser/calc/XDX;
+      90: aload_0
+      91: iconst_0
+      92: anewarray     #156                // class ensdfparser/calc/XDX
+      95: putfield      #171                // Field Earea:[Lensdfparser/calc/XDX;
+      98: aload_0
+      99: iconst_0
+     100: anewarray     #156                // class ensdfparser/calc/XDX
+     103: putfield      #173                // Field EareaInkeV:[Lensdfparser/calc/XDX;
+     106: aload_0
+     107: iconst_0
+     108: newarray       float
+     110: putfield      #175                // Field gridEIB:[F
+     113: aload_0
+     114: iconst_0
+     115: newarray       double
+     117: putfield      #177                // Field EIB:[D
+     120: aload_0
+     121: iconst_0
+     122: anewarray     #156                // class ensdfparser/calc/XDX
+     125: putfield      #179                // Field areaIBbeta:[Lensdfparser/calc/XDX;
+     128: aload_0
+     129: iconst_0

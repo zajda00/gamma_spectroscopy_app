@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Optional, Tuple
 from scipy.integrate import quad
 from dataclasses import asdict
+import re
 
 try:
     # helper to parse Z from symbol when available
@@ -166,6 +167,8 @@ def compute_logft(levels, abf_rows, beta_inputs) -> list[CompatLogftResult]:
         except Exception:
             daughter_z = 0
 
+    parent_states = _coerce_parent_states(beta_inputs)
+
     # import allowed_parent_states from app_decay_scheme.spin_rules
     try:
         from app_decay_scheme.spin_rules import allowed_parent_states
@@ -176,9 +179,9 @@ def compute_logft(levels, abf_rows, beta_inputs) -> list[CompatLogftResult]:
         branch = abf_by_level.get(lv.level_id, 0.0)
         if branch <= 0:
             continue
-        parents = allowed_parent_states(beta_inputs.parent_states, lv.jpi)
+        parents = allowed_parent_states(parent_states, lv.jpi)
         if not parents:
-            parents = [(s, 'no_simple_match') for s in beta_inputs.parent_states if s.include_in_analysis]
+            parents = [(s, 'no_simple_match') for s in parent_states if getattr(s, 'include_in_analysis', True)]
         for parent, cls in parents:
             endpoint = beta_inputs.qbeta_keV + parent.excitation_energy_keV - lv.e_level_keV
             res = compute_logft_for_parent_level(beta_inputs.qbeta_keV, parent.excitation_energy_keV, lv.e_level_keV, parent.half_life_ms, branch, daughter_z)
@@ -194,3 +197,61 @@ def compute_logft(levels, abf_rows, beta_inputs) -> list[CompatLogftResult]:
                 logft=res.logft
             ))
     return out
+
+
+def _parse_half_life_to_seconds(raw_value: object) -> float:
+    """Parse half-life strings like '0.72 s', '5 ms', '1.2(3) s' into seconds."""
+    if raw_value is None:
+        return 0.0
+    text = str(raw_value).strip()
+    if not text:
+        return 0.0
+    text = text.replace('−', '-')
+    match = re.search(r'(?P<value>\d+(?:\.\d+)?)\s*(?P<unit>min|ms|µs|us|ns|ps|yr|y|h|d|m|s)?', text, flags=re.I)
+    if not match:
+        return 0.0
+    value = float(match.group('value'))
+    unit = (match.group('unit') or 's').lower()
+    unit_map = {'ps': 1e-12, 'ns': 1e-9, 'us': 1e-6, 'µs': 1e-6, 'ms': 1e-3, 's': 1.0, 'min': 60.0, 'm': 60.0, 'h': 3600.0, 'd': 86400.0, 'y': 31557600.0, 'yr': 31557600.0}
+    return value * unit_map.get(unit, 1.0)
+
+
+def _coerce_parent_states(beta_inputs) -> list:
+    """Return parent states usable by logft calculation from either loaded project data or settings UI."""
+    if getattr(beta_inputs, 'parent_states', None):
+        return list(beta_inputs.parent_states)
+
+    states = []
+    mother_states = getattr(beta_inputs, 'mother_states', None) or []
+    for idx, state in enumerate(mother_states, start=1):
+        if not isinstance(state, dict):
+            continue
+        jpi = str(state.get('jpi') or state.get('spin_parity') or state.get('Jpi') or 'unknown').strip()
+        if not jpi and isinstance(state.get('spin_parity'), str):
+            jpi = str(state['spin_parity']).strip()
+        exc = state.get('e_keV') or state.get('energy_keV') or state.get('energy') or state.get('e') or 0.0
+        t12 = state.get('t12') or state.get('half_life') or state.get('half_life_display') or ''
+        try:
+            exc_keV = float(exc)
+        except (TypeError, ValueError):
+            exc_keV = 0.0
+        half_life_ms = _parse_half_life_to_seconds(t12) * 1000.0
+        states.append(type('ParentStateLike', (), {
+            'state_id': f'parent_state_{idx}',
+            'jpi': jpi or 'unknown',
+            'excitation_energy_keV': exc_keV,
+            'half_life_ms': half_life_ms,
+            'include_in_analysis': True,
+        })())
+
+    if states:
+        return states
+
+    # Final fallback: synthesize a single generic parent state when only basic settings are available.
+    return [type('ParentStateLike', (), {
+        'state_id': 'parent_state_1',
+        'jpi': str(getattr(beta_inputs, 'mother_spin_display', '') or getattr(beta_inputs, 'mother_spinpar', '') or 'unknown').strip() or 'unknown',
+        'excitation_energy_keV': 0.0,
+        'half_life_ms': 0.0,
+        'include_in_analysis': True,
+    })()]

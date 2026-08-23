@@ -1,0 +1,46 @@
+Compiled from "Parent.java"
+public class ensdfparser.ensdf.Parent extends ensdfparser.ensdf.Record {
+  protected java.lang.String dm_name_s;
+  protected ensdfparser.ensdf.Nucleus nuc;
+  protected ensdfparser.ensdf.Level lev;
+  protected java.lang.String q_s;
+  protected java.lang.String dq_s;
+  protected float q_f;
+  protected float dq_f;
+  protected java.lang.String ion_s;
+  protected java.lang.String qMev_s;
+  protected ensdfparser.ensdf.DecayMode dm;
+  protected java.lang.String indexS;
+  public ensdfparser.ensdf.Parent();
+  public void setValues(java.util.Vector<java.lang.String>) throws java.lang.Exception;
+  public void doWork() throws java.lang.Exception;
+  protected void parseQV();
+  protected java.lang.String rTrim(java.lang.String);
+  public void setDMName(java.lang.String);
+  public void setDMValue(java.lang.String);
+  public void setDMUnc(java.lang.String);
+  public ensdfparser.ensdf.DecayMode DM();
+  public java.lang.String DMName();
+  public ensdfparser.ensdf.Nucleus nucleus();
+  public ensdfparser.ensdf.Level level();
+  public java.lang.String QS();
+  public java.lang.String DQS();
+  public java.lang.String QUnicode();
+  public float QF();
+  public float DQF();
+  public void setDQF(float);
+  public java.lang.String ionS();
+  public java.lang.String qMeVS();
+  public java.lang.String getIndexS();
+  public void setIndexS(java.lang.String);
+  public java.lang.String ES();
+  public java.lang.String DES();
+  public float EF();
+  public float DEF();
+  public java.lang.String RIS();
+  public java.lang.String DRIS();
+  public java.lang.String flag();
+  public java.lang.String q();
+  public java.lang.String coinS();
+  public void addFlag(java.lang.String);
+}

@@ -3,6 +3,7 @@ from dataclasses import asdict
 from pathlib import Path
 from datetime import datetime
 import shutil
+import re
 from PySide6.QtCore import Qt, QSignalBlocker
 from PySide6.QtGui import QAction, QPixmap
 from PySide6.QtWidgets import (
@@ -19,8 +20,25 @@ from .loaders import ProjectDataLoader
 from app_logft.logft_calc import compute_logft
 from .preview import render_eps_to_png, find_ghostscript_executable
 from .periodic_table import complete_from_symbol, complete_from_z, z_from_symbol, symbol_from_z
-from app_nndc.nndc_client import NNDCData
+from app_nndc.nndc_client import NNDCData, first_not_none
 from app_nndc.ui_widgets import create_nndc_fetch_button
+from .models import ParentState
+
+
+def _get_parent_state_jpi(state) -> str:
+    if isinstance(state, dict):
+        return str(
+            state.get("jpi")
+            or state.get("spin_parity")
+            or ""
+        )
+
+    return str(
+        getattr(state, "jpi", None)
+        or getattr(state, "spin_parity", None)
+        or ""
+    )
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -412,6 +430,9 @@ class MainWindow(QMainWindow):
         decay_lay.addRow('Parent nucleus', self.parent_edit)
         decay_lay.addRow('Daughter nucleus', self.daughter_edit)
         decay_lay.addRow('Decay channel (0=blank, 1=α, 2=β-, 3=β+, 4=β-n)', self.decay_channel_spin)
+        self.fetch_all_nndc_btn = QPushButton("Fetch all data from NNDC")
+        self.fetch_all_nndc_btn.clicked.connect(self._fetch_all_nndc_data)
+        decay_lay.addRow('', self.fetch_all_nndc_btn)
         form.addRow(decay_grp)
         
         # ===== MOTHER NUCLEUS DATA =====
@@ -803,26 +824,44 @@ class MainWindow(QMainWindow):
         self.iterative_tolerance_spin.valueChanged.connect(self._sync_settings_to_model)
         self.iterative_max_iters_spin.valueChanged.connect(self._sync_settings_to_model)
 
-    def _add_mother_state_row(self, jpi: str = '', e: str = '', de: str = '', t12: str = '', dt12: str = ''):
+    def _add_mother_state_row(self, jpi: str = '', e: str = '', de: str = '', t12: str = '', dt12: str = '',):
         row_widget = QWidget()
+
         row_layout = QHBoxLayout(row_widget)
         row_layout.setContentsMargins(0, 0, 0, 0)
+
         jpi_edit = QLineEdit(jpi)
-        e_edit = QLineEdit('')
-        de_edit = QLineEdit('')
+        e_edit = QLineEdit(e)
+        de_edit = QLineEdit(de)
         t12_edit = QLineEdit(t12)
-        dt12_edit = QLineEdit('')
+        dt12_edit = QLineEdit(dt12)
+
         remove_btn = QPushButton('-')
-        remove_btn.clicked.connect(lambda: self._remove_mother_state_row(row_widget))
+        remove_btn.clicked.connect(
+            lambda: self._remove_mother_state_row(row_widget)
+        )
+
         row_layout.addWidget(jpi_edit, 2)
         row_layout.addWidget(e_edit, 2)
         row_layout.addWidget(de_edit, 1)
         row_layout.addWidget(t12_edit, 2)
         row_layout.addWidget(dt12_edit, 1)
         row_layout.addWidget(remove_btn)
-        self.mother_state_layout.addWidget(row_widget)
-        self.mother_state_rows.append((row_widget, jpi_edit, e_edit, de_edit, t12_edit, dt12_edit))
 
+        self.mother_state_layout.addWidget(row_widget)
+
+        self.mother_state_rows.append(
+            (
+                row_widget,
+                jpi_edit,
+                e_edit,
+                de_edit,
+                t12_edit,
+                dt12_edit,
+            )
+        )
+
+    
     def _remove_mother_state_row(self, row_widget: QWidget | None = None):
         if not self.mother_state_rows:
             return
@@ -1063,10 +1102,25 @@ class MainWindow(QMainWindow):
         self.daughter_edit.setText(b.daughter_nucleus)
         self.decay_channel_spin.setValue(b.decay_channel)
         
-        # Mother/daughter detailed: leave empty on project load and fill only when
-        # parent/daughter are entered in the Decay Process fields.
-        self._clear_nucleus_details()
-        
+        # Mother/daughter detailed: restore saved values instead of clearing them.
+        with QSignalBlocker(self.mother_a_spin):
+            self.mother_a_spin.setValue(int(getattr(b, 'mother_a', 0) or 0))
+        with QSignalBlocker(self.mother_z_spin):
+            self.mother_z_spin.setValue(int(getattr(b, 'mother_z', 0) or 0))
+        with QSignalBlocker(self.mother_n_spin):
+            self.mother_n_spin.setValue(int(getattr(b, 'mother_n', 0) or 0))
+        with QSignalBlocker(self.mother_symbol_edit):
+            self.mother_symbol_edit.setText(symbol_from_z(int(getattr(b, 'mother_z', 0) or 0)) if getattr(b, 'mother_z', 0) else '')
+
+        with QSignalBlocker(self.daughter_a_spin):
+            self.daughter_a_spin.setValue(int(getattr(b, 'daughter_a', 0) or 0))
+        with QSignalBlocker(self.daughter_z_spin):
+            self.daughter_z_spin.setValue(int(getattr(b, 'daughter_z', 0) or 0))
+        with QSignalBlocker(self.daughter_n_spin):
+            self.daughter_n_spin.setValue(int(getattr(b, 'daughter_n', 0) or 0))
+        with QSignalBlocker(self.daughter_symbol_edit):
+            self.daughter_symbol_edit.setText(symbol_from_z(int(getattr(b, 'daughter_z', 0) or 0)) if getattr(b, 'daughter_z', 0) else '')
+
         # Q-value
         self.qbeta_edit.setText(str(b.qbeta_keV))
         self.dqbeta_edit.setText(str(b.dqbeta_keV))
@@ -1223,7 +1277,58 @@ class MainWindow(QMainWindow):
         b.mother_q = ''
         b.mother_sn = ''
         b.mother_pn = ''
-        
+
+        parent_states: list[ParentState] = []
+        for idx, state in enumerate(mother_states, start=1):
+            jpi = (state.get('jpi') or '').strip()
+            exc = str(state.get('e_keV') or state.get('energy') or '').strip()
+            half = str(state.get('t12') or state.get('half_life') or '').strip()
+            try:
+                exc_keV = float(exc) if exc else 0.0
+            except ValueError:
+                exc_keV = 0.0
+            try:
+                half_life_ms = float(half) * 1000.0 if half and re.fullmatch(r'[-+]?\d+(?:\.\d+)?', half) else 0.0
+            except ValueError:
+                half_life_ms = 0.0
+            if half and not half_life_ms:
+                match = re.search(r'(?P<val>\d+(?:\.\d+)?)\s*(?P<unit>min|ms|µs|us|ns|ps|yr|y|h|d|m|s)?', half, flags=re.I)
+                if match:
+                    value = float(match.group('val'))
+                    unit = (match.group('unit') or 's').lower()
+                    unit_map = {'ps': 1e-6, 'ns': 1e-3, 'us': 1.0, 'µs': 1.0, 'ms': 1e3, 's': 1e6, 'min': 6e7, 'm': 6e7, 'h': 3.6e9, 'd': 8.64e10, 'y': 3.15576e13, 'yr': 3.15576e13}
+                    half_life_ms = value * unit_map.get(unit, 1e6) / 1000.0
+            parent_states.append(ParentState(
+                state_id=f'parent_state_{idx}',
+                jpi=jpi or 'unknown',
+                excitation_energy_keV=exc_keV,
+                half_life_ms=half_life_ms,
+                include_in_analysis=True,
+            ))
+        b.parent_states = parent_states
+        parent_jpi_values = [
+            _get_parent_state_jpi(state)
+            for state in parent_states
+        ]
+        b.parent_spinpar = '; '.join(
+            jpi
+            for jpi in parent_jpi_values
+            if jpi
+        )
+
+        parent_t12_values = []
+        for state in parent_states:
+            if isinstance(state, dict):
+                value = state.get('t12') or state.get('half_life') or ''
+            else:
+                value = getattr(state, 't12', None) or getattr(state, 'half_life', None) or ''
+            parent_t12_values.append(str(value))
+        b.parent_t12 = '; '.join(
+            value
+            for value in parent_t12_values
+            if value
+        )
+
         # Separation energy
         try: b.neutron_separation_energy_keV = float(self.sn_edit.text()) if self.sn_edit.text().strip() else None
         except ValueError: pass
@@ -1438,12 +1543,12 @@ class MainWindow(QMainWindow):
                     widget.deleteLater()
             self.mother_state_rows = []
             for entry in states:
-                jpi = entry.get('jpi') or entry.get('spin_parity', '')
-                t12 = entry.get('t12') or entry.get('half_life', '')
-                e = entry.get('e') or entry.get('e_keV') or entry.get('energy', '')
-                de = entry.get('de') or entry.get('de_keV') or entry.get('energy_uncertainty', '')
-                dt12 = entry.get('dt12') or entry.get('half_life_uncertainty', '')
-                self._add_mother_state_row(jpi, str(e), str(de), t12, str(dt12))
+                jpi = first_not_none(entry.get('jpi_raw'), entry.get('jpi'), '')
+                t12 = first_not_none(entry.get('half_life_display'), entry.get('t12'), entry.get('half_life'), '')
+                e = first_not_none(entry.get('energy_keV'), entry.get('energy_display'), entry.get('e_keV'), entry.get('energy'), entry.get('e'))
+                de = first_not_none(entry.get('energy_uncertainty_keV'), entry.get('energy_uncertainty'), entry.get('de_keV'), entry.get('de'), entry.get('energy_uncertainty_display'))
+                dt12 = first_not_none(entry.get('half_life_uncertainty_display'), entry.get('dt12'), entry.get('half_life_uncertainty'))
+                self._add_mother_state_row(jpi, str(e) if e is not None else '', str(de) if de is not None else '', str(t12) if t12 is not None else '', str(dt12) if dt12 is not None else '')
         else:
             # Fallback: use single-value fields if available
             if data.mother_half_life_str:
@@ -1465,17 +1570,23 @@ class MainWindow(QMainWindow):
         if self.sep_energy_type_combo.currentText() == 'n':
             if data.sn_keV is not None:
                 self.sn_edit.setText(f"{data.sn_keV:.1f}")
-                if getattr(data, 'sn_uncertainty_keV', None) is not None:
-                    self.serr_edit.setText(f"{data.sn_uncertainty_keV:.1f}")
+                if data.dsn_keV is not None:
+                    self.serr_edit.setText(f"{data.dsn_keV:.1f}")
                 else:
-                    self.serr_edit.setText('')
+                    self.serr_edit.clear()
+            else:
+                self.sn_edit.clear()
+                self.serr_edit.clear()
         else:
             if data.sp_keV is not None:
                 self.sn_edit.setText(f"{data.sp_keV:.1f}")
-                if getattr(data, 'sp_uncertainty_keV', None) is not None:
-                    self.serr_edit.setText(f"{data.sp_uncertainty_keV:.1f}")
+                if data.dsp_keV is not None:
+                    self.serr_edit.setText(f"{data.dsp_keV:.1f}")
                 else:
-                    self.serr_edit.setText('')
+                    self.serr_edit.clear()
+            else:
+                self.sn_edit.clear()
+                self.serr_edit.clear()
         self.on_input_changed()
 
     def on_input_changed(self):
@@ -1510,3 +1621,13 @@ class MainWindow(QMainWindow):
         with (self.project_folder / 'analysis_notes_edited.md').open('w', encoding='utf-8') as f:
             f.write(self.notes_edit.toPlainText())
         QMessageBox.information(self, 'Saved', f'Edited files written in {self.project_folder}')
+
+    def _fetch_all_nndc_data(self):
+        """Trigger all NNDC fetch buttons in sequence so a full decay dataset is populated."""
+        for button in (
+            getattr(self, 'fetch_qvalue_btn', None),
+            getattr(self, 'fetch_mother_btn', None),
+            getattr(self, 'fetch_sep_energy_btn', None),
+        ):
+            if button is not None:
+                button.click()

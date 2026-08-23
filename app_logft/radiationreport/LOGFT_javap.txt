@@ -1,0 +1,642 @@
+Compiled from "LOGFT.java"
+public class ensdfparser.check.LOGFT {
+  public static final double limitOfAllowed;
+
+  public static final double limitOfFirstUnique;
+
+  public static final double limitOfSecondNonUnique;
+
+  public static final double limitOfSecondUnique;
+
+  public static final double lowerLimitOfSuperAllowed;
+
+  public static final double upperLimitOfSuperAllowed;
+
+  public static final double limitOfIsospinForbidden;
+
+  static double bufferOffset;
+
+  static {};
+    Code:
+       0: ldc2_w        #32                 // double 0.1d
+       3: putstatic     #34                 // Field bufferOffset:D
+       6: return
+
+  public ensdfparser.check.LOGFT();
+    Code:
+       0: aload_0
+       1: invokespecial #39                 // Method java/lang/Object."<init>":()V
+       4: return
+
+  public static double limitOfAllowed(int);
+    Code:
+       0: iload_0
+       1: bipush        80
+       3: if_icmpge     10
+       6: ldc2_w        #8                  // double 5.9d
+       9: dreturn
+      10: ldc2_w        #44                 // double 5.2d
+      13: dreturn
+
+  public static java.util.Vector<java.lang.String> findDeltaJPSForLogft(ensdfparser.ensdf.SDS2XDX, int, boolean, boolean);
+    Code:
+       0: aload_0
+       1: iload_1
+       2: iload_2
+       3: iload_3
+       4: getstatic     #34                 // Field bufferOffset:D
+       7: invokestatic  #53                 // Method findDeltaJPSForLogft:(Lensdfparser/ensdf/SDS2XDX;IZZD)Ljava/util/Vector;
+      10: areturn
+
+  public static java.util.Vector<java.lang.String> findDeltaJPSForLogft(ensdfparser.ensdf.SDS2XDX, int, boolean, boolean, double);
+    Code:
+       0: aload_0
+       1: iload_1
+       2: iload_2
+       3: iload_3
+       4: dload         4
+       6: ldc           #61                 // String
+       8: invokestatic  #63                 // Method findDeltaJPSForLogft:(Lensdfparser/ensdf/SDS2XDX;IZZDLjava/lang/String;)Ljava/util/Vector;
+      11: areturn
+
+  public static java.util.Vector<java.lang.String> findDeltaJPSForLogft(ensdfparser.ensdf.SDS2XDX, int, boolean, boolean, double, java.lang.String);
+    Code:
+       0: new           #67                 // class java/util/Vector
+       3: dup
+       4: invokespecial #69                 // Method java/util/Vector."<init>":()V
+       7: astore        7
+       9: aload_0
+      10: invokevirtual #70                 // Method ensdfparser/ensdf/SDS2XDX.x:()D
+      13: dstore        8
+      15: aload_0
+      16: invokevirtual #76                 // Method ensdfparser/ensdf/SDS2XDX.dx:()D
+      19: dstore        10
+      21: aload_0
+      22: invokevirtual #79                 // Method ensdfparser/ensdf/SDS2XDX.s:()Ljava/lang/String;
+      25: astore        12
+      27: aload_0
+      28: invokevirtual #83                 // Method ensdfparser/ensdf/SDS2XDX.ds:()Ljava/lang/String;
+      31: astore        13
+      33: dload         8
+      35: dconst_0
+      36: dcmpg
+      37: ifgt          43
+      40: aload         7
+      42: areturn
+      43: iload_1
+      44: invokestatic  #86                 // Method limitOfAllowed:(I)D
+      47: dstore        14
+      49: iconst_0
+      50: istore        16
+      52: aload_0
+      53: invokevirtual #88                 // Method ensdfparser/ensdf/SDS2XDX.dxu:()D
+      56: dconst_0
+      57: dcmpl
+      58: ifle          73
+      61: aload_0
+      62: invokevirtual #88                 // Method ensdfparser/ensdf/SDS2XDX.dxu:()D
+      65: dstore        10
+      67: iconst_1
+      68: istore        16
+      70: goto          187
+      73: dload         10
+      75: dconst_0
+      76: dcmpg
+      77: ifge          187
+      80: invokestatic  #91                 // Method ensdfparser/calc/UncertaintyParser.defaultUncParser:()Lensdfparser/calc/UncertaintyParser$UncParser;
+      83: aload         12
+      85: aload         13
+      87: invokeinterface #97,  3           // InterfaceMethod ensdfparser/calc/UncertaintyParser$UncParser.get:(Ljava/lang/String;Ljava/lang/String;)Lensdfparser/calc/XDX;
+      92: astore        17
+      94: aload         17
+      96: invokevirtual #103                // Method ensdfparser/calc/XDX.x:()D
+      99: dstore        8
+     101: aload         17
+     103: invokevirtual #106                // Method ensdfparser/calc/XDX.dxu:()D
+     106: dstore        10
+     108: aload         13
+     110: invokevirtual #107                // Method java/lang/String.isEmpty:()Z
+     113: ifne          126
+     116: aload         13
+     118: ldc           #113                // String L
+     120: invokevirtual #115                // Method java/lang/String.startsWith:(Ljava/lang/String;)Z
+     123: ifeq          187
+     126: aload_0
+     127: invokevirtual #70                 // Method ensdfparser/ensdf/SDS2XDX.x:()D
+     130: dload         14
+     132: dload         4
+     134: dsub
+     135: dcmpg
+     136: ifge          174
+     139: dload         8
+     141: dload         14
+     143: dload         4
+     145: dsub
+     146: dcmpg
+     147: ifge          174
+     150: dload         8
+     152: dload         10
+     154: dadd
+     155: dload         14
+     157: dcmpl
+     158: iflt          174
+     161: aload_0
+     162: invokevirtual #70                 // Method ensdfparser/ensdf/SDS2XDX.x:()D
+     165: dstore        8
+     167: ldc2_w        #119                // double 0.01d
+     170: dstore        10
+     172: iconst_1
+     173: istore_2
+     174: aload         13
+     176: ldc           #113                // String L
+     178: invokevirtual #115                // Method java/lang/String.startsWith:(Ljava/lang/String;)Z
+     181: ifeq          187
+     184: iconst_1
+     185: istore        16
+     187: dload         10
+     189: dconst_0
+     190: dcmpl
+     191: ifle          229
+     194: iload_3
+     195: ifne          207
+     198: iload         16
+     200: ifeq          207
+     203: iconst_0
+     204: goto          208
+     207: iconst_1
+     208: istore_3
+     209: dload         8
+     211: dload         10
+     213: dadd
+     214: iload_1
+     215: iload_2
+     216: iload_3
+     217: dload         4
+     219: aload         6
+     221: invokestatic  #121                // Method findDeltaJPSForLogft:(DIZZDLjava/lang/String;)Ljava/util/Vector;
+     224: astore        7
+     226: goto          266
+     229: aload         7
+     231: ldc           #124                // String (0)
+     233: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     236: pop
+     237: aload         7
+     239: ldc           #130                // String (1)
+     241: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     244: pop
+     245: aload         7
+     247: ldc           #132                // String (2)
+     249: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     252: pop
+     253: aload         7
+     255: ldc           #134                // String (3+)
+     257: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     260: pop
+     261: goto          266
+     264: astore        8
+     266: aload         7
+     268: areturn
+    Exception table:
+       from    to  target type
+           9    42   264   Class java/lang/Exception
+          43   261   264   Class java/lang/Exception
+
+  public static java.util.Vector<java.lang.String> findDeltaJPSForLogft(double, int, boolean, boolean);
+    Code:
+       0: dload_0
+       1: iload_2
+       2: iload_3
+       3: iload         4
+       5: invokestatic  #150                // Method findDeltaJPSForLogft:(DIZZ)Ljava/util/Vector;
+       8: areturn
+
+  public static java.util.Vector<java.lang.String> findDeltaJPSForLogft(double, int, boolean, boolean, double);
+    Code:
+       0: dload_0
+       1: iload_2
+       2: iload_3
+       3: iload         4
+       5: dload         5
+       7: ldc           #61                 // String
+       9: invokestatic  #121                // Method findDeltaJPSForLogft:(DIZZDLjava/lang/String;)Ljava/util/Vector;
+      12: areturn
+
+  public static java.util.Vector<java.lang.String> findDeltaJPSForLogft(double, int, boolean, boolean, double, java.lang.String);
+    Code:
+       0: new           #67                 // class java/util/Vector
+       3: dup
+       4: invokespecial #69                 // Method java/util/Vector."<init>":()V
+       7: astore        8
+       9: dload_0
+      10: dconst_0
+      11: dcmpg
+      12: ifgt          18
+      15: aload         8
+      17: areturn
+      18: dload_0
+      19: dstore        9
+      21: iload_2
+      22: invokestatic  #86                 // Method limitOfAllowed:(I)D
+      25: dstore        11
+      27: dload         9
+      29: dload         11
+      31: dload         5
+      33: dsub
+      34: dcmpg
+      35: ifgt          112
+      38: iload         4
+      40: ifeq          70
+      43: aload         8
+      45: ldc           #124                // String (0)
+      47: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+      50: pop
+      51: aload         8
+      53: ldc           #130                // String (1)
+      55: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+      58: pop
+      59: aload         8
+      61: ldc           #132                // String (2)
+      63: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+      66: pop
+      67: goto          769
+      70: iload_3
+      71: ifeq          93
+      74: aload         8
+      76: ldc           #155                // String 0(+)
+      78: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+      81: pop
+      82: aload         8
+      84: ldc           #157                // String 1(+)
+      86: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+      89: pop
+      90: goto          769
+      93: aload         8
+      95: ldc           #159                // String 0+
+      97: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     100: pop
+     101: aload         8
+     103: ldc           #161                // String 1+
+     105: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     108: pop
+     109: goto          769
+     112: dload         9
+     114: dload         11
+     116: dcmpg
+     117: ifgt          194
+     120: iload         4
+     122: ifeq          152
+     125: aload         8
+     127: ldc           #124                // String (0)
+     129: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     132: pop
+     133: aload         8
+     135: ldc           #130                // String (1)
+     137: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     140: pop
+     141: aload         8
+     143: ldc           #132                // String (2)
+     145: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     148: pop
+     149: goto          769
+     152: iload_3
+     153: ifeq          175
+     156: aload         8
+     158: ldc           #163                // String (0+)
+     160: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     163: pop
+     164: aload         8
+     166: ldc           #165                // String (1+)
+     168: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     171: pop
+     172: goto          769
+     175: aload         8
+     177: ldc           #155                // String 0(+)
+     179: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     182: pop
+     183: aload         8
+     185: ldc           #157                // String 1(+)
+     187: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     190: pop
+     191: goto          769
+     194: dload         9
+     196: ldc2_w        #11                 // double 7.4d
+     199: dload         5
+     201: dsub
+     202: dcmpg
+     203: ifgt          280
+     206: iload         4
+     208: ifeq          238
+     211: aload         8
+     213: ldc           #124                // String (0)
+     215: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     218: pop
+     219: aload         8
+     221: ldc           #130                // String (1)
+     223: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     226: pop
+     227: aload         8
+     229: ldc           #132                // String (2)
+     231: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     234: pop
+     235: goto          769
+     238: iload_3
+     239: ifeq          261
+     242: aload         8
+     244: ldc           #124                // String (0)
+     246: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     249: pop
+     250: aload         8
+     252: ldc           #130                // String (1)
+     254: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     257: pop
+     258: goto          769
+     261: aload         8
+     263: ldc           #167                // String 0
+     265: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     268: pop
+     269: aload         8
+     271: ldc           #169                // String 1
+     273: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     276: pop
+     277: goto          769
+     280: dload         9
+     282: ldc2_w        #11                 // double 7.4d
+     285: dcmpg
+     286: ifgt          379
+     289: iload         4
+     291: ifeq          329
+     294: aload         8
+     296: ldc           #124                // String (0)
+     298: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     301: pop
+     302: aload         8
+     304: ldc           #130                // String (1)
+     306: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     309: pop
+     310: aload         8
+     312: ldc           #132                // String (2)
+     314: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     317: pop
+     318: aload         8
+     320: ldc           #171                // String (3)
+     322: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     325: pop
+     326: goto          769
+     329: iload_3
+     330: ifeq          360
+     333: aload         8
+     335: ldc           #167                // String 0
+     337: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     340: pop
+     341: aload         8
+     343: ldc           #169                // String 1
+     345: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     348: pop
+     349: aload         8
+     351: ldc           #173                // String 2-
+     353: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     356: pop
+     357: goto          769
+     360: aload         8
+     362: ldc           #124                // String (0)
+     364: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     367: pop
+     368: aload         8
+     370: ldc           #130                // String (1)
+     372: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     375: pop
+     376: goto          769
+     379: dload         9
+     381: ldc2_w        #14                 // double 11.0d
+     384: dload         5
+     386: dsub
+     387: dcmpg
+     388: ifge          458
+     391: iload         4
+     393: ifeq          431
+     396: aload         8
+     398: ldc           #124                // String (0)
+     400: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     403: pop
+     404: aload         8
+     406: ldc           #130                // String (1)
+     408: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     411: pop
+     412: aload         8
+     414: ldc           #132                // String (2)
+     416: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     419: pop
+     420: aload         8
+     422: ldc           #171                // String (3)
+     424: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     427: pop
+     428: goto          769
+     431: aload         8
+     433: ldc           #167                // String 0
+     435: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     438: pop
+     439: aload         8
+     441: ldc           #169                // String 1
+     443: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     446: pop
+     447: aload         8
+     449: ldc           #173                // String 2-
+     451: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     454: pop
+     455: goto          769
+     458: dload         9
+     460: ldc2_w        #14                 // double 11.0d
+     463: dcmpg
+     464: ifge          534
+     467: iload         4
+     469: ifeq          507
+     472: aload         8
+     474: ldc           #124                // String (0)
+     476: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     479: pop
+     480: aload         8
+     482: ldc           #130                // String (1)
+     484: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     487: pop
+     488: aload         8
+     490: ldc           #132                // String (2)
+     492: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     495: pop
+     496: aload         8
+     498: ldc           #171                // String (3)
+     500: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     503: pop
+     504: goto          769
+     507: aload         8
+     509: ldc           #124                // String (0)
+     511: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     514: pop
+     515: aload         8
+     517: ldc           #130                // String (1)
+     519: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     522: pop
+     523: aload         8
+     525: ldc           #175                // String (2-)
+     527: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     530: pop
+     531: goto          769
+     534: dload         9
+     536: ldc2_w        #17                 // double 13.8d
+     539: dload         5
+     541: dsub
+     542: dcmpg
+     543: ifge          613
+     546: iload         4
+     548: ifeq          586
+     551: aload         8
+     553: ldc           #124                // String (0)
+     555: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     558: pop
+     559: aload         8
+     561: ldc           #130                // String (1)
+     563: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     566: pop
+     567: aload         8
+     569: ldc           #132                // String (2)
+     571: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     574: pop
+     575: aload         8
+     577: ldc           #171                // String (3)
+     579: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     582: pop
+     583: goto          769
+     586: aload         8
+     588: ldc           #167                // String 0
+     590: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     593: pop
+     594: aload         8
+     596: ldc           #169                // String 1
+     598: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     601: pop
+     602: aload         8
+     604: ldc           #177                // String 2
+     606: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     609: pop
+     610: goto          769
+     613: dload         9
+     615: ldc2_w        #17                 // double 13.8d
+     618: dcmpg
+     619: ifge          689
+     622: iload         4
+     624: ifeq          662
+     627: aload         8
+     629: ldc           #124                // String (0)
+     631: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     634: pop
+     635: aload         8
+     637: ldc           #130                // String (1)
+     639: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     642: pop
+     643: aload         8
+     645: ldc           #132                // String (2)
+     647: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     650: pop
+     651: aload         8
+     653: ldc           #171                // String (3)
+     655: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     658: pop
+     659: goto          769
+     662: aload         8
+     664: ldc           #124                // String (0)
+     666: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     669: pop
+     670: aload         8
+     672: ldc           #130                // String (1)
+     674: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     677: pop
+     678: aload         8
+     680: ldc           #132                // String (2)
+     682: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     685: pop
+     686: goto          769
+     689: iload         4
+     691: ifeq          737
+     694: aload         8
+     696: ldc           #124                // String (0)
+     698: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     701: pop
+     702: aload         8
+     704: ldc           #130                // String (1)
+     706: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     709: pop
+     710: aload         8
+     712: ldc           #132                // String (2)
+     714: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     717: pop
+     718: aload         8
+     720: ldc           #171                // String (3)
+     722: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     725: pop
+     726: aload         8
+     728: ldc           #179                // String (4)
+     730: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     733: pop
+     734: goto          769
+     737: aload         8
+     739: ldc           #124                // String (0)
+     741: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     744: pop
+     745: aload         8
+     747: ldc           #130                // String (1)
+     749: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     752: pop
+     753: aload         8
+     755: ldc           #132                // String (2)
+     757: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     760: pop
+     761: aload         8
+     763: ldc           #134                // String (3+)
+     765: invokevirtual #126                // Method java/util/Vector.add:(Ljava/lang/Object;)Z
+     768: pop
+     769: aload         7
+     771: invokevirtual #181                // Method java/lang/String.trim:()Ljava/lang/String;
+     774: astore        13
+     776: aload         13
+     778: invokestatic  #184                // Method ensdfparser/nds/util/Str.removeAllBrackets:(Ljava/lang/String;)Ljava/lang/String;
+     781: astore        13
+     783: aload         13
+     785: ldc           #159                // String 0+
+     787: invokevirtual #190                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+     790: ifeq          869
+     793: dload         9
+     795: ldc2_w        #26                 // double 6.4d
+     798: dcmpg
+     799: ifge          869
+     802: dload         9
+     804: ldc2_w        #193                // double 3.6d
+     807: dcmpl
+     808: ifle          869
+     811: aload         8
+     813: invokevirtual #195                // Method java/util/Vector.iterator:()Ljava/util/Iterator;
+     816: astore        15
+     818: goto          854
+     821: aload         15
+     823: invokeinterface #199,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+     828: checkcast     #108                // class java/lang/String
+     831: astore        14
+     833: aload         14
+     835: ldc           #159                // String 0+
+     837: invokevirtual #205                // Method java/lang/String.contains:(Ljava/lang/CharSequence;)Z
+     840: ifeq          854
+     843: aload         8
+     845: aload         14
+     847: invokevirtual #209                // Method java/util/Vector.remove:(Ljava/lang/Object;)Z
+     850: pop
+     851: goto          869
+     854: aload         15
+     856: invokeinterface #212,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+     861: ifne          821
+     864: goto          869
+     867: astore        9
+     869: aload         8
+     871: areturn
+    Exception table:
+       from    to  target type
+           9    17   867   Class java/lang/Exception
+          18   864   867   Class java/lang/Exception
+}

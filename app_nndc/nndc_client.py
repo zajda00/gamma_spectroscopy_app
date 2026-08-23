@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """NNDC API client for fetching nuclear data.
 
 Queries NNDC (National Nuclear Data Center) REST APIs to retrieve:
@@ -30,6 +31,231 @@ class FetchError(Exception):
     pass
 
 
+def first_not_none(*values):
+    """Return the first value that is not None."""
+    for value in values:
+        if value is not None:
+            return value
+    return None
+
+
+def parse_nds_value_with_uncertainty(raw_value: str) -> tuple[float | None, float | None]:
+    """Parse NDS-style value strings like '4.77×10^3 + 4' or '100.42 + 11'.
+
+    Returns (value_keV, uncertainty_keV) for the numeric portion.
+    """
+    text = (raw_value or '').strip()
+    if not text:
+        return None, None
+
+    text = text.replace('×', 'x').replace('−', '-')
+    text = re.sub(r'\s+', ' ', text)
+
+    sci_match = re.search(
+        r'(?P<mant>\d+(?:\.\d+)?)\s*x\s*10\s*(?:\^)?\s*(?P<exp>[+-]?\d+)',
+        text,
+        flags=re.I,
+    )
+    if sci_match:
+        mantissa = float(sci_match.group('mant'))
+        exponent = int(sci_match.group('exp'))
+        value = mantissa * (10 ** exponent)
+        mantissa_decimals = len(sci_match.group('mant').split('.')[-1]) if '.' in sci_match.group('mant') else 0
+        tail = text[sci_match.end():]
+        unc_match = re.search(r'(?P<unc>\d+)', tail)
+        if unc_match:
+            unc_digits = int(unc_match.group('unc'))
+            unc = unc_digits * (10 ** (exponent - mantissa_decimals))
+            return value, unc
+        return value, None
+
+    value_match = re.search(r'(?P<val>\d+(?:\.\d+)?)', text)
+    if not value_match:
+        return None, None
+
+    value_text = value_match.group('val')
+    value = float(value_text)
+    decimal_places = len(value_text.split('.')[-1]) if '.' in value_text else 0
+    tail = text[value_match.end():]
+
+    unc_match = re.search(r'(?:[±+]\s*|\s+)(?P<unc>\d+(?:\.\d+)?)', tail, flags=re.I)
+    if unc_match is None:
+        unc_match = re.search(r'(?P<unc>\d+(?:\.\d+)?)\s*(?:$|[A-Za-z%µ])', tail, flags=re.I)
+    if unc_match:
+        unc = float(unc_match.group('unc')) * (10 ** (-decimal_places))
+        return value, unc
+    return value, None
+
+
+def _normalize_display_number(value: float | None, digits: int = 3) -> str:
+    """Return a compact display string for numeric values without losing precision."""
+    if value is None:
+        return ''
+    if isinstance(value, int):
+        return str(value)
+    if abs(value) >= 1000 or (abs(value) >= 1 and value % 1 == 0):
+        return f"{value:.3g}"
+    return f"{value:.12g}".rstrip('0').rstrip('.') if '.' in f"{value:.12g}" else f"{value:.12g}"
+
+
+def _parse_energy_field(raw_text: str) -> tuple[float | None, float | None, str, str]:
+    """Parse energy text from NNDC adopted levels.
+
+    Returns (energy_keV, energy_uncertainty_keV, energy_display, energy_uncertainty_display).
+    """
+    text = (raw_text or '').strip()
+    if not text:
+        return None, None, '', ''
+
+    clean = html.unescape(text).replace('&nbsp;', ' ')
+    clean = re.sub(r'<[^>]+>', ' ', clean)
+    clean = re.sub(r'\s+', ' ', clean).strip()
+
+    if re.fullmatch(r'\d+(?:\.\d+)?\s*\+\s*[A-Za-z]+', clean, flags=re.I):
+        return None, None, clean, ''
+
+    if re.fullmatch(r'\d+(?:\.\d+)?\s*\+\s*X', clean, flags=re.I):
+        return None, None, clean, ''
+
+    pair_match = re.search(r'^(?P<base>\d+(?:\.\d+)?)\s+(?P<unc>\d+(?:\.\d+)?)\s*$', clean)
+    if pair_match:
+        raw_value = float(pair_match.group('base'))
+        raw_unc = float(pair_match.group('unc'))
+        return raw_value, raw_unc, pair_match.group('base'), pair_match.group('unc')
+
+    value_match = re.search(r'(?P<base>\d+(?:\.\d+)?)', clean)
+    if not value_match:
+        return None, None, clean, ''
+
+    raw_value = float(value_match.group('base'))
+    if re.search(r'\+\s*[A-Za-z]', clean, flags=re.I):
+        return None, None, clean, ''
+
+    if re.search(r'\(|±|\+/-', clean):
+        parsed_value, parsed_unc = parse_nds_value_with_uncertainty(clean)
+        if parsed_value is not None:
+            return parsed_value, parsed_unc, _normalize_display_number(parsed_value), _normalize_display_number(parsed_unc)
+
+    return raw_value, None, str(raw_value), ''
+
+def _parse_half_life_field(
+    raw_text: str,
+) -> tuple[str, float | None, float | None, str, str]:
+    """
+    Parse NuDat / NDS half-life strings.
+
+    Examples:
+    - "0.529 s 13"   -> "0.529 s", 0.529 s, 0.013 s, "0.013 s"
+    - "0.55 s 5"     -> "0.55 s", 0.55 s, 0.05 s, "0.05 s"
+    - "37.230 m 14"  -> "37.230 m", 2233.8 s, 0.84 s, "0.014 m"
+    - "715 ms 3"     -> "715 ms", 0.715 s, 0.003 s, "3 ms"
+
+    Returns:
+        (
+            half_life_display,
+            half_life_seconds,
+            half_life_uncertainty_seconds,
+            half_life_uncertainty_display,
+            raw_half_life_value_display,
+        )
+    """
+    text = (raw_text or "").strip()
+
+    if not text:
+        return "", None, None, "", ""
+
+    clean = html.unescape(text).replace("&nbsp;", " ")
+    clean = re.sub(r"<[^>]+>", " ", clean)
+    clean = re.sub(r"\s+", " ", clean).strip()
+
+    # Longer units must occur before "m".
+    # Otherwise "ms" could be incorrectly read as "m".
+    match = re.search(
+        r"(?P<value>\d+(?:\.\d+)?)\s*"
+        r"(?P<unit>min|ms|µs|μs|us|ns|ps|yr|y|h|d|m|s)?"
+        r"(?:"
+        r"\s*\(\s*(?P<unc_paren>\d+(?:\.\d+)?)\s*\)"
+        r"|\s+(?P<unc_plain>\d+(?:\.\d+)?)"
+        r")?",
+        clean,
+        flags=re.I,
+    )
+
+    if not match:
+        return clean, None, None, "", clean
+
+    value_text = match.group("value")
+    value = float(value_text)
+
+    # Keep the original unit for GUI display.
+    unit_display = match.group("unit") or "s"
+
+    # Normalize only for conversion to seconds.
+    unit_key = unit_display.lower().replace("μ", "µ")
+
+    unit_map = {
+        "ps": 1e-12,
+        "ns": 1e-9,
+        "us": 1e-6,
+        "µs": 1e-6,
+        "ms": 1e-3,
+        "s": 1.0,
+        "m": 60.0,
+        "min": 60.0,
+        "h": 3600.0,
+        "d": 86400.0,
+        "y": 31557600.0,
+        "yr": 31557600.0,
+    }
+
+    factor = unit_map.get(unit_key, 1.0)
+    value_seconds = value * factor
+
+    uncertainty_text = (
+        match.group("unc_paren")
+        or match.group("unc_plain")
+    )
+
+    uncertainty_input_unit = None
+    uncertainty_seconds = None
+
+    if uncertainty_text is not None:
+        decimal_places = (
+            len(value_text.split(".")[1])
+            if "." in value_text
+            else 0
+        )
+
+        # NDS integer uncertainty digits, e.g.:
+        # 37.230 m 14 -> 0.014 m
+        # 715 ms 3    -> 3 ms
+        if "." in uncertainty_text:
+            uncertainty_input_unit = float(uncertainty_text)
+        else:
+            uncertainty_input_unit = (
+                float(uncertainty_text)
+                * (10 ** (-decimal_places))
+            )
+
+        uncertainty_seconds = uncertainty_input_unit * factor
+
+    display_value = f"{value_text} {unit_display}"
+
+    display_uncertainty = ""
+    if uncertainty_input_unit is not None:
+        display_uncertainty = (
+            f"{uncertainty_input_unit:.12g} {unit_display}"
+        )
+
+    return (
+        display_value,
+        value_seconds,
+        uncertainty_seconds,
+        display_uncertainty,
+        clean,
+    )
+
+
 @dataclass
 class NNDCData:
     """Container for NNDC nuclear data."""
@@ -37,7 +263,7 @@ class NNDCData:
     q_beta_keV: Optional[float] = None
     dq_beta_keV: Optional[float] = None
     q_beta_str: Optional[str] = None
-    
+
     # Mother/Parent nucleus data
     mother_half_life_str: Optional[str] = None
     mother_spin_parity_str: Optional[str] = None
@@ -46,17 +272,16 @@ class NNDCData:
     mother_sn_str: Optional[str] = None
     mother_pn_keV: Optional[float] = None
     mother_pn_str: Optional[str] = None
-    mother_states: list[dict[str, str]] = field(default_factory=list)
-    
+    mother_states: list[dict[str, Any]] = field(default_factory=list)
+
     # Separation energies
     sn_keV: Optional[float] = None
     sn_str: Optional[str] = None
+    dsn_keV: Optional[float] = None
     sp_keV: Optional[float] = None
     sp_str: Optional[str] = None
-    # Separation energy uncertainties (keV)
-    sn_uncertainty_keV: Optional[float] = None
-    sp_uncertainty_keV: Optional[float] = None
-    
+    dsp_keV: Optional[float] = None
+
     # Metadata
     source: str = ''
     fetch_timestamp: Optional[datetime] = None
@@ -65,48 +290,48 @@ class NNDCData:
 
 class NNDCClient:
     """Client for querying NNDC databases.
-    
+
     Provides methods to fetch Q-values, nuclear properties, and separation energies.
     Implements caching to reduce API load.
     """
-    
+
     # NNDC REST API endpoints
     NNDC_API_BASE = "https://www.nndc.bnl.gov/nudat3/api/"
     DATASET_PAGE_BASE = "https://www.nndc.bnl.gov/nudat3/getdataset.jsp"
-    
+
     # Cache settings (in memory)
     CACHE_DURATION = timedelta(hours=24)
-    
+
     def __init__(self, use_cache: bool = True):
         """Initialize NNDC client.
-        
+
         Args:
             use_cache: Enable in-memory caching of results
         """
         self.use_cache = use_cache
         self._cache: Dict[str, tuple[NNDCData, datetime]] = {}
-    
+
     def _cache_key(self, parent: str, daughter: str, decay_mode: str) -> str:
         """Generate cache key for a query."""
         return f"{parent}→{daughter}:{decay_mode}".lower()
-    
+
     def _get_cached(self, key: str) -> Optional[NNDCData]:
         """Retrieve cached data if available and not expired."""
         if not self.use_cache or key not in self._cache:
             return None
-        
+
         data, timestamp = self._cache[key]
         if datetime.now() - timestamp > self.CACHE_DURATION:
             del self._cache[key]
             return None
-        
+
         return data
-    
+
     def _set_cached(self, key: str, data: NNDCData) -> None:
         """Store data in cache."""
         if self.use_cache:
             self._cache[key] = (data, datetime.now())
-    
+
     def _query_nudat3_dataset(self, nucleus: str) -> Optional[str]:
         """Fetch the plain HTML dataset page used by NNDC for adopted levels.
 
@@ -134,30 +359,19 @@ class NNDCClient:
             raise FetchError(f"Network error: {e.reason}")
         except Exception as e:
             raise FetchError(f"Dataset fetch error: {str(e)}")
-    
+
     def _parse_dataset_html(self, html_text: str, result: NNDCData) -> NNDCData:
-        """Scrape mother Q-value, Sn, Pn, T1/2, spin/parity and excited-level table from NNDC dataset HTML.
-
-        This parser focuses on the dataset page table rows (<tr> tags). It only treats
-        an excited level as an isomeric state if the row lists a decay channel (e.g. 'β-').
-        It extracts energy (keV) with uncertainty, and half-life with uncertainty and
-        converts units (half-life -> seconds) so the UI can display consistent units.
-        """
+        """Parse ADOPTED LEVELS table rows from the NuDat HTML dataset page."""
         try:
-            # Keep original HTML for table-row-level parsing
             html_src = html_text
-
-            # Prepare a plain-text copy for scalar matches (Q, Sn, Sp) as fallback
             text = re.sub(r'<script.*?</script>', ' ', html_src, flags=re.S | re.I)
             text = re.sub(r'<style.*?</style>', ' ', text, flags=re.S | re.I)
             text = re.sub(r'<[^>]+>', ' ', text)
             text = html.unescape(text)
             text = re.sub(r'\s+', ' ', text)
 
-            # Helper: parse numeric value with uncertainty in parentheses or ± form
             def parse_value_with_unc(s: str):
                 s = s.strip()
-                # scientific notation like 1.23×10^3 or 1.23 x 10^3
                 sci = re.search(r'([0-9]+(?:\.[0-9]+)?)\s*(?:×|x)\s*10\s*\^\s*([+-]?\d+)', s)
                 par = re.search(r'([0-9]+(?:\.[0-9]+)?)\s*\(\s*(\d+)\s*\)', s)
                 plusminus = re.search(r'([0-9]+(?:\.[0-9]+)?)\s*(?:±|\+/-)\s*([0-9]+(?:\.[0-9]+)?)', s)
@@ -183,7 +397,6 @@ class NNDCClient:
                     return float(basic.group(1)), None
                 return None, None
 
-            # Q-value (beta) extraction (fallback) — preserve original NNDC handling for parenthesis uncertainty
             q_match = re.search(r'Q\s*\(β-\)\s*=\s*([0-9.]+)\s*(?:×\s*10\s*\^?\s*([0-9]+))?\s*keV(?:\s*(\d+))?', text, flags=re.I)
             if q_match:
                 base = float(q_match.group(1))
@@ -194,203 +407,195 @@ class NNDCClient:
                 result.mother_q_str = f"{q_val:.0f} keV"
                 unc_digit = q_match.group(3)
                 if unc_digit:
-                    # Uncertainty given as last digits in parentheses — scale according to exponent
                     dq_val = float(unc_digit) * (10 ** (exp - 2))
                     result.dq_beta_keV = dq_val
                     result.q_beta_str = f"{q_val:.0f}({dq_val:.0f}) keV"
                     result.mother_q_str = result.q_beta_str
 
-            # Separation energies (Sn, Sp) with uncertainties if present
-            sn_match = re.search(r'S\s*\(\s*n\s*\)\s*=\s*([0-9.\(\)×x\^±+\-\s]+)\s*keV', text, flags=re.I)
-            if sn_match:
-                val_str = sn_match.group(1)
-                base, unc = parse_value_with_unc(val_str)
-                if base is not None:
-                    result.sn_keV = base
-                    result.sn_str = f"{base:.2f} keV"
-                    result.mother_sn_keV = base
-                    result.mother_sn_str = result.sn_str
-                    if unc is not None:
-                        # treat uncertainty units same as base (keV)
-                        result.sn_uncertainty_keV = unc
-                        result.mother_sn_str = f"{base:.2f}({unc:.2f}) keV"
+            def _extract_separation_value(label: str) -> tuple[float | None, float | None]:
+                pattern = rf'S\s*\(\s*{label}\s*\)\s*=\s*(.*?)(?=\s*S\s*\(\s*(?:n|p)\s*\)|\s*Q\s*\(|\s*$)'
+                match = re.search(pattern, text, flags=re.I | re.S)
+                if not match:
+                    return None, None
+                return parse_nds_value_with_uncertainty(match.group(1))
 
-            sp_match = re.search(r'S\s*\(\s*p\s*\)\s*=\s*([0-9.\(\)×x\^±+\-\s]+)\s*keV', text, flags=re.I)
-            if sp_match:
-                val_str = sp_match.group(1)
-                base, unc = parse_value_with_unc(val_str)
-                if base is not None:
-                    result.sp_keV = base
-                    result.sp_str = f"{base:.2f} keV"
+            sn_value, sn_unc = _extract_separation_value('n')
+            if sn_value is not None:
+                result.sn_keV = sn_value
+                result.sn_str = f"{sn_value:.2f} keV"
+                result.mother_sn_keV = sn_value
+                result.mother_sn_str = result.sn_str
+                if sn_unc is not None:
+                    result.dsn_keV = sn_unc
+                    result.mother_sn_str = f"{sn_value:.2f}({sn_unc:.2f}) keV"
 
-            # Now parse table rows from the HTML. We look for <tr>..</tr> blocks and inspect each row's text.
-            rows = re.findall(r'<tr[^>]*>(.*?)</tr>', html_src, flags=re.S | re.I)
-            state_entries: list[dict[str, str]] = []
-            for row_html in rows:
-                # Extract TD cells and their classes
-                td_matches = re.findall(r'<td[^>]*class=[\'\"]?([^\'\">]+)[\'\"]?[^>]*>(.*?)</td>', row_html, flags=re.S | re.I)
-                if not td_matches:
-                    continue
-                # Normalize cells as list of (class, text)
-                norm = []
-                for cls, td in td_matches:
-                    txt = re.sub(r'<[^>]+>', ' ', html.unescape(td)).strip()
-                    txt = re.sub(r'\s+', ' ', txt)
-                    norm.append((cls.lower(), txt))
+            sp_value, sp_unc = _extract_separation_value('p')
+            if sp_value is not None:
+                result.sp_keV = sp_value
+                result.sp_str = f"{sp_value:.2f} keV"
+                if sp_unc is not None:
+                    result.dsp_keV = sp_unc
 
-                # Walk through sequence looking for repeating groups (elvl -> jpi -> t12)
-                i = 0
-                while i < len(norm):
-                    cls, txt = norm[i]
-                    if 'elvl' in cls:
-                        # energy cell
-                        energy_txt = txt
-                        # find next jpi and next t12 cells within next 6 cells
-                        jpi_txt = ''
-                        t12_txt = ''
-                        for k in range(i+1, min(i+7, len(norm))):
-                            c_k, t_k = norm[k]
-                            if 'jpi' in c_k and not jpi_txt:
-                                jpi_txt = t_k
-                            if 't12' in c_k and not t12_txt:
-                                t12_txt = t_k
-                            if jpi_txt and t12_txt:
-                                break
+            def clean_cell_value(raw_html: str) -> str:
+                cleaned = re.sub(r'onmouseover=".*?"', ' ', raw_html, flags=re.S | re.I)
+                cleaned = re.sub(r'onmouseout=".*?"', ' ', cleaned, flags=re.S | re.I)
+                cleaned = re.sub(r'<[^>]+>', ' ', html.unescape(cleaned))
+                cleaned = cleaned.replace('&nbsp;', ' ')
+                cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+                return cleaned
 
-                        # parse energy (handle '80  50' meaning 80(50) and prefer explicit pair)
-                        e_val = None; e_unc = None
-                        # explicit two-number uncertainty '80  50' (base then uncertainty)
-                        m_pair = re.search(r'([0-9]+(?:\.[0-9]+)?)\s+([0-9]+(?:\.[0-9]+)?)', energy_txt)
-                        if m_pair:
-                            try:
-                                e_val = float(m_pair.group(1))
-                                e_unc = float(m_pair.group(2))
-                            except Exception:
-                                e_val = None
-                        # prefer numeric at end of the energy text if pair not found
-                        if e_val is None:
-                            end_match = re.search(r'([0-9]+(?:\.[0-9]+)?)(?:\s*\(\s*\d+\s*\))?\s*$', energy_txt)
-                            if end_match:
-                                try:
-                                    e_val, e_unc = parse_value_with_unc(end_match.group(0))
-                                except Exception:
-                                    e_val = None
-                        if e_val is None:
-                            m = re.search(r'([0-9]+(?:\.[0-9]+)?(?:\s*\(\s*\d+\s*\))?)', energy_txt)
-                            if m:
-                                try:
-                                    e_val, e_unc = parse_value_with_unc(m.group(1))
-                                except Exception:
-                                    e_val = None
+            adopted_tables = []
+            for table_match in re.finditer(r'<table\b[^>]*>(.*?)</table>', html_src, flags=re.S | re.I):
+                table_html = table_match.group(1)
+                if 'cell elvl' in table_html and 'cellc jpi' in table_html and 'cellc t12' in table_html:
+                    adopted_tables.append(table_html)
 
-                        # combined text to detect decay channel
-                        combined = ' '.join([energy_txt, jpi_txt, t12_txt]).lower()
-                        decay_present = re.search(r'\b(β|beta|it|α|alpha|ec|electron capture|p\-|n\-|beta-delayed|proton|neutron)\b', combined, flags=re.I)
-                        if not decay_present:
-                            i += 1
-                            continue
+            decay_branch_pattern = re.compile(
+                r'(%\s*(?:β|BETA|EC|ε|IT|α|ALPHA|SF)|'
+                r'\b(?:β[-+]?|EC|ε|IT|α|SF)\b)',
+                flags=re.I,
+            )
 
-                        # require either an energy (possibly zero) or a half-life to include
-                        if e_val is None and not t12_txt:
-                            i += 1
-                            continue
+            def is_ground_state(
+                energy_keV: float | None,
+                energy_display: str,
+            ) -> bool:
+                """
+                Stan podstawowy ma liczbową energię równą zero.
+                Wpisy typu 0.0+X nie są automatycznie stanem podstawowym.
+                """
+                if energy_keV is None:
+                    return False
 
-                        # parse half-life if present
-                        hl_val_s = None; hl_unc_s = None
-                        if t12_txt:
-                            hl_match = re.search(r'([0-9]+(?:\.[0-9]+)?(?:\s*\(\s*\d+\s*\))?)(?:\s*(ps|ns|us|µs|ms|s|min|h|d|y|yr))', t12_txt, flags=re.I)
-                            if hl_match:
-                                base_hl, unc_hl = parse_value_with_unc(hl_match.group(1))
-                                unit = hl_match.group(2).lower()
-                                unit_map = {'ps':1e-12,'ns':1e-9,'us':1e-6,'µs':1e-6,'ms':1e-3,'s':1.0,'min':60.0,'h':3600.0,'d':86400.0,'y':31557600.0,'yr':31557600.0}
-                                factor = unit_map.get(unit, 1.0)
-                                if base_hl is not None:
-                                    hl_val_s = base_hl * factor
-                                if unc_hl is not None:
-                                    hl_unc_s = unc_hl * factor
+                return (
+                    abs(energy_keV) < 1e-12
+                    and '+' not in (energy_display or '')
+                )
 
-                        # extract jpi symbol (prefer parenthesized form)
-                        jpi = ''
-                        jm_all = re.findall(r'\(\s*([0-9]+(?:/?[0-9]+)?\s*[+\-])\s*\)', jpi_txt)
-                        if jm_all:
-                            jpi = jm_all[-1].strip()
-                        else:
-                            jm = re.search(r'([0-9]+(?:/?[0-9]+)?\s*[+\-])', jpi_txt)
-                            if jm:
-                                jpi = jm.group(1).strip()
+            def has_explicit_decay_branch(t12_decay_raw: str) -> bool:
+                """
+                Zwraca True tylko dla rekordów zawierających jawny tryb
+                rozpadu, np. % beta-, IT, EC, alpha lub SF.
+                """
+                return bool(
+                    t12_decay_raw
+                    and decay_branch_pattern.search(t12_decay_raw)
+                )
 
-                        # Build entry
-                        entry: dict[str, str] = {}
-                        if jpi:
-                            entry['jpi'] = jpi
-                        entry['e_keV'] = f"{e_val:.3f}"
-                        if e_unc is not None:
-                            entry['de_keV'] = f"{e_unc:.3f}"
-                        if hl_val_s is not None:
-                            entry['t12'] = f"{hl_val_s:.6g} s"
-                        if hl_unc_s is not None:
-                            entry['dt12'] = f"{hl_unc_s:.6g} s"
-                        entry['source_row'] = ' | '.join([c + ':' + t for c,t in norm[max(0,i-1):min(len(norm), i+6)]])
+
+            state_entries: list[dict[str, Any]] = []
+            for table_html in adopted_tables:
+                for match in re.finditer(
+                    r'<td\b[^>]*class=[\'\"]?[^\'\"]*elvl[^\'\"]*[\'\"]?[^>]*>(.*?)</td>\s*'
+                    r'<td\b[^>]*class=[\'\"]?[^\'\"]*jpi[^\'\"]*[\'\"]?[^>]*>(.*?)</td>\s*'
+                    r'<td\b[^>]*class=[\'\"]?[^\'\"]*t12[^\'"]*[\'"]?[^>]*>(.*?)</td>',
+                    table_html,
+                    flags=re.S | re.I,
+                ):
+                    energy_html, jpi_html, t12_html = match.groups()
+                    energy_txt = clean_cell_value(energy_html)
+                    jpi_txt = clean_cell_value(jpi_html)
+                    t12_txt = clean_cell_value(t12_html)
+                    t12_decay_raw = t12_txt
+                    if not energy_txt or not jpi_txt or not t12_txt:
+                        continue
+
+                    energy_keV, energy_uncertainty_keV, energy_display, energy_uncertainty_display = _parse_energy_field(energy_txt)
+                    half_life_display, half_life_seconds, half_life_uncertainty_seconds, half_life_uncertainty_display, _ = _parse_half_life_field(t12_txt)
+                    jpi_raw = jpi_txt.strip()
+                    if not jpi_raw:
+                        continue
+
+                    entry: dict[str, Any] = {
+                        'jpi_raw': jpi_raw,
+                        'jpi': jpi_raw,
+                        'energy_display': energy_display,
+                        'energy_keV': energy_keV,
+                        'energy_uncertainty_keV': energy_uncertainty_keV,
+                        'half_life_display': half_life_display,
+                        'half_life_uncertainty_display': half_life_uncertainty_display,
+                        'e_keV': None if energy_keV is None else str(energy_keV),
+                        'de_keV': None if energy_uncertainty_keV is None else str(energy_uncertainty_keV),
+                        't12': half_life_display,
+                        'dt12': half_life_uncertainty_display,
+                        't12_decay_raw': t12_decay_raw,
+                        'has_decay_branch': has_explicit_decay_branch(t12_decay_raw),
+
+                    }
+                    if energy_display:
+                        entry['energy'] = energy_display
+                    if energy_uncertainty_display:
+                        entry['energy_uncertainty'] = energy_uncertainty_display
+                    if half_life_display:
+                        entry['half_life'] = half_life_display
+                    if half_life_uncertainty_display:
+                        entry['half_life_uncertainty'] = half_life_uncertainty_display
+                    if half_life_seconds is not None:
+                        entry['half_life_seconds'] = half_life_seconds
+                    if half_life_uncertainty_seconds is not None:
+                        entry['half_life_uncertainty_seconds'] = half_life_uncertainty_seconds
+                    if (is_ground_state(energy_keV, energy_display) or entry['has_decay_branch']):
                         state_entries.append(entry)
-                        i += 1
-                    else:
-                        i += 1
+
 
             if state_entries:
-                # Post-process: deduplicate by normalized Jπ (remove spaces), prefer entries
-                # that have energy and half-life information.
-                dedup: dict[str, dict] = {}
-                def score(ent: dict) -> int:
+                dedup: dict[str, dict[str, Any]] = {}
+
+                def score(ent: dict[str, Any]) -> int:
                     s = 0
-                    if ent.get('e_keV'): s += 2
-                    if ent.get('t12'): s += 1
+                    if ent.get('energy_keV') is not None:
+                        s += 2
+                    if ent.get('t12'):
+                        s += 1
                     return s
+
                 for ent in state_entries:
-                    jraw = ent.get('jpi','') or ''
-                    jnorm = re.sub(r"\s+", '', jraw)
+                    jraw = ent.get('jpi_raw', '') or ''
+                    jnorm = re.sub(r'\s+', '', jraw)
                     if not jnorm:
-                        # keep entries without jpi under special key (use numeric index)
                         jnorm = f'__nojp__{len(dedup)}'
                     if jnorm not in dedup or score(ent) > score(dedup[jnorm]):
                         dedup[jnorm] = ent
+
                 result.mother_states = list(dedup.values())
-                if len(state_entries) == 1:
+                if len(result.mother_states) == 1:
                     result.mother_half_life_str = result.mother_states[0].get('t12', result.mother_half_life_str)
                     result.mother_spin_parity_str = result.mother_states[0].get('jpi', result.mother_spin_parity_str)
                 else:
                     if not result.mother_half_life_str:
-                        result.mother_half_life_str = '; '.join(e.get('t12','') for e in result.mother_states if e.get('t12')) or result.mother_half_life_str
+                        result.mother_half_life_str = '; '.join(e.get('t12', '') for e in result.mother_states if e.get('t12')) or result.mother_half_life_str
                     if not result.mother_spin_parity_str:
-                        result.mother_spin_parity_str = '; '.join(e.get('jpi','') for e in result.mother_states if e.get('jpi')) or result.mother_spin_parity_str
-        except (KeyError, TypeError, ValueError, re.error) as e:
-            logger.warning(f"Error parsing NNDC dataset HTML: {e}")
+                        result.mother_spin_parity_str = '; '.join(e.get('jpi', '') for e in result.mother_states if e.get('jpi')) or result.mother_spin_parity_str
+            else:
+                plain_state_pattern = re.compile(
+                    r'(?P<half>\d+(?:\.\d+)?)\s*(?P<unit>min|ms|µs|us|ns|ps|yr|y|h|d|m|s)?\s*(?:\(\s*(?P<unc>\d+)\s*\))?\s*(?P<jpi>\(\s*[0-9]+(?:/\d+)?\s*[+-]\s*\))',
+                    flags=re.I,
+                )
+                for match in plain_state_pattern.finditer(text):
+                    half = match.group('half')
+                    unit = (match.group('unit') or 's').lower()
+                    jpi = match.group('jpi').strip()
+                    entry = {'jpi_raw': jpi, 'jpi': jpi, 't12': f'{half} {unit}' if unit else half}
+                    result.mother_states.append(entry)
+                if result.mother_states:
+                    result.mother_half_life_str = '; '.join(e.get('t12', '') for e in result.mother_states if e.get('t12'))
+                    result.mother_spin_parity_str = '; '.join(e.get('jpi', '') for e in result.mother_states if e.get('jpi'))
+        except (KeyError, TypeError, ValueError, re.error) as exc:
+            logger.warning(f"Error parsing NNDC dataset HTML: {exc}")
 
         return result
 
     def fetch_q_value(self, parent_nucleus: str, daughter_nucleus: str, decay_mode: str = "beta-") -> NNDCData:
-        """Fetch Q-value for beta decay from NNDC NSR database.
-        
-        Args:
-            parent_nucleus: Parent nucleus symbol (e.g., '122Ag')
-            daughter_nucleus: Daughter nucleus symbol (e.g., '122Cd')
-            decay_mode: Decay mode ('beta-', 'beta+', 'EC', etc.)
-            
-        Returns:
-            NNDCData with Q-value information
-            
-        Raises:
-            FetchError: If the API query fails
-        """
+        """Fetch Q-value for beta decay from NNDC NSR database."""
         cache_key = self._cache_key(parent_nucleus, daughter_nucleus, decay_mode)
         cached = self._get_cached(cache_key)
         if cached is not None:
             logger.info(f"Using cached Q-value for {parent_nucleus}→{daughter_nucleus}")
             return cached
-        
+
         result = NNDCData(source="NNDC NSR")
-        
+
         try:
-            # Use dataset page (getdataset.jsp) exclusively as requested
             dataset_html = self._query_nudat3_dataset(parent_nucleus)
             if dataset_html:
                 result = self._parse_dataset_html(dataset_html, result)
@@ -400,42 +605,29 @@ class NNDCClient:
 
             logger.warning(f"No Q-value data found for {parent_nucleus}→{daughter_nucleus} on dataset page")
             result.error_message = f"No data available for {parent_nucleus} on dataset page"
-            
         except FetchError as e:
             result.error_message = str(e)
             logger.error(f"Failed to fetch Q-value: {e}")
         except Exception as e:
             result.error_message = f"Unexpected error: {str(e)}"
             logger.error(f"Unexpected error fetching Q-value: {e}", exc_info=True)
-        
+
         result.fetch_timestamp = datetime.now()
         return result
-    
+
     def fetch_separation_energies(self, nucleus: str) -> NNDCData:
-        """Fetch separation energies (Sn, Sp) for a nucleus.
-        
-        Args:
-            nucleus: Nucleus symbol (e.g., '122Cd')
-            
-        Returns:
-            NNDCData with separation energy information
-            
-        Raises:
-            FetchError: If the API query fails
-        """
+        """Fetch separation energies (Sn, Sp) for a nucleus."""
         cache_key = f"sep_energy:{nucleus.lower()}"
         cached = self._get_cached(cache_key)
         if cached is not None:
             logger.info(f"Using cached separation energies for {nucleus}")
             return cached
-        
+
         result = NNDCData(source="NNDC Nudat3")
-        
+
         try:
-            # Prefer dataset page only
             dataset_html = self._query_nudat3_dataset(nucleus)
             if dataset_html:
-                # dataset parser also extracts Sn/Sp when present
                 result = self._parse_dataset_html(dataset_html, result)
                 result.fetch_timestamp = datetime.now()
                 self._set_cached(cache_key, result)
@@ -443,39 +635,27 @@ class NNDCClient:
 
             logger.warning(f"No separation energy data found for {nucleus} on dataset page")
             result.error_message = f"No data available for {nucleus} on dataset page"
-            
         except FetchError as e:
             result.error_message = str(e)
             logger.error(f"Failed to fetch separation energies: {e}")
         except Exception as e:
             result.error_message = f"Unexpected error: {str(e)}"
             logger.error(f"Unexpected error fetching separation energies: {e}", exc_info=True)
-        
+
         result.fetch_timestamp = datetime.now()
         return result
-    
+
     def fetch_nuclear_properties(self, nucleus: str) -> NNDCData:
-        """Fetch nuclear properties (half-life, spin/parity) for a nucleus.
-        
-        Args:
-            nucleus: Nucleus symbol (e.g., '122Ag')
-            
-        Returns:
-            NNDCData with nuclear property information
-            
-        Raises:
-            FetchError: If the API query fails
-        """
+        """Fetch nuclear properties (half-life, spin/parity) for a nucleus."""
         cache_key = f"properties:{nucleus.lower()}"
         cached = self._get_cached(cache_key)
         if cached is not None:
             logger.info(f"Using cached properties for {nucleus}")
             return cached
-        
+
         result = NNDCData(source="NNDC Nudat3")
-        
+
         try:
-            # Use dataset page exclusively for nuclear properties
             dataset_html = self._query_nudat3_dataset(nucleus)
             if dataset_html:
                 result = self._parse_dataset_html(dataset_html, result)
@@ -485,86 +665,52 @@ class NNDCClient:
 
             logger.warning(f"No nuclear property data found for {nucleus} on dataset page")
             result.error_message = f"No data available for {nucleus} on dataset page"
-            
         except FetchError as e:
             result.error_message = str(e)
             logger.error(f"Failed to fetch nuclear properties: {e}")
         except Exception as e:
             result.error_message = f"Unexpected error: {str(e)}"
             logger.error(f"Unexpected error fetching nuclear properties: {e}", exc_info=True)
-        
+
         result.fetch_timestamp = datetime.now()
         return result
-    
+
     def _normalize_nucleus_id(self, nucleus: str) -> str:
-        """Convert nucleus symbol (e.g., '122Ag') to NNDC format.
-        
-        Args:
-            nucleus: Nucleus symbol, e.g., "122Ag", "122ag", "Ag-122"
-            
-        Returns:
-            NNDC nucleus ID, e.g., "122AG"
-        """
-        import re
-        
-        # Remove hyphens and normalize
+        """Convert nucleus symbol (e.g., '122Ag') to NNDC format."""
         nucleus = nucleus.replace('-', '').strip()
-        
-        # Extract A and Z from formats like "122Ag" or "Ag122"
         match = re.match(r'^(\d+)([a-zA-Z]+)$', nucleus)
         if match:
-            mass_num = match.group(1)
-            symbol = match.group(2).upper()
-            return f"{mass_num}{symbol}"
-        
+            return f"{match.group(1)}{match.group(2).upper()}"
+
         match = re.match(r'^([a-zA-Z]+)(\d+)$', nucleus)
         if match:
-            symbol = match.group(1).upper()
-            mass_num = match.group(2)
-            return f"{mass_num}{symbol}"
-        
-        # If no match, return uppercase as-is
+            return f"{match.group(2)}{match.group(1).upper()}"
+
         return nucleus.upper()
-    
+
     def _query_nudat3(self, nucleus_id: str) -> Optional[Dict[str, Any]]:
-        """Query NNDC Nudat3 database for a nucleus.
-        
-        Args:
-            nucleus_id: Nucleus ID in NNDC format (e.g., "122AG")
-            
-        Returns:
-            JSON response as dict, or None if not found
-            
-        Raises:
-            FetchError: If the HTTP request fails
-        """
+        """Query NNDC Nudat3 database for a nucleus."""
         url = f"{self.NNDC_API_BASE}nucleus/{nucleus_id}/"
-        
+
         try:
             logger.debug(f"Querying NNDC: {url}")
-            
             req = urllib.request.Request(url)
             req.add_header('User-Agent', 'gamma-spectroscopy-app/1.0')
-            
             with urllib.request.urlopen(req, timeout=10) as response:
                 content = response.read().decode('utf-8')
                 return json.loads(content)
-        
         except urllib.error.HTTPError as e:
             if e.code == 404:
                 logger.info(f"Nucleus {nucleus_id} not found in NNDC")
                 return None
             raise FetchError(f"HTTP {e.code}: {e.reason}")
-        
         except urllib.error.URLError as e:
             raise FetchError(f"Network error: {e.reason}")
-        
         except json.JSONDecodeError as e:
             raise FetchError(f"Invalid JSON response: {e}")
-        
         except Exception as e:
             raise FetchError(f"Unexpected error: {str(e)}")
-    
+
     def _parse_nudat3_response(self, data: Dict[str, Any], result: NNDCData) -> NNDCData:
         """Parse Nudat3 API response for Q-value data."""
         try:
@@ -578,54 +724,57 @@ class NNDCClient:
                             if isinstance(q_val, (int, float)):
                                 result.q_beta_keV = float(q_val)
                                 result.q_beta_str = f"{q_val:.1f} keV"
-                
+
                 if 'half_life' in data:
                     hl = data['half_life']
                     if hl:
                         result.mother_half_life_str = str(hl)
-                
+
                 if 'ground_state' in data:
                     gs = data['ground_state']
-                    if isinstance(gs, dict) and 'spin_parity' in gs:
-                        result.mother_spin_parity_str = gs['spin_parity']
-                # Additionally, extract level list if present to enumerate excited states
+                    if isinstance(gs, dict):
+                        if 'spin_parity' in gs:
+                            result.mother_spin_parity_str = gs['spin_parity']
+                        if 'half_life' in gs and not result.mother_half_life_str:
+                            result.mother_half_life_str = str(gs['half_life'])
+
                 if 'levels' in data and isinstance(data['levels'], list):
-                    state_entries: list[dict[str, str]] = []
+                    state_entries: list[dict[str, Any]] = []
                     for lvl in data['levels']:
                         try:
                             jpi = lvl.get('spin_parity') or lvl.get('jpi')
                             hl = lvl.get('half_life') or lvl.get('t1/2')
                             energy = lvl.get('energy') or lvl.get('energy_keV') or lvl.get('e_keV')
                             de = lvl.get('energy_uncertainty') or lvl.get('dE') or lvl.get('de_keV')
-                            entry: dict[str, str] = {}
+                            entry: dict[str, Any] = {}
                             if jpi:
+                                entry['jpi_raw'] = str(jpi)
                                 entry['jpi'] = str(jpi)
                             if hl:
                                 entry['t12'] = str(hl)
                             if energy is not None:
-                                entry['e_keV'] = str(energy)
+                                entry['energy_keV'] = str(energy)
                             if de is not None:
-                                entry['de_keV'] = str(de)
+                                entry['energy_uncertainty_keV'] = str(de)
                             if entry:
                                 state_entries.append(entry)
                         except Exception:
                             continue
                     if state_entries:
                         result.mother_states = state_entries
-                        # Compose compact strings for display if single or multiple
                         if len(state_entries) == 1:
                             result.mother_half_life_str = state_entries[0].get('t12', result.mother_half_life_str)
                             result.mother_spin_parity_str = state_entries[0].get('jpi', result.mother_spin_parity_str)
                         else:
                             if not result.mother_half_life_str:
-                                result.mother_half_life_str = '; '.join(e.get('t12','') for e in state_entries if e.get('t12')) or result.mother_half_life_str
+                                result.mother_half_life_str = '; '.join(e.get('t12', '') for e in state_entries if e.get('t12')) or result.mother_half_life_str
                             if not result.mother_spin_parity_str:
-                                result.mother_spin_parity_str = '; '.join(e.get('jpi','') for e in state_entries if e.get('jpi')) or result.mother_spin_parity_str
+                                result.mother_spin_parity_str = '; '.join(e.get('jpi', '') for e in state_entries if e.get('jpi')) or result.mother_spin_parity_str
         except (KeyError, TypeError, ValueError) as e:
             logger.warning(f"Error parsing Nudat3 response: {e}")
-        
+
         return result
-    
+
     def _parse_separation_energies(self, data: Dict[str, Any], result: NNDCData) -> NNDCData:
         """Parse separation energy data from NNDC response."""
         try:
@@ -636,14 +785,16 @@ class NNDCClient:
                         if 'sn' in sep_data:
                             result.sn_keV = float(sep_data['sn'])
                             result.sn_str = f"{sep_data['sn']:.1f} keV"
+                            result.dsn_keV = None
                         if 'sp' in sep_data:
                             result.sp_keV = float(sep_data['sp'])
                             result.sp_str = f"{sep_data['sp']:.1f} keV"
+                            result.dsp_keV = None
         except (KeyError, TypeError, ValueError) as e:
             logger.warning(f"Error parsing separation energies: {e}")
-        
+
         return result
-    
+
     def _parse_nuclear_properties(self, data: Dict[str, Any], result: NNDCData) -> NNDCData:
         """Parse nuclear properties (T1/2, spin/parity) from NNDC response."""
         try:
@@ -661,9 +812,9 @@ class NNDCClient:
                     result.mother_spin_parity_str = data['spin_parity']
         except (KeyError, TypeError, ValueError) as e:
             logger.warning(f"Error parsing nuclear properties: {e}")
-        
+
         return result
-    
+
     def clear_cache(self) -> None:
         """Clear all cached data."""
         self._cache.clear()
