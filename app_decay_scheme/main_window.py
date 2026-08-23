@@ -19,6 +19,8 @@ from .loaders import ProjectDataLoader
 from app_logft.logft_calc import compute_logft
 from .preview import render_eps_to_png, find_ghostscript_executable
 from .periodic_table import complete_from_symbol, complete_from_z, z_from_symbol, symbol_from_z
+from app_nndc.nndc_client import NNDCData
+from app_nndc.ui_widgets import create_nndc_fetch_button
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -404,8 +406,8 @@ class MainWindow(QMainWindow):
         # ===== DECAY PROCESS =====
         decay_grp = QGroupBox("Decay Process")
         decay_lay = QFormLayout(decay_grp)
-        self.parent_edit = QLineEdit()
-        self.daughter_edit = QLineEdit()
+        self.parent_edit = QLineEdit(); self.parent_edit.setPlaceholderText('e.g., 122Ag')
+        self.daughter_edit = QLineEdit(); self.daughter_edit.setPlaceholderText('e.g., 122Cd')
         self.decay_channel_spin = QSpinBox(); self.decay_channel_spin.setRange(0, 4); self.decay_channel_spin.setValue(2)
         decay_lay.addRow('Parent nucleus', self.parent_edit)
         decay_lay.addRow('Daughter nucleus', self.daughter_edit)
@@ -415,27 +417,27 @@ class MainWindow(QMainWindow):
         # ===== MOTHER NUCLEUS DATA =====
         m_nuc_grp = QGroupBox("Mother nucleus (detailed)")
         m_nuc_lay = QFormLayout(m_nuc_grp)
-        self.mother_a_spin = QSpinBox(); self.mother_a_spin.setRange(1, 300)
+        self.mother_a_spin = QSpinBox(); self.mother_a_spin.setRange(0, 300)
         self.mother_symbol_edit = QLineEdit()
-        self.mother_z_spin = QSpinBox(); self.mother_z_spin.setRange(1, 118)
+        self.mother_z_spin = QSpinBox(); self.mother_z_spin.setRange(0, 118)
         self.mother_n_spin = QSpinBox(); self.mother_n_spin.setReadOnly(True); self.mother_n_spin.setRange(0, 300)
         m_nuc_lay.addRow('A', self.mother_a_spin)
         m_nuc_lay.addRow('Symbol', self.mother_symbol_edit)
         m_nuc_lay.addRow('Z', self.mother_z_spin)
-        m_nuc_lay.addRow('N (auto)', self.mother_n_spin)
+        m_nuc_lay.addRow('N', self.mother_n_spin)
         form.addRow(m_nuc_grp)
         
         # ===== DAUGHTER NUCLEUS DATA =====
         d_nuc_grp = QGroupBox("Daughter nucleus (detailed)")
         d_nuc_lay = QFormLayout(d_nuc_grp)
-        self.daughter_a_spin = QSpinBox(); self.daughter_a_spin.setRange(1, 300)
+        self.daughter_a_spin = QSpinBox(); self.daughter_a_spin.setRange(0, 300)
         self.daughter_symbol_edit = QLineEdit()
-        self.daughter_z_spin = QSpinBox(); self.daughter_z_spin.setRange(1, 118)
+        self.daughter_z_spin = QSpinBox(); self.daughter_z_spin.setRange(0, 118)
         self.daughter_n_spin = QSpinBox(); self.daughter_n_spin.setReadOnly(True); self.daughter_n_spin.setRange(0, 300)
         d_nuc_lay.addRow('A', self.daughter_a_spin)
         d_nuc_lay.addRow('Symbol', self.daughter_symbol_edit)
         d_nuc_lay.addRow('Z', self.daughter_z_spin)
-        d_nuc_lay.addRow('N (auto)', self.daughter_n_spin)
+        d_nuc_lay.addRow('N', self.daughter_n_spin)
         form.addRow(d_nuc_grp)
         
         # ===== Q-VALUE =====
@@ -443,36 +445,101 @@ class MainWindow(QMainWindow):
         q_lay = QFormLayout(q_grp)
         self.qbeta_edit = QLineEdit()
         self.dqbeta_edit = QLineEdit()
-        q_lay.addRow('Qbeta [keV]', self.qbeta_edit)
-        q_lay.addRow('dQbeta [keV]', self.dqbeta_edit)
+        q_lay.addRow('Q [keV]', self.qbeta_edit)
+        q_lay.addRow('dQ s[keV]', self.dqbeta_edit)
+        
+        # Add NNDC fetch button for Q-value
+        self.fetch_qvalue_btn = create_nndc_fetch_button(
+            "Fetch from NNDC",
+            lambda: self.parent_edit.text(),
+            lambda: self.daughter_edit.text(),
+            'fetch_q_value',
+            self._on_nndc_qvalue_fetched,
+            self
+        )
+        q_lay.addRow('', self.fetch_qvalue_btn)
         form.addRow(q_grp)
         
-        # ===== MOTHER DISPLAY VALUES =====
-        m_val_grp = QGroupBox("Mother display values")
+        # ===== MOTHER ISOMER STATES =====
+        m_val_grp = QGroupBox("Mother isomer states")
         m_val_lay = QFormLayout(m_val_grp)
-        self.mother_spinpar_edit = QLineEdit(); self.mother_spinpar_edit.setPlaceholderText('e.g., (1-)')
-        self.mother_t12_edit = QLineEdit(); self.mother_t12_edit.setPlaceholderText('e.g., 0.72(10) s')
-        self.mother_q_edit = QLineEdit(); self.mother_q_edit.setPlaceholderText('e.g., 9510(40) keV')
-        self.mother_sn_edit = QLineEdit(); self.mother_sn_edit.setPlaceholderText('e.g., 5834 keV')
-        self.mother_pn_edit = QLineEdit(); self.mother_pn_edit.setPlaceholderText('e.g., 12.3')
-        m_val_lay.addRow('Spin/parity', self.mother_spinpar_edit)
-        m_val_lay.addRow('T1/2', self.mother_t12_edit)
-        m_val_lay.addRow('Q value', self.mother_q_edit)
-        m_val_lay.addRow('Sn', self.mother_sn_edit)
-        m_val_lay.addRow('Pn', self.mother_pn_edit)
+        self.mother_state_container = QWidget()
+        self.mother_state_layout = QVBoxLayout(self.mother_state_container)
+        self.mother_state_layout.setContentsMargins(0, 0, 0, 0)
+        self.mother_state_rows: list[tuple[QWidget, QLineEdit, QLineEdit, QLineEdit, QLineEdit, QLineEdit]] = []
+
+        def add_mother_state_row(jpi: str = '', e: str = '', de: str = '', t12: str = '', dt12: str = ''):
+            row_widget = QWidget()
+            row_lay = QHBoxLayout(row_widget)
+            row_lay.setContentsMargins(0, 0, 0, 0)
+            jpi_edit = QLineEdit(jpi)
+            e_edit = QLineEdit(e)
+            de_edit = QLineEdit(de)
+            t12_edit = QLineEdit(t12)
+            dt12_edit = QLineEdit(dt12)
+            remove_btn = QPushButton('-')
+            remove_btn.clicked.connect(lambda: self._remove_mother_state_row(row_widget))
+            row_lay.addWidget(jpi_edit, 2)
+            row_lay.addWidget(e_edit, 2)
+            row_lay.addWidget(de_edit, 1)
+            row_lay.addWidget(t12_edit, 2)
+            row_lay.addWidget(dt12_edit, 1)
+            row_lay.addWidget(remove_btn)
+            self.mother_state_layout.addWidget(row_widget)
+            self.mother_state_rows.append((row_widget, jpi_edit, e_edit, de_edit, t12_edit, dt12_edit))
+
+        self.mother_add_state_btn = QPushButton('+')
+        self.mother_add_state_btn.clicked.connect(lambda: add_mother_state_row())
+        button_row = QHBoxLayout()
+        button_row.addWidget(self.mother_add_state_btn)
+
+        # Column headers for the dynamic mother state rows
+        header_widget = QWidget()
+        header_lay = QHBoxLayout(header_widget)
+        header_lay.setContentsMargins(0, 0, 0, 0)
+        header_lay.addWidget(QLabel('Spin/Parity'), 1)
+        header_lay.addWidget(QLabel('E [keV]'), 2)
+        header_lay.addWidget(QLabel('dE [keV]'), 1)
+        header_lay.addWidget(QLabel('T1/2'), 2)
+        header_lay.addWidget(QLabel('dT1/2'), 1)
+        m_val_lay.addRow('', header_widget)
+        m_val_lay.addRow('', self.mother_state_container)
+        m_val_lay.addRow('', button_row)
+
+        # Add NNDC fetch button for mother isomer values
+        self.fetch_mother_btn = create_nndc_fetch_button(
+            "Fetch from NNDC",
+            lambda: self.parent_edit.text(),
+            lambda: self.daughter_edit.text(),
+            'fetch_nuclear_properties',
+            self._on_nndc_mother_fetched,
+            self
+        )
+        m_val_lay.addRow('', self.fetch_mother_btn)
         form.addRow(m_val_grp)
         
-        # ===== SEPARATION ENERGY =====
-        sep_grp = QGroupBox("Separation energy")
+        # ===== SEPARATION ENERGY (DAUGHTER) =====
+        sep_grp = QGroupBox("Separation energy (daughter)")
         sep_lay = QFormLayout(sep_grp)
         self.sn_edit = QLineEdit()
-        self.sn_show_check = QCheckBox()
+        self.serr_edit = QLineEdit()
         self.sep_energy_type_combo = QComboBox(); self.sep_energy_type_combo.addItems(['n', 'p'])
-        sep_lay.addRow('Value [keV]', self.sn_edit)
-        sep_lay.addRow('Show', self.sn_show_check)
+        sep_lay.addRow('S [keV]', self.sn_edit)
+        sep_lay.addRow('dS [keV]', self.serr_edit)
         sep_lay.addRow('Type (n/p)', self.sep_energy_type_combo)
+
+        # Add NNDC fetch button for daughter separation energy
+        self.fetch_sep_energy_btn = create_nndc_fetch_button(
+            "Fetch from NNDC",
+            lambda: self.daughter_edit.text(),
+            lambda: "",
+            'fetch_separation_energies',
+            self._on_nndc_sep_energy_fetched,
+            self
+        )
+        sep_lay.addRow('', self.fetch_sep_energy_btn)
         form.addRow(sep_grp)
-        
+
         # ===== MOTHER DISPLAY TOGGLES =====
         m_tog_grp = QGroupBox("Mother display toggles")
         m_tog_lay = QFormLayout(m_tog_grp)
@@ -480,14 +547,10 @@ class MainWindow(QMainWindow):
         self.mother_t12_show_check = QCheckBox(); self.mother_t12_show_check.setChecked(True)
         self.mother_spinpar_show_check = QCheckBox(); self.mother_spinpar_show_check.setChecked(True)
         self.mother_q_show_check = QCheckBox(); self.mother_q_show_check.setChecked(True)
-        self.mother_sn_show_check = QCheckBox(); self.mother_sn_show_check.setChecked(False)
-        self.mother_pn_show_check = QCheckBox(); self.mother_pn_show_check.setChecked(False)
         m_tog_lay.addRow('Show nucleus', self.mother_show_check)
         m_tog_lay.addRow('Show T1/2', self.mother_t12_show_check)
         m_tog_lay.addRow('Show spin/parity', self.mother_spinpar_show_check)
         m_tog_lay.addRow('Show Q', self.mother_q_show_check)
-        m_tog_lay.addRow('Show Sn', self.mother_sn_show_check)
-        m_tog_lay.addRow('Show Pn', self.mother_pn_show_check)
         form.addRow(m_tog_grp)
         
         # ===== LEVEL ANNOTATIONS =====
@@ -497,10 +560,12 @@ class MainWindow(QMainWindow):
         self.logft_show_check = QCheckBox(); self.logft_show_check.setChecked(True)
         self.spinpar_show_check = QCheckBox(); self.spinpar_show_check.setChecked(True)
         self.t12_show_check = QCheckBox(); self.t12_show_check.setChecked(True)
+        self.sep_energy_show_check = QCheckBox(); self.sep_energy_show_check.setChecked(True)
         lev_lay.addRow('Show beta feeding', self.beta_feeding_show_check)
         lev_lay.addRow('Show log ft', self.logft_show_check)
         lev_lay.addRow('Show spin/parity', self.spinpar_show_check)
         lev_lay.addRow('Show T1/2', self.t12_show_check)
+        lev_lay.addRow('Show separation energy', self.sep_energy_show_check)
         form.addRow(lev_grp)
         
         # ===== DRAWING PARAMETERS =====
@@ -526,6 +591,20 @@ class MainWindow(QMainWindow):
         png_lay.addRow('White background', self.png_white_background_check)
         form.addRow(png_grp)
         
+        # ===== GROUND STATE FEEDING =====
+        gs_grp = QGroupBox("Ground-state feeding")
+        gs_lay = QFormLayout(gs_grp)
+        self.ground_state_feeding_combo = QComboBox()
+        self.ground_state_feeding_combo.addItems(['none', 'manual', 'closure_to_100', 'iterative'])
+        self.manual_gs_feeding_spin = QDoubleSpinBox(); self.manual_gs_feeding_spin.setRange(0.0, 100.0); self.manual_gs_feeding_spin.setDecimals(3)
+        self.iterative_tolerance_spin = QDoubleSpinBox(); self.iterative_tolerance_spin.setRange(0.0001, 10.0); self.iterative_tolerance_spin.setDecimals(4); self.iterative_tolerance_spin.setValue(0.01)
+        self.iterative_max_iters_spin = QSpinBox(); self.iterative_max_iters_spin.setRange(1, 100); self.iterative_max_iters_spin.setValue(20)
+        gs_lay.addRow('Ground-state feeding mode', self.ground_state_feeding_combo)
+        gs_lay.addRow('Manual g.s. feeding [%]', self.manual_gs_feeding_spin)
+        gs_lay.addRow('Iterative tolerance [%]', self.iterative_tolerance_spin)
+        gs_lay.addRow('Max iterations', self.iterative_max_iters_spin)
+        form.addRow(gs_grp)
+        
         settings_scroll.setWidget(settings_widget)
         split.addWidget(settings_scroll)
         split.addWidget(self._create_preview_widget(include_reload_save=True))
@@ -535,6 +614,8 @@ class MainWindow(QMainWindow):
         # Connect auto-fill and sync signals
         self._connect_nucleus_auto_fill()
         self._connect_settings_signals()
+        # Ensure mother/daughter detailed sections are empty at startup
+        self._clear_nucleus_details()
 
     def _connect_nucleus_auto_fill(self):
         """Set up auto-fill logic for nucleus fields using periodic table."""
@@ -563,7 +644,7 @@ class MainWindow(QMainWindow):
                 with QSignalBlocker(self.mother_n_spin):
                     self.mother_n_spin.setValue(data['N'])
                 return
-            except:
+            except (KeyError, ValueError, TypeError):
                 pass
         
         # Try A + Z → symbol + N
@@ -575,7 +656,7 @@ class MainWindow(QMainWindow):
                 with QSignalBlocker(self.mother_n_spin):
                     self.mother_n_spin.setValue(data['N'])
                 return
-            except:
+            except (KeyError, ValueError, TypeError):
                 pass
         
         # Just update N = A - Z
@@ -602,7 +683,7 @@ class MainWindow(QMainWindow):
                 with QSignalBlocker(self.daughter_n_spin):
                     self.daughter_n_spin.setValue(data['N'])
                 return
-            except:
+            except (KeyError, ValueError, TypeError):
                 pass
         
         # Try A + Z → symbol + N
@@ -614,7 +695,7 @@ class MainWindow(QMainWindow):
                 with QSignalBlocker(self.daughter_n_spin):
                     self.daughter_n_spin.setValue(data['N'])
                 return
-            except:
+            except (KeyError, ValueError, TypeError):
                 pass
         
         # Just update N = A - Z
@@ -623,27 +704,165 @@ class MainWindow(QMainWindow):
             with QSignalBlocker(self.daughter_n_spin):
                 self.daughter_n_spin.setValue(max(0, n))
 
+    def _clear_nucleus_details(self):
+        """Clear mother and daughter detailed fields (leave empty)."""
+        self.mother_a_spin.setValue(0)
+        self.mother_symbol_edit.setText('')
+        self.mother_z_spin.setValue(0)
+        self.mother_n_spin.setValue(0)
+
+        self.daughter_a_spin.setValue(0)
+        self.daughter_symbol_edit.setText('')
+        self.daughter_z_spin.setValue(0)
+        self.daughter_n_spin.setValue(0)
+
+    def _parse_nucleus_string(self, s: str):
+        """Parse nucleus string like '122Ag' or 'Ag122' into (A, symbol) or None."""
+        import re
+        s = s.strip()
+        if not s:
+            return None
+        m = re.match(r'^(\d+)([A-Za-z]+)$', s)
+        if m:
+            return (int(m.group(1)), m.group(2))
+        m = re.match(r'^([A-Za-z]+)(\d+)$', s)
+        if m:
+            return (int(m.group(2)), m.group(1))
+        return None
+
+    def _on_parent_entered(self):
+        """Auto-fill mother detailed fields when parent is entered; clear when empty."""
+        txt = self.parent_edit.text().strip()
+        parsed = self._parse_nucleus_string(txt)
+        if not parsed:
+            self._clear_nucleus_details()
+            return
+        a, sym = parsed
+        try:
+            z = z_from_symbol(sym)
+        except Exception:
+            z = 0
+        with QSignalBlocker(self.mother_a_spin):
+            self.mother_a_spin.setValue(a)
+        with QSignalBlocker(self.mother_symbol_edit):
+            self.mother_symbol_edit.setText(sym)
+        with QSignalBlocker(self.mother_z_spin):
+            self.mother_z_spin.setValue(z if z is not None else 0)
+        with QSignalBlocker(self.mother_n_spin):
+            self.mother_n_spin.setValue(max(0, a - (z or 0)))
+
+    def _on_daughter_entered(self):
+        """Auto-fill daughter detailed fields when daughter is entered; clear when empty."""
+        txt = self.daughter_edit.text().strip()
+        parsed = self._parse_nucleus_string(txt)
+        if not parsed:
+            self.daughter_a_spin.setValue(0)
+            self.daughter_symbol_edit.setText('')
+            self.daughter_z_spin.setValue(0)
+            self.daughter_n_spin.setValue(0)
+            return
+        a, sym = parsed
+        try:
+            z = z_from_symbol(sym)
+        except Exception:
+            z = 0
+        with QSignalBlocker(self.daughter_a_spin):
+            self.daughter_a_spin.setValue(a)
+        with QSignalBlocker(self.daughter_symbol_edit):
+            self.daughter_symbol_edit.setText(sym)
+        with QSignalBlocker(self.daughter_z_spin):
+            self.daughter_z_spin.setValue(z if z is not None else 0)
+        with QSignalBlocker(self.daughter_n_spin):
+            self.daughter_n_spin.setValue(max(0, a - (z or 0)))
+
     def _connect_settings_signals(self):
         """Connect all settings widgets to sync-to-model."""
         for w in [self.parent_edit, self.daughter_edit, self.qbeta_edit, self.dqbeta_edit,
-                  self.mother_spinpar_edit, self.mother_t12_edit, self.mother_q_edit,
-                  self.mother_sn_edit, self.mother_pn_edit, self.sn_edit]:
+                self.sn_edit, self.serr_edit]:
             w.editingFinished.connect(self._sync_settings_to_model)
+
+        # Parent/Daughter entered handlers: populate detailed sections only after user types parent/daughter
+        self.parent_edit.editingFinished.connect(self._on_parent_entered)
+        self.daughter_edit.editingFinished.connect(self._on_daughter_entered)
         
         for w in [self.decay_channel_spin, self.mother_a_spin, self.mother_z_spin,
                   self.daughter_a_spin, self.daughter_z_spin, self.font_size_spin,
                   self.font_size_trans_spin]:
             w.valueChanged.connect(self._sync_settings_to_model)
         
-        for w in [self.sep_energy_type_combo, self.abf_field_combo]:
+        for w in [self.sep_energy_type_combo, self.abf_field_combo, self.ground_state_feeding_combo]:
             w.currentIndexChanged.connect(self._sync_settings_to_model)
         
-        for w in [self.sn_show_check, self.mother_show_check, self.mother_t12_show_check,
+        for w in [self.mother_show_check, self.mother_t12_show_check,
                   self.mother_spinpar_show_check, self.mother_q_show_check,
-                  self.mother_sn_show_check, self.mother_pn_show_check,
                   self.beta_feeding_show_check, self.logft_show_check,
-                  self.spinpar_show_check, self.t12_show_check, self.png_white_background_check]:
+                  self.spinpar_show_check, self.t12_show_check, self.png_white_background_check, self.sep_energy_show_check]:
             w.stateChanged.connect(self._sync_settings_to_model)
+
+        self.manual_gs_feeding_spin.valueChanged.connect(self._sync_settings_to_model)
+        self.iterative_tolerance_spin.valueChanged.connect(self._sync_settings_to_model)
+        self.iterative_max_iters_spin.valueChanged.connect(self._sync_settings_to_model)
+
+    def _add_mother_state_row(self, jpi: str = '', e: str = '', de: str = '', t12: str = '', dt12: str = ''):
+        row_widget = QWidget()
+        row_layout = QHBoxLayout(row_widget)
+        row_layout.setContentsMargins(0, 0, 0, 0)
+        jpi_edit = QLineEdit(jpi)
+        e_edit = QLineEdit('')
+        de_edit = QLineEdit('')
+        t12_edit = QLineEdit(t12)
+        dt12_edit = QLineEdit('')
+        remove_btn = QPushButton('-')
+        remove_btn.clicked.connect(lambda: self._remove_mother_state_row(row_widget))
+        row_layout.addWidget(jpi_edit, 2)
+        row_layout.addWidget(e_edit, 2)
+        row_layout.addWidget(de_edit, 1)
+        row_layout.addWidget(t12_edit, 2)
+        row_layout.addWidget(dt12_edit, 1)
+        row_layout.addWidget(remove_btn)
+        self.mother_state_layout.addWidget(row_widget)
+        self.mother_state_rows.append((row_widget, jpi_edit, e_edit, de_edit, t12_edit, dt12_edit))
+
+    def _remove_mother_state_row(self, row_widget: QWidget | None = None):
+        if not self.mother_state_rows:
+            return
+        if row_widget is None:
+            row_widget = self.mother_state_rows[-1][0]
+        for idx, (widget, jpi_edit, e_edit, de_edit, t12_edit, dt12_edit) in enumerate(self.mother_state_rows):
+            if widget is row_widget:
+                self.mother_state_layout.removeWidget(widget)
+                widget.deleteLater()
+                self.mother_state_rows.pop(idx)
+                break
+        if not self.mother_state_rows:
+            self._add_mother_state_row()
+        self._sync_settings_to_model()
+
+    def _populate_mother_state_rows(self):
+        while self.mother_state_layout.count():
+            item = self.mother_state_layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
+        self.mother_state_rows = []
+
+        states = self.project.beta_inputs.mother_states if self.project else []
+        if not states:
+            spinstr = (self.project.beta_inputs.mother_spinpar if self.project else '').strip()
+            t12str = (self.project.beta_inputs.mother_t12 if self.project else '').strip()
+            if spinstr or t12str:
+                states = [{'jpi': spinstr, 't12': t12str}]
+        if not states:
+            states = [{'jpi': '', 't12': ''}]
+
+        for state in states:
+            # accept several possible key names from NNDCData parsing
+            jpi = state.get('jpi', '') or state.get('spin_parity', '')
+            t12 = state.get('t12', '') or state.get('half_life', '')
+            e = state.get('e', '') or state.get('e_keV', '') or state.get('energy', '')
+            de = state.get('de', '') or state.get('de_keV', '') or state.get('energy_uncertainty', '')
+            dt12 = state.get('dt12', '') or state.get('half_life_uncertainty', '')
+            self._add_mother_state_row(jpi, str(e), str(de), t12, str(dt12))
 
     def _build_levels_tab(self):
         main_layout = QVBoxLayout(self.levels_tab)
@@ -756,7 +975,7 @@ class MainWindow(QMainWindow):
                         fit_success = True
                     else:
                         raise ValueError('Invalid viewport size')
-                except:
+                except (ValueError, AttributeError, RuntimeError, Exception):
                     # Fallback: show at 100% if fit-to-window fails
                     pass
             # If fit-to-window completely failed for all labels, fallback to 100% view
@@ -844,41 +1063,29 @@ class MainWindow(QMainWindow):
         self.daughter_edit.setText(b.daughter_nucleus)
         self.decay_channel_spin.setValue(b.decay_channel)
         
-        # Mother nucleus (detailed)
-        self.mother_a_spin.setValue(b.mother_a if b.mother_a > 0 else 122)
-        self.mother_symbol_edit.setText(symbol_from_z(b.mother_z) if b.mother_z > 0 else 'Ag')
-        self.mother_z_spin.setValue(b.mother_z if b.mother_z > 0 else 47)
-        self.mother_n_spin.setValue(b.mother_n if b.mother_n > 0 else b.mother_a - b.mother_z)
-        
-        # Daughter nucleus (detailed)
-        self.daughter_a_spin.setValue(b.daughter_a if b.daughter_a > 0 else 122)
-        self.daughter_symbol_edit.setText(symbol_from_z(b.daughter_z) if b.daughter_z > 0 else 'Cd')
-        self.daughter_z_spin.setValue(b.daughter_z if b.daughter_z > 0 else 48)
-        self.daughter_n_spin.setValue(b.daughter_n if b.daughter_n > 0 else b.daughter_a - b.daughter_z)
+        # Mother/daughter detailed: leave empty on project load and fill only when
+        # parent/daughter are entered in the Decay Process fields.
+        self._clear_nucleus_details()
         
         # Q-value
         self.qbeta_edit.setText(str(b.qbeta_keV))
         self.dqbeta_edit.setText(str(b.dqbeta_keV))
         
         # Mother display values
-        self.mother_spinpar_edit.setText(b.mother_spinpar or b.mother_spin_display)
-        self.mother_t12_edit.setText(b.mother_t12 or b.mother_half_life_display)
-        self.mother_q_edit.setText(b.mother_q)
-        self.mother_sn_edit.setText(b.mother_sn)
-        self.mother_pn_edit.setText(b.mother_pn)
-        
+        self._populate_mother_state_rows()
+
         # Separation energy
         self.sn_edit.setText('' if b.neutron_separation_energy_keV is None else str(b.neutron_separation_energy_keV))
-        self.sn_show_check.setChecked(b.show_neutron_separation)
+        self.serr_edit.setText('' if b.neutron_separation_energy_uncertainty_keV is None else str(b.neutron_separation_energy_uncertainty_keV) if hasattr(b, 'neutron_separation_energy_uncertainty_keV') else '')
         self.sep_energy_type_combo.setCurrentText(b.separation_energy_type)
-        
+        # Show toggle moved to Level annotations
+        self.sep_energy_show_check.setChecked(b.show_neutron_separation)
+
         # Mother display toggles
         self.mother_show_check.setChecked(r.mother_show)
         self.mother_t12_show_check.setChecked(r.mother_t12_show)
         self.mother_spinpar_show_check.setChecked(r.mother_spinpar_show)
         self.mother_q_show_check.setChecked(r.mother_q_show)
-        self.mother_sn_show_check.setChecked(r.mother_sn_show)
-        self.mother_pn_show_check.setChecked(r.mother_pn_show)
         
         # Level annotations
         self.beta_feeding_show_check.setChecked(r.beta_feeding_show)
@@ -894,7 +1101,11 @@ class MainWindow(QMainWindow):
         self.abf_field_combo.setCurrentText(self.abf_field_combo.itemText(
             max(0, self.abf_field_combo.findText('absolute_percent' if hasattr(self, '_abf_field') else 'absolute_percent'))
         ) if hasattr(self, '_abf_field') else 'absolute_percent')
-        
+        self.ground_state_feeding_combo.setCurrentText(b.ground_state_feeding_mode if b.ground_state_feeding_mode in {'none','manual','closure_to_100','iterative'} else 'closure_to_100')
+        self.manual_gs_feeding_spin.setValue(float(b.manual_ground_state_feeding_percent) if b.manual_ground_state_feeding_percent is not None else 0.0)
+        self.iterative_tolerance_spin.setValue(float(b.iterative_tolerance))
+        self.iterative_max_iters_spin.setValue(int(b.iterative_max_iterations))
+
         # PNG output settings
         self.png_white_background_check.setChecked(r.png_white_background)
         
@@ -906,6 +1117,10 @@ class MainWindow(QMainWindow):
         self._fill_transitions_table()
         
         self._building = False
+        
+        # Trigger nucleus auto-fill to compute N values immediately
+        self._mother_nucleus_changed()
+        self._daughter_nucleus_changed()
 
     def _fill_levels_table(self):
         cols = ['level_id', 'e_level_keV', 'jpi', 'jpi_origin_year', 'comments']
@@ -988,16 +1203,36 @@ class MainWindow(QMainWindow):
         except ValueError: pass
         
         # Mother display values
-        b.mother_spinpar = self.mother_spinpar_edit.text().strip()
-        b.mother_t12 = self.mother_t12_edit.text().strip()
-        b.mother_q = self.mother_q_edit.text().strip()
-        b.mother_sn = self.mother_sn_edit.text().strip()
-        b.mother_pn = self.mother_pn_edit.text().strip()
+        mother_states = []
+        for _, jpi_edit, e_edit, de_edit, t12_edit, dt12_edit in self.mother_state_rows:
+            jpi = jpi_edit.text().strip()
+            e = e_edit.text().strip()
+            de = de_edit.text().strip()
+            t12 = t12_edit.text().strip()
+            dt12 = dt12_edit.text().strip()
+            if jpi or t12 or e:
+                entry: dict = {'jpi': jpi}
+                if e: entry['e_keV'] = e
+                if de: entry['de_keV'] = de
+                if t12: entry['t12'] = t12
+                if dt12: entry['dt12'] = dt12
+                mother_states.append(entry)
+        b.mother_states = mother_states
+        b.mother_spinpar = '; '.join(s.get('jpi', '') for s in mother_states if s.get('jpi'))
+        b.mother_t12 = '; '.join(s.get('t12', '') for s in mother_states if s.get('t12'))
+        b.mother_q = ''
+        b.mother_sn = ''
+        b.mother_pn = ''
         
         # Separation energy
         try: b.neutron_separation_energy_keV = float(self.sn_edit.text()) if self.sn_edit.text().strip() else None
         except ValueError: pass
-        b.show_neutron_separation = self.sn_show_check.isChecked()
+        # separation energy show flag is controlled from level annotations
+        try:
+            b.neutron_separation_energy_uncertainty_keV = float(self.serr_edit.text()) if self.serr_edit.text().strip() else None
+        except ValueError:
+            b.neutron_separation_energy_uncertainty_keV = None
+        b.show_neutron_separation = self.sep_energy_show_check.isChecked()
         b.separation_energy_type = self.sep_energy_type_combo.currentText()
         
         # Mother display toggles → RenderSettings
@@ -1005,8 +1240,8 @@ class MainWindow(QMainWindow):
         r.mother_t12_show = self.mother_t12_show_check.isChecked()
         r.mother_spinpar_show = self.mother_spinpar_show_check.isChecked()
         r.mother_q_show = self.mother_q_show_check.isChecked()
-        r.mother_sn_show = self.mother_sn_show_check.isChecked()
-        r.mother_pn_show = self.mother_pn_show_check.isChecked()
+        r.mother_sn_show = self.sep_energy_show_check.isChecked()
+        r.mother_pn_show = False
         
         # Level annotations → RenderSettings
         r.beta_feeding_show = self.beta_feeding_show_check.isChecked()
@@ -1050,9 +1285,9 @@ class MainWindow(QMainWindow):
         field = self.abf_field_combo.currentText()
         abf_no = compute_abf(self.project.levels, self.project.transitions, mode='no_ground_state', field=field)
         abf_with = compute_abf(self.project.levels, self.project.transitions, mode='with_ground_state_closure', field=field)
+        logft = compute_logft(self.project.levels, abf_with, self.project.beta_inputs)
         self._fill_abf_table(self.abf_no_table, abf_no)
         self._fill_abf_table(self.abf_with_table, abf_with)
-        logft = compute_logft(self.project.levels, abf_with, self.project.beta_inputs)
         self._fill_logft_table(logft)
         
         # Generate and write scheme to TEMPORARY file
@@ -1070,7 +1305,6 @@ class MainWindow(QMainWindow):
         if self.project is None or self.output_folder is None:
             QMessageBox.warning(self, 'Error', 'Load a project first')
             return
-        
         temp_eps_path = self._get_temp_eps_path()
         if not temp_eps_path.exists():
             QMessageBox.warning(self, 'Error', 'No preview generated. Click "Reload scheme" first.')
@@ -1105,10 +1339,10 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, 'Error', f'Failed to save scheme:\n{exc}')
 
     def _fill_abf_table(self, table, rows):
-        cols = ['level_id','e_level_keV','jpi','incoming','outgoing','abf_raw','abf_clipped','mode']
+        cols = ['level_id','e_level_keV','jpi','incoming','outgoing','abf_raw','abf_clipped','mode','warning']
         table.setColumnCount(len(cols)); table.setHorizontalHeaderLabels(cols); table.setRowCount(len(rows))
         for i, r in enumerate(rows):
-            vals = [r.level_id, f'{r.e_level_keV:.2f}', r.jpi, f'{r.incoming:.4f}', f'{r.outgoing:.4f}', f'{r.abf_raw:.4f}', f'{r.abf_clipped:.4f}', r.mode]
+            vals = [r.level_id, f'{r.e_level_keV:.2f}', r.jpi, f'{r.incoming:.4f}', f'{r.outgoing:.4f}', f'{r.abf_raw:.4f}', f'{r.abf_clipped:.4f}', r.mode, r.warning]
             for j, v in enumerate(vals):
                 table.setItem(i, j, QTableWidgetItem(v))
 
@@ -1183,6 +1417,82 @@ class MainWindow(QMainWindow):
         super().resizeEvent(event)
         if getattr(self, 'preview_fit_to_window', False):
             self._update_preview_pixmap()
+
+    def _on_nndc_qvalue_fetched(self, data: NNDCData):
+        """Handle Q-value data fetched from NNDC."""
+        if data.q_beta_keV is not None:
+            self.qbeta_edit.setText(f"{data.q_beta_keV:.2f}")
+        if data.dq_beta_keV is not None:
+            self.dqbeta_edit.setText(f"{data.dq_beta_keV:.2f}")
+        self.on_input_changed()
+    
+    def _on_nndc_mother_fetched(self, data: NNDCData):
+        """Handle mother nuclear properties fetched from NNDC."""
+        states = data.mother_states or []
+        if states:
+            # Replace all rows with fetched states
+            while self.mother_state_layout.count():
+                item = self.mother_state_layout.takeAt(0)
+                widget = item.widget()
+                if widget is not None:
+                    widget.deleteLater()
+            self.mother_state_rows = []
+            for entry in states:
+                jpi = entry.get('jpi') or entry.get('spin_parity', '')
+                t12 = entry.get('t12') or entry.get('half_life', '')
+                e = entry.get('e') or entry.get('e_keV') or entry.get('energy', '')
+                de = entry.get('de') or entry.get('de_keV') or entry.get('energy_uncertainty', '')
+                dt12 = entry.get('dt12') or entry.get('half_life_uncertainty', '')
+                self._add_mother_state_row(jpi, str(e), str(de), t12, str(dt12))
+        else:
+            # Fallback: use single-value fields if available
+            if data.mother_half_life_str:
+                self._populate_mother_state_rows()
+                if self.mother_state_rows:
+                    _, jpi_edit, e_edit, de_edit, t12_edit, dt12_edit = self.mother_state_rows[0]
+                    t12_edit.setText(data.mother_half_life_str)
+            if data.mother_spin_parity_str:
+                if not self.mother_state_rows:
+                    self._add_mother_state_row(data.mother_spin_parity_str, '', '', '', '')
+                else:
+                    _, jpi_edit, _, _, _, _ = self.mother_state_rows[0]
+                    jpi_edit.setText(data.mother_spin_parity_str)
+        self.on_input_changed()
+    
+    def _on_nndc_sep_energy_fetched(self, data: NNDCData):
+        """Handle separation energy data fetched from NNDC."""
+        # Use neutron or proton separation energy based on current selection
+        if self.sep_energy_type_combo.currentText() == 'n':
+            if data.sn_keV is not None:
+                self.sn_edit.setText(f"{data.sn_keV:.1f}")
+                if getattr(data, 'sn_uncertainty_keV', None) is not None:
+                    self.serr_edit.setText(f"{data.sn_uncertainty_keV:.1f}")
+                else:
+                    self.serr_edit.setText('')
+        else:
+            if data.sp_keV is not None:
+                self.sn_edit.setText(f"{data.sp_keV:.1f}")
+                if getattr(data, 'sp_uncertainty_keV', None) is not None:
+                    self.serr_edit.setText(f"{data.sp_uncertainty_keV:.1f}")
+                else:
+                    self.serr_edit.setText('')
+        self.on_input_changed()
+
+    def on_input_changed(self):
+        """General handler called when input fields change (or NNDC autofill completes).
+
+        Keeps model in sync and triggers light recomputation/validation without
+        interfering with the user's current editing flow.
+        """
+        try:
+            # Sync GUI settings to model and recompute derived quantities
+            self._sync_settings_to_model()
+            # Recompute ABF/logft and refresh preview (non-blocking if template missing)
+            self.recompute_everything()
+        except Exception:
+            # Swallow exceptions to avoid breaking NNDC callbacks; log to console
+            import traceback
+            traceback.print_exc()
 
     def save_project_files(self):
         if self.project is None or self.project_folder is None:

@@ -16,7 +16,9 @@ def _strip_markdown_fences(text: str) -> str:
 
 
 def load_beta_inputs_from_text(text: str) -> BetaInputs:
-    payload = yaml.safe_load(_strip_markdown_fences(text))
+    payload = yaml.safe_load(_strip_markdown_fences(text)) or {}
+    if not isinstance(payload, dict):
+        payload = {}
     states = [ParentState(
         state_id=s.get('state_id', ''),
         jpi=s.get('Jpi', ''),
@@ -30,7 +32,25 @@ def load_beta_inputs_from_text(text: str) -> BetaInputs:
     included = [s for s in states if s.include_in_analysis]
     mother_spin_display = ', '.join(s.jpi for s in included)
     mother_half_life_display = '; '.join(f"{s.jpi}: {s.half_life_ms:g} ms" for s in included)
+    legacy_mother_states = payload.get('mother_states') or []
+    if not legacy_mother_states and (payload.get('mother_spinpar') or payload.get('mother_t12')):
+        legacy_mother_states = []
+        spin_values = [v.strip() for v in str(payload.get('mother_spinpar', '')).split(';') if v.strip()]
+        t12_values = [v.strip() for v in str(payload.get('mother_t12', '')).split(';') if v.strip()]
+        for idx, spin in enumerate(spin_values):
+            t12 = t12_values[idx] if idx < len(t12_values) else ''
+            if spin or t12:
+                legacy_mother_states.append({'jpi': spin, 't12': t12})
+        if not legacy_mother_states and (payload.get('mother_spinpar') or payload.get('mother_t12')):
+            legacy_mother_states = [{'jpi': str(payload.get('mother_spinpar', '')).strip(), 't12': str(payload.get('mother_t12', '')).strip()}]
     ns = payload.get('sNucl')
+    ground_state_cfg = payload.get('ground_state_feeding', {}) or {}
+    gs_mode = str(ground_state_cfg.get('mode', 'closure_to_100') or 'closure_to_100')
+    manual_percent = ground_state_cfg.get('manual_ground_state_feeding_percent')
+    if manual_percent is None:
+        manual_percent = ground_state_cfg.get('fitted_ground_state_feeding_percent')
+    if manual_percent is None:
+        manual_percent = ground_state_cfg.get('initial_ground_state_feeding_percent')
     return BetaInputs(
         raw=payload,
         parent_nucleus=payload.get('parent_nucleus', ''),
@@ -43,19 +63,24 @@ def load_beta_inputs_from_text(text: str) -> BetaInputs:
         neutron_separation_energy_keV=float(ns) if ns not in (None, '') else None,
         show_neutron_separation=bool(payload.get('sNuclShow', False)),
         ground_state_strategy=(payload.get('ground_state_feeding', {}) or {}).get('estimation_method', 'closure_to_100'),
+        ground_state_feeding_mode=gs_mode,
+        manual_ground_state_feeding_percent=float(manual_percent) if manual_percent not in (None, '') else None,
+        iterative_ground_state_feeding=bool(ground_state_cfg.get('iterative', False) or ground_state_cfg.get('iterative_ground_state_feeding', False)),
+        iterative_tolerance=float(ground_state_cfg.get('tolerance', 0.01) or 0.01),
+        iterative_max_iterations=int(ground_state_cfg.get('max_iterations', 20) or 20),
         normalization_reference_keV=float((payload.get('normalization', {}) or {}).get('reference_transition_keV', 0.0) or 0.0),
-        # New fields with defaults
         mother_a=0,
         mother_z=0,
         mother_n=0,
         daughter_a=0,
         daughter_z=0,
         daughter_n=0,
-        mother_t12='',
-        mother_spinpar='',
-        mother_q='',
-        mother_sn='',
-        mother_pn='',
+        mother_t12=str(payload.get('mother_t12', '')),
+        mother_spinpar=str(payload.get('mother_spinpar', '')),
+        mother_q=str(payload.get('mother_q', '')),
+        mother_sn=str(payload.get('mother_sn', '')),
+        mother_pn=str(payload.get('mother_pn', '')),
+        mother_states=legacy_mother_states,
         decay_channel=2,
         separation_energy_type='n',
     )
@@ -80,4 +105,10 @@ def dump_beta_inputs_to_text(beta: BetaInputs) -> str:
         }
         for s in beta.parent_states
     ]
+    payload['mother_states'] = beta.mother_states
+    payload['mother_spinpar'] = beta.mother_spinpar
+    payload['mother_t12'] = beta.mother_t12
+    payload['mother_q'] = beta.mother_q
+    payload['mother_sn'] = beta.mother_sn
+    payload['mother_pn'] = beta.mother_pn
     return yaml.safe_dump(payload, sort_keys=False, allow_unicode=True)

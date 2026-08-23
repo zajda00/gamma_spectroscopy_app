@@ -70,19 +70,23 @@ def export_workbook(source: Path, output_dir: Path | None = None, verbose: bool 
             print(f"Folder wyjściowy: {output_dir}\n")
 
         for sheet_name in workbook.sheet_names:
-            # header=None zachowuje cały arkusz, także pierwszy wiersz.
+            # Read the sheet with the first row as header. This matches the app's
+            # expected CSV contract: levels.csv / transitions.csv contain real
+            # column names such as "E_level_keV" or "relative_percent".
             df = pd.read_excel(
                 workbook,
                 sheet_name=sheet_name,
-                header=None,
+                header=0,
                 dtype=object,
                 na_filter=False,
             )
 
+            # Drop fully empty rows but keep the header row intact.
+            df = df.dropna(axis=0, how="all").reset_index(drop=True)
+
             file_stem = safe_filename(sheet_name)
             csv_name = f"{file_stem}.csv"
 
-            # Zabezpieczenie, gdy dwa arkusze po oczyszczeniu nazw mają tę samą nazwę.
             counter = 2
             while csv_name.lower() in used_names:
                 csv_name = f"{file_stem}_{counter}.csv"
@@ -95,7 +99,7 @@ def export_workbook(source: Path, output_dir: Path | None = None, verbose: bool 
             df.to_csv(
                 output_path,
                 index=False,
-                header=False,
+                header=True,
                 encoding="utf-8-sig",
             )
 
