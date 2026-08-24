@@ -10,7 +10,8 @@ from PySide6.QtWidgets import (
     QMainWindow, QWidget, QFileDialog, QMessageBox, QVBoxLayout, QHBoxLayout,
     QTabWidget, QLabel, QLineEdit, QPushButton, QTableWidget, QTableWidgetItem,
     QSplitter, QPlainTextEdit, QCheckBox, QComboBox, QFormLayout, QScrollArea,
-    QDialog, QTextEdit, QInputDialog, QSpinBox, QDoubleSpinBox, QGroupBox
+    QDialog, QTextEdit, QInputDialog, QSpinBox, QDoubleSpinBox, QGroupBox,
+    QProgressBar, QApplication
 )
 
 from .abf import compute_abf
@@ -20,7 +21,7 @@ from .loaders import ProjectDataLoader
 from app_logft.logft_calc import compute_logft
 from .preview import render_eps_to_png, find_ghostscript_executable
 from .periodic_table import complete_from_symbol, complete_from_z, z_from_symbol, symbol_from_z
-from app_nndc.nndc_client import NNDCData, first_not_none
+from app_nndc.nndc_client import NNDCClient, NNDCData, first_not_none
 from app_nndc.ui_widgets import create_nndc_fetch_button
 from .models import ParentState
 
@@ -53,9 +54,11 @@ class MainWindow(QMainWindow):
         self.output_eps_path: Path | None = None  # Permanent output file (only written by Save)
         self.temp_eps_path: Path | None = None    # Temporary file (overwritten by Reload)
         self.preview_pixmap = None
-        self.preview_zoom = 1.0
-        self.preview_fit_to_window = False  # Default: show at 100% zoom instead of trying to fit (which may fail during init)
+        self.preview_zoom = 0.85  # Default: 85% zoom for better initial view (less zoomed in)
+        self.preview_fit_to_window = True  # Default: fit to window by default, with fallback to 0.85 zoom if needed
         self.eps_edit_mode = False
+        self._last_abf_rows = None  # Cache of last computed ABF rows
+        self._last_logft_rows = None  # Cache of last computed logft rows
 
         self._building = False
         self._setup_ui()
@@ -307,12 +310,18 @@ class MainWindow(QMainWindow):
         top = QHBoxLayout()
         self.load_input_btn = QPushButton('Load input data')
         self.template_btn = QPushButton('Select scheme template')
-        self.compute_btn = QPushButton('Recompute ABF / log ft')
+        self.compute_abf_btn = QPushButton('Compute ABF')
+        self.compute_logft_btn = QPushButton('Compute logft')
         self.save_project_btn = QPushButton('Save project files')
         self.auto_write = QCheckBox('Auto write EPS')
         self.auto_write.setChecked(True)
-        for w in [self.load_input_btn, self.template_btn, self.compute_btn, self.save_project_btn, self.auto_write]:
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setRange(0, 100)
+        self.progress_bar.setValue(0)
+        self.progress_bar.setVisible(False)
+        for w in [self.load_input_btn, self.template_btn, self.compute_abf_btn, self.compute_logft_btn, self.save_project_btn, self.auto_write]:
             top.addWidget(w)
+        top.addWidget(self.progress_bar)
         layout.addLayout(top)
 
         # Initialize shared preview widgets (will be used by all tabs)
@@ -341,7 +350,8 @@ class MainWindow(QMainWindow):
 
         self.load_input_btn.clicked.connect(self.load_input_folder)
         self.template_btn.clicked.connect(self.select_template)
-        self.compute_btn.clicked.connect(self.recompute_everything)
+        self.compute_abf_btn.clicked.connect(self.compute_abf_values)
+        self.compute_logft_btn.clicked.connect(self.compute_logft_values)
         self.save_project_btn.clicked.connect(self.save_project_files)
         self.auto_write.toggled.connect(lambda _: self.maybe_write_scheme())
 
@@ -984,12 +994,12 @@ class MainWindow(QMainWindow):
 
     def _preview_zoom_in(self):
         self.preview_fit_to_window = False
-        self.preview_zoom *= 1.25
+        self.preview_zoom *= 1.1
         self._update_preview_pixmap()
 
     def _preview_zoom_out(self):
         self.preview_fit_to_window = False
-        self.preview_zoom /= 1.25
+        self.preview_zoom /= 1.1
         self._update_preview_pixmap()
 
 
@@ -1001,25 +1011,39 @@ class MainWindow(QMainWindow):
             fit_success = False
             for label in self.preview_labels:
                 try:
-                    viewport_size = label.parent().viewport().size()
-                    # Only scale if viewport has valid size
-                    if viewport_size.width() > 0 and viewport_size.height() > 0:
+                    # Try to get viewport from parent scroll area
+                    parent = label.parent()
+                    if parent and hasattr(parent, 'viewport'):
+                        viewport_size = parent.viewport().size()
+                    else:
+                        viewport_size = parent.size() if parent else None
+                    
+                    # Also try label's parent widget size as fallback
+                    if not viewport_size or viewport_size.width() <= 0 or viewport_size.height() <= 0:
+                        if parent:
+                            viewport_size = parent.size()
+                    
+                    # Only scale if we have a valid size
+                    if viewport_size and viewport_size.width() > 0 and viewport_size.height() > 0:
+                        # Add small margin (95% of available space) to ensure it fits comfortably
+                        target_width = int(viewport_size.width() * 0.95)
+                        target_height = int(viewport_size.height() * 0.95)
                         scaled = self.preview_pixmap.scaled(
-                            viewport_size,
+                            target_width,
+                            target_height,
                             Qt.KeepAspectRatio,
                             Qt.SmoothTransformation,
                         )
                         label.setPixmap(scaled)
                         label.resize(scaled.size())
                         fit_success = True
-                    else:
-                        raise ValueError('Invalid viewport size')
-                except (ValueError, AttributeError, RuntimeError, Exception):
-                    # Fallback: show at 100% if fit-to-window fails
+                except (ValueError, AttributeError, RuntimeError, Exception, TypeError):
+                    # Continue trying other labels
                     pass
-            # If fit-to-window completely failed for all labels, fallback to 100% view
+            # If fit-to-window completely failed for all labels, fallback to 70% zoom
             if not fit_success:
                 self.preview_fit_to_window = False
+                self.preview_zoom = 0.85  # Fallback to 85% instead of 100%
                 self._update_preview_pixmap()
                 return
         else:
@@ -1177,14 +1201,23 @@ class MainWindow(QMainWindow):
         self._daughter_nucleus_changed()
 
     def _fill_levels_table(self):
-        cols = ['level_id', 'e_level_keV', 'jpi', 'jpi_origin_year', 'comments']
+        base_cols = ['level_id', 'e_level_keV', 'jpi', 'jpi_origin_year', 'comments']
+        display_cols = ['logft', 'ABF'] + base_cols
         self.levels_table.blockSignals(True)
-        self.levels_table.setColumnCount(len(cols)); self.levels_table.setHorizontalHeaderLabels(cols)
+        self.levels_table.setColumnCount(len(display_cols)); self.levels_table.setHorizontalHeaderLabels(display_cols)
         self.levels_table.setRowCount(len(self.project.levels))
         for i, lv in enumerate(self.project.levels):
-            vals = [lv.level_id, f'{lv.e_level_keV:.2f}', lv.jpi, lv.jpi_origin_year, lv.comments]
+            vals = [
+                '' if lv.logft is None else f'{lv.logft:.4f}',
+                '' if getattr(lv, 'abf', None) is None else f'{float(lv.abf):.4f}',
+                lv.level_id, f'{lv.e_level_keV:.2f}', lv.jpi, lv.jpi_origin_year, lv.comments,
+            ]
             for j, v in enumerate(vals):
-                self.levels_table.setItem(i, j, QTableWidgetItem(v))
+                item = QTableWidgetItem(v)
+                # Make logft and ABF columns read-only
+                if j < 2:
+                    item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+                self.levels_table.setItem(i, j, item)
         self.levels_table.blockSignals(False)
 
     def _fill_transitions_table(self):
@@ -1204,7 +1237,16 @@ class MainWindow(QMainWindow):
     def _levels_changed(self, item):
         if self._building or self.project is None:
             return
-        row = item.row(); col = item.column(); key = ['level_id','e_level_keV','jpi','jpi_origin_year','comments'][col]
+        row = item.row(); col = item.column()
+        # Column layout: ['logft', 'ABF', 'level_id', 'e_level_keV', 'jpi', 'jpi_origin_year', 'comments']
+        # Skip logft and ABF columns (they are read-only, set by calculations)
+        editable_keys = ['level_id','e_level_keV','jpi','jpi_origin_year','comments']
+        if col < 2:  # Skip logft and ABF columns
+            return
+        key_index = col - 2  # Offset for logft and ABF columns
+        if key_index >= len(editable_keys):
+            return
+        key = editable_keys[key_index]
         lv = self.project.levels[row]
         txt = item.text()
         if key == 'e_level_keV':
@@ -1369,10 +1411,12 @@ class MainWindow(QMainWindow):
         abf_with = compute_abf(self.project.levels, self.project.transitions, mode='with_ground_state_closure', field=field)
         self._fill_abf_table(self.abf_no_table, abf_no)
         self._fill_abf_table(self.abf_with_table, abf_with)
-        logft = compute_logft(self.project.levels, abf_with, self.project.beta_inputs)
-        self._fill_logft_table(logft)
+        self._mark_level_metrics(abf_rows=abf_with)
+        self._fill_levels_table()
+        # Store last ABF rows for later use (e.g., when computing logft manually)
+        self._last_abf_rows = list(abf_with)
         # Always regenerate preview when data changes (respects auto_write checkbox)
-        self.maybe_write_scheme(abf_with=abf_with, logft=logft)
+        self.maybe_write_scheme(abf_with=abf_with)
 
     def reload_scheme(self):
         """Manually reload and regenerate scheme from current data (to temporary file)."""
@@ -1438,7 +1482,7 @@ class MainWindow(QMainWindow):
             QMessageBox.information(
                 self,
                 'Scheme saved',
-                f'Scheme files saved in:\n{self.output_folder}\n\n' + '\n'.join(files_saved)
+                f'Scheme files saved in:\n{self.project_folder}\n\n' + '\n'.join(files_saved)
             )
         except Exception as exc:
             QMessageBox.critical(self, 'Error', f'Failed to save scheme:\n{exc}')
@@ -1464,6 +1508,9 @@ class MainWindow(QMainWindow):
         """
         Generate EPS scheme to temporary file for preview.
         Permanent save to output folder is only done via save_scheme().
+        
+        ABF is computed if not provided (for speed and consistency in preview).
+        Logft is NOT auto-computed - it must be explicitly passed from compute_logft_values().
         """
         if self.project is None or self.template_path is None:
             return
@@ -1475,28 +1522,34 @@ class MainWindow(QMainWindow):
         
         try:
             engine = EpsTemplateEngine.from_file(self.template_path)
+            # ABF is always computed for preview consistency
             if abf_with is None:
                 abf_with = compute_abf(self.project.levels, self.project.transitions, mode='with_ground_state_closure', field=self.abf_field_combo.currentText())
+            # Logft is NOT auto-computed here - only use what was explicitly provided
+            # This prevents expensive re-calculation on every update
             if logft is None:
-                logft = compute_logft(self.project.levels, abf_with, self.project.beta_inputs)
+                logft = []  # Empty list, no logft to show
+            
             abf_map = {r.level_id: ('' if r.e_level_keV == 0 else f'{r.abf_clipped:.3f}') for r in abf_with}
             logft_map = {}
             # Build single-display logft per level. If multiple computed values exist
             # (typically due to ambiguous parent/spin), show only the largest value
             # and prefix with '<' to indicate an upper-limit/ambiguity (e.g. '<5.60').
-            temp_vals: dict[str, list[float]] = {}
-            for row in logft:
-                if row.logft is None:
-                    continue
-                temp_vals.setdefault(row.level_id, []).append(float(row.logft))
-            for lvl, vals in temp_vals.items():
-                if not vals:
-                    continue
-                if len(vals) == 1:
-                    logft_map[lvl] = f'{vals[0]:.2f}'
-                else:
-                    maxv = max(vals)
-                    logft_map[lvl] = f'<{maxv:.2f}'
+            if logft:
+                temp_vals: dict[str, list[float]] = {}
+                for row in logft:
+                    if row.logft is None:
+                        continue
+                    temp_vals.setdefault(row.level_id, []).append(float(row.logft))
+                for lvl, vals in temp_vals.items():
+                    if not vals:
+                        continue
+                    if len(vals) == 1:
+                        logft_map[lvl] = f'{vals[0]:.2f}'
+                    else:
+                        maxv = max(vals)
+                        logft_map[lvl] = f'<{maxv:.2f}'
+            
             text = engine.render(self.project.beta_inputs, self.project.levels, self.project.transitions, 
                                  render_settings=self.project.render_settings,
                                  abf_map=abf_map, logft_map=logft_map)
@@ -1623,11 +1676,196 @@ class MainWindow(QMainWindow):
         QMessageBox.information(self, 'Saved', f'Edited files written in {self.project_folder}')
 
     def _fetch_all_nndc_data(self):
-        """Trigger all NNDC fetch buttons in sequence so a full decay dataset is populated."""
-        for button in (
-            getattr(self, 'fetch_qvalue_btn', None),
-            getattr(self, 'fetch_mother_btn', None),
-            getattr(self, 'fetch_sep_energy_btn', None),
-        ):
-            if button is not None:
-                button.click()
+        """Fetch all NNDC data (Q-value, nuclear properties, separation energy) in one combined call."""
+        parent_nuc = self.parent_edit.text().strip()
+        daughter_nuc = self.daughter_edit.text().strip()
+
+        if not parent_nuc:
+            QMessageBox.warning(self, 'Missing data', 'Please specify the parent nucleus.')
+            return
+
+        if not daughter_nuc:
+            QMessageBox.warning(self, 'Missing data', 'Please specify the daughter nucleus.')
+            return
+
+        # Create NNDC client
+        client = NNDCClient(use_cache=True)
+        errors = []
+        success_count = 0
+
+        # 1. Fetch Q-value data
+        try:
+            q_data = client.fetch_q_value(parent_nuc, daughter_nuc, 'beta-')
+            if q_data.error_message:
+                errors.append(f"Q-value: {q_data.error_message}")
+            else:
+                if q_data.q_beta_keV is not None:
+                    self.qbeta_edit.setText(f"{q_data.q_beta_keV:.2f}")
+                if q_data.dq_beta_keV is not None:
+                    self.dqbeta_edit.setText(f"{q_data.dq_beta_keV:.2f}")
+                success_count += 1
+        except Exception as exc:
+            errors.append(f"Q-value: {exc}")
+
+        # 2. Fetch nuclear properties (mother nucleus)
+        try:
+            mother_data = client.fetch_nuclear_properties(parent_nuc)
+            if mother_data.error_message:
+                errors.append(f"Mother properties: {mother_data.error_message}")
+            else:
+                states = mother_data.mother_states or []
+                if states:
+                    # Clear existing rows and repopulate with fetched data
+                    while self.mother_state_layout.count():
+                        item = self.mother_state_layout.takeAt(0)
+                        widget = item.widget()
+                        if widget is not None:
+                            widget.deleteLater()
+                    self.mother_state_rows = []
+                    for entry in states:
+                        jpi = first_not_none(entry.get('jpi_raw'), entry.get('jpi'), '')
+                        t12 = first_not_none(entry.get('half_life_display'), entry.get('t12'), entry.get('half_life'), '')
+                        e = first_not_none(entry.get('energy_keV'), entry.get('energy_display'), entry.get('e_keV'), entry.get('energy'), entry.get('e'))
+                        de = first_not_none(entry.get('energy_uncertainty_keV'), entry.get('energy_uncertainty'), entry.get('de_keV'), entry.get('de'), entry.get('energy_uncertainty_display'))
+                        dt12 = first_not_none(entry.get('half_life_uncertainty_display'), entry.get('dt12'), entry.get('half_life_uncertainty'))
+                        self._add_mother_state_row(jpi, str(e) if e is not None else '', str(de) if de is not None else '', str(t12) if t12 is not None else '', str(dt12) if dt12 is not None else '')
+                success_count += 1
+        except Exception as exc:
+            errors.append(f"Mother properties: {exc}")
+
+        # 3. Fetch separation energies
+        try:
+            sep_data = client.fetch_separation_energies(parent_nuc)
+            if sep_data.error_message:
+                errors.append(f"Separation energy: {sep_data.error_message}")
+            else:
+                if self.sep_energy_type_combo.currentText() == 'n':
+                    if sep_data.sn_keV is not None:
+                        self.sn_edit.setText(f"{sep_data.sn_keV:.1f}")
+                        if sep_data.dsn_keV is not None:
+                            self.serr_edit.setText(f"{sep_data.dsn_keV:.1f}")
+                        else:
+                            self.serr_edit.clear()
+                    else:
+                        self.sn_edit.clear()
+                        self.serr_edit.clear()
+                else:
+                    if sep_data.sp_keV is not None:
+                        self.sn_edit.setText(f"{sep_data.sp_keV:.1f}")
+                        if sep_data.dsp_keV is not None:
+                            self.serr_edit.setText(f"{sep_data.dsp_keV:.1f}")
+                        else:
+                            self.serr_edit.clear()
+                    else:
+                        self.sn_edit.clear()
+                        self.serr_edit.clear()
+                success_count += 1
+        except Exception as exc:
+            errors.append(f"Separation energy: {exc}")
+
+        # Sync all changes to model and recompute once
+        self.on_input_changed()
+
+        # Show single result message
+        if errors:
+            if success_count > 0:
+                QMessageBox.warning(
+                    self,
+                    'NNDC Fetch - Partial Success',
+                    f'Fetched {success_count}/3 data sources.\n\nErrors:\n' + '\n'.join(errors)
+                )
+            else:
+                QMessageBox.critical(
+                    self,
+                    'NNDC Fetch Error',
+                    'Failed to fetch NNDC data.\n\nErrors:\n' + '\n'.join(errors)
+                )
+        else:
+            QMessageBox.information(
+                self,
+                'Success',
+                'All NNDC data fetched successfully!\n(Q-value, mother properties, separation energy)'
+            )
+    
+    def _set_progress_visible(self, visible: bool, value: int = 0):
+        self.progress_bar.setVisible(visible)
+        self.progress_bar.setValue(value)
+        QApplication.processEvents()
+
+    def _with_progress(self, fn):
+        self.compute_abf_btn.setEnabled(False)
+        self.compute_logft_btn.setEnabled(False)
+        self._set_progress_visible(True, 10)
+        try:
+            result = fn()
+            self._set_progress_visible(True, 100)
+            return result
+        finally:
+            self._set_progress_visible(False, 0)
+            self.compute_abf_btn.setEnabled(True)
+            self.compute_logft_btn.setEnabled(True)
+
+    def _mark_level_metrics(self, abf_rows=None, logft_rows=None):
+        if self.project is None:
+            return
+        for level in self.project.levels:
+            level.abf = None
+            level.logft = None
+        if abf_rows is not None:
+            for row in abf_rows:
+                level = next((lv for lv in self.project.levels if lv.level_id == row.level_id), None)
+                if level is not None and getattr(row, 'abf_clipped', None) is not None:
+                    level.abf = float(row.abf_clipped)
+        if logft_rows is not None:
+            for row in logft_rows:
+                level = next((lv for lv in self.project.levels if lv.level_id == row.level_id), None)
+                if level is not None and getattr(row, 'logft', None) is not None:
+                    level.logft = float(row.logft)
+
+    def _has_abf_results(self) -> bool:
+        if self.project is None:
+            return False
+        return any(getattr(level, 'abf', None) is not None for level in self.project.levels) or bool(self._last_abf_rows)
+
+    def compute_abf_values(self):
+        if self.project is None:
+            return
+
+        def _compute():
+            field = self.abf_field_combo.currentText()
+            abf_no = compute_abf(self.project.levels, self.project.transitions, mode='no_ground_state', field=field)
+            abf_with = compute_abf(self.project.levels, self.project.transitions, mode='with_ground_state_closure', field=field)
+            self._last_abf_rows = list(abf_with)
+            self._last_logft_rows = []
+            self._mark_level_metrics(abf_rows=abf_with)
+            self._fill_abf_table(self.abf_no_table, abf_no)
+            self._fill_abf_table(self.abf_with_table, abf_with)
+            self._fill_levels_table()
+            self.maybe_write_scheme(abf_with=abf_with)
+            return abf_with
+
+        return self._with_progress(_compute)
+
+    def compute_logft_values(self):
+        if self.project is None:
+            return
+        if not self._has_abf_results():
+            QMessageBox.warning(self, 'Missing ABF values', 'Compute apparent beta feeding first. Logft calculation was not started.')
+            return
+
+        def _compute():
+            abf_rows = list(self._last_abf_rows) if self._last_abf_rows else [
+                compute_abf(self.project.levels, self.project.transitions, mode='with_ground_state_closure', field=self.abf_field_combo.currentText())
+            ]
+            if not abf_rows:
+                QMessageBox.warning(self, 'Missing ABF values', 'Apparent beta feeding is not available for this scheme.')
+                return None
+            logft_rows = compute_logft(self.project.levels, abf_rows, self.project.beta_inputs)
+            self._last_logft_rows = list(logft_rows)
+            self._mark_level_metrics(abf_rows=self._last_abf_rows, logft_rows=logft_rows)
+            self._fill_logft_table(logft_rows)
+            self._fill_levels_table()
+            self.maybe_write_scheme(abf_with=self._last_abf_rows, logft=logft_rows)
+            return logft_rows
+
+        return self._with_progress(_compute)

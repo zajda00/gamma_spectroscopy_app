@@ -1,0 +1,2 @@
+normalization_id,reference_peak_id,relative_reference_percent,absolute_reference_percent,dabsolute_reference_percent,normalization_status,include_internal_conversion,comment
+norm_122Ag_01,pk_569p36,100.0,89.2237,0.6278,active,False,Reference gamma line used by the current analysis.

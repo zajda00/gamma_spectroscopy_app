@@ -69,6 +69,9 @@ class Level:
     in_scheme: bool = True
     level_origin: str = ''
     certain: bool = True
+    # Calculated values (populated after ABF/logft calculation)
+    abf: float | None = None
+    logft: float | None = None
 
 @dataclass
 class Transition:

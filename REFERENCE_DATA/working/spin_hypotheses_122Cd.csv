@@ -1,0 +1,13 @@
+hypothesis_id,level_id,Jpi,status,confidence,origin_year,basis,comment
+hyp_lv_2823_01,lv_2823,(8+),active,tentative,1990.0,imported_initial_assignment,
+hyp_lv_2616_01,lv_2616,(8-),active,tentative,2008.0,imported_initial_assignment,
+hyp_lv_2502_01,lv_2502,(7-),active,tentative,2008.0,imported_initial_assignment,
+hyp_lv_2178_01,lv_2178,(6+),active,tentative,1990.0,imported_initial_assignment,
+hyp_lv_1992_01,lv_1992,0(+),active,tentative,1995.0,imported_initial_assignment,
+hyp_lv_1979_01,lv_1979,"(3,4+)",active,tentative,1978.0,imported_initial_assignment,
+hyp_lv_1910_01,lv_1910,(3-),active,tentative,1995.0,imported_initial_assignment,
+hyp_lv_1705_01,lv_1705,0(+),active,tentative,1995.0,imported_initial_assignment,
+hyp_lv_1368_01,lv_1368,(2)+,active,tentative,1978.0,imported_initial_assignment,
+hyp_lv_1329_01,lv_1329,(4+),active,tentative,1978.0,imported_initial_assignment,
+hyp_lv_569_01,lv_569,2+,active,adopted,1971.0,imported_initial_assignment,
+hyp_lv_0_01,lv_0,0+,active,adopted,,imported_initial_assignment,
