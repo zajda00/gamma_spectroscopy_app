@@ -16,4 +16,4 @@ dependencies = [
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["app_decay_scheme*"]
+include = ["app_*"]

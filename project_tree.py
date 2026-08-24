@@ -1,7 +1,6 @@
 from pathlib import Path
 import sys
 
-# Foldery będą widoczne w drzewie, ale ich zawartość nie zostanie rozwinięta.
 SKIP_CONTENTS_FOR = {
     ".venv",
     ".vscode",
@@ -13,7 +12,6 @@ SKIP_CONTENTS_FOR = {
     "node_modules",
 }
 
-# Pliki techniczne, których nie chcemy pokazywać.
 SKIP_FILES = {
     "project_tree.txt",
 }
