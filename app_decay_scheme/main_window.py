@@ -1735,7 +1735,7 @@ class MainWindow(QMainWindow):
 
         # 3. Fetch separation energies
         try:
-            sep_data = client.fetch_separation_energies(parent_nuc)
+            sep_data = client.fetch_separation_energies(daughter_nuc)
             if sep_data.error_message:
                 errors.append(f"Separation energy: {sep_data.error_message}")
             else:
