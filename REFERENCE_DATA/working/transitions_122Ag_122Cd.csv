@@ -1,0 +1,48 @@
+transition_id,peak_id,level_initial_id,level_final_id,assignment_status,in_scheme,quality_flag,multipolarity,mixing_ratio,dmixing_ratio,comment
+tr_lv_2923_lv_2823,pk_100p42,lv_2923,lv_2823,active,True,normal,E2,,,
+tr_lv_2644_lv_2536,pk_108p54,lv_2644,lv_2536,active,True,normal,M2,,,
+tr_lv_2616_lv_2502,pk_114p11,lv_2616,lv_2502,active,True,doublet_affected,E1,,,doublet?
+tr_lv_2644_lv_2502,pk_141p95,lv_2644,lv_2502,active,True,normal,M2,,,
+tr_lv_2502_lv_2178,pk_324p60,lv_2502,lv_2178,active,True,normal,M2,,,
+tr_lv_2965_lv_2616,pk_348p77,lv_2965,lv_2616,active,True,normal,M1,,,
+tr_lv_2444_lv_1979,pk_465p50,lv_2444,lv_1979,active,True,estimated_from_doublet_split,M1,,,"doublet, bad fit"
+tr_lv_2644_lv_2178,pk_466p36,lv_2644,lv_2178,active,True,doublet_affected,M1,,,"doublet, 665 keV coincidence"
+tr_lv_2502_lv_1979,pk_523p14,lv_2502,lv_1979,active,True,normal,M1,,,
+tr_lv_1910_lv_1368,pk_541p88,lv_1910,lv_1368,active,True,normal,no IC,,,
+tr_lv_2536_lv_1979,pk_556p69,lv_2536,lv_1979,active,True,normal,no IC,,,
+tr_lv_569_lv_0,pk_569p36,lv_569,lv_0,active,True,normal,no IC,,,
+tr_lv_2823_lv_2178,pk_645p23,lv_2823,lv_2178,active,True,normal,no IC,,,
+tr_lv_1979_lv_1329,pk_650p05,lv_1979,lv_1329,active,True,normal,no IC,,,
+tr_lv_2644_lv_1979,pk_665p27,lv_2644,lv_1979,active,True,doublet_affected,no IC,,,doublet
+tr_lv_2668_lv_1979,pk_689p30,lv_2668,lv_1979,active,True,doublet_affected,no IC,,,doublet
+tr_lv_1329_lv_569,pk_759p56,lv_1329,lv_569,active,True,normal,no IC,,,
+tr_lv_2702_lv_1910,pk_792p04,lv_2702,lv_1910,active,True,normal,no IC,,,
+tr_lv_1368_lv_569,pk_798p43,lv_1368,lv_569,active,True,normal,no IC,,,
+tr_lv_2800_lv_1979,pk_821p19,lv_2800,lv_1979,active,True,normal,no IC,,,
+tr_lv_2178_lv_1329,pk_848p72,lv_2178,lv_1329,active,True,normal,no IC,,,
+tr_lv_2854_lv_1979,pk_875p27,lv_2854,lv_1979,active,True,doublet_affected,no IC,,,doublet
+tr_lv_1705_lv_569,pk_1135p23,lv_1705,lv_569,active,True,normal,no IC,,,
+tr_lv_1910_lv_569,pk_1340p61,lv_1910,lv_569,active,True,normal,no IC,,,
+tr_lv_1368_lv_0,pk_1367p97,lv_1368,lv_0,active,True,normal,no IC,,,
+tr_lv_1992_lv_569,pk_1422p69,lv_1992,lv_569,active,True,normal,no IC,,,
+tr_lv_2196_lv_569,pk_1627p05,lv_2196,lv_569,active,True,normal,no IC,,,
+tr_lv_3050_lv_1329,pk_1721p39,lv_3050,lv_1329,active,True,normal,no IC,,,
+tr_lv_2316_lv_569,pk_1746p49,lv_2316,lv_569,active,True,possible_escape_peak,no IC,,,2767 keV single escape?
+tr_lv_2578_lv_569,pk_2008p21,lv_2578,lv_569,active,True,normal,no IC,,,
+tr_lv_4955_lv_2923,pk_2031p71,lv_4955,lv_2923,active,True,doublet_affected,no IC,,,doublet?
+tr_lv_2668_lv_569,pk_2098p96,lv_2668,lv_569,active,True,normal,no IC,,,
+tr_lv_2936_lv_569,pk_2366p11,lv_2936,lv_569,active,True,normal,no IC,,,
+tr_lv_4302_lv_1705,pk_2596p22,lv_4302,lv_1705,active,True,normal,no IC,,,
+tr_lv_4135_lv_1368,pk_2767p02,lv_4135,lv_1368,active,True,normal,no IC,,,
+tr_lv_3467_lv_569,pk_2897p36,lv_3467,lv_569,active,True,normal,no IC,,,
+tr_lv_2936_lv_0,pk_2935p68,lv_2936,lv_0,active,True,normal,no IC,,,
+tr_lv_3555_lv_569,pk_2985p13,lv_3555,lv_569,active,True,normal,no IC,,,
+tr_lv_3608_lv_569,pk_3038p15,lv_3608,lv_569,active,True,normal,no IC,,,
+tr_lv_3050_lv_0,pk_3050p64,lv_3050,lv_0,active,True,normal,no IC,,,
+tr_lv_3809_lv_569,pk_3239p21,lv_3809,lv_569,active,True,normal,no IC,,,
+tr_lv_3467_lv_0,pk_3467p18,lv_3467,lv_0,active,True,normal,no IC,,,
+tr_lv_3555_lv_0,pk_3555p10,lv_3555,lv_0,active,True,normal,no IC,,,
+tr_lv_4302_lv_569,pk_3732p81,lv_4302,lv_569,active,True,normal,no IC,,,
+tr_lv_3809_lv_0,pk_3808p63,lv_3809,lv_0,active,True,normal,no IC,,,
+tr_lv_4084_lv_0,pk_4084p20,lv_4084,lv_0,active,True,normal,no IC,,,
+tr_lv_4302_lv_0,pk_4302p83,lv_4302,lv_0,active,True,normal,no IC,,,

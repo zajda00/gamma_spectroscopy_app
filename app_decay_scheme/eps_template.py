@@ -20,7 +20,7 @@ def _nuclide_to_parts(text: str):
     try:
         from .periodic_table import z_from_symbol
         z = z_from_symbol(sym) or 0
-    except:
+    except (ImportError, AttributeError):
         # Fallback hardcoded map
         z_map = {'Ag': 47, 'Cd': 48, 'In': 49, 'Sn': 50}
         z = z_map.get(sym, 0)
@@ -36,10 +36,11 @@ def _fmt_q_display(beta_inputs: BetaInputs) -> str:
 
 
 def _fmt_level_line(level: Level, abf: str, logft: str, dashed: int = 0, color: int = 0) -> str:
+    # Swap order: show logft first (left) and intensity/abf second
     jpi = f"({level.jpi})" if level.jpi else '()'
     e_string = f"({level.e_level_keV:.2f})"
     t12 = '()' if level.t12_s in (None, 0) else f"({level.t12_s})"
-    return f"({abf})\t({logft})\t\t\t{e_string}\t\t{jpi}\t\t{level.e_level_keV:.2f}\t{t12}\t\t{dashed}\t{color}\tlevel"
+    return f"({logft})\t({abf})\t\t\t{e_string}\t\t{jpi}\t\t{level.e_level_keV:.2f}\t{t12}\t\t{dashed}\t{color}\tlevel"
 
 
 def _fmt_trans_label(tr: Transition) -> str:
@@ -106,7 +107,7 @@ class EpsTemplateEngine:
             try:
                 from .periodic_table import symbol_from_z
                 daughter_sym = symbol_from_z(daughter_z)
-            except:
+            except (ImportError, AttributeError, KeyError):
                 _, daughter_sym, _ = _nuclide_to_parts(beta_inputs.daughter_nucleus)
         else:
             daughter_a, daughter_sym, daughter_z = _nuclide_to_parts(beta_inputs.daughter_nucleus)
@@ -117,7 +118,7 @@ class EpsTemplateEngine:
             try:
                 from .periodic_table import symbol_from_z
                 parent_sym = symbol_from_z(parent_z)
-            except:
+            except (ImportError, AttributeError, KeyError):
                 _, parent_sym, _ = _nuclide_to_parts(beta_inputs.parent_nucleus)
         else:
             parent_a, parent_sym, parent_z = _nuclide_to_parts(beta_inputs.parent_nucleus)
@@ -175,10 +176,30 @@ class EpsTemplateEngine:
             _replace_line_starting(lines, '/mPn ', f'/mPn ({beta_inputs.mother_pn}) def')
         
         # Separation energy
+        # Separation energy: display label (mSn/mPn) as actual fetched value, but
+        # place the visual separation-line at 1.2 * highest level energy to avoid
+        # stretching the decay scheme vertically.
         _replace_line_starting(lines, '/sNuclShow ', f'/sNuclShow {1 if render_settings.separation_energy_show else 0} def')
         _replace_line_starting(lines, '/sNuclType ', f'/sNuclType ({beta_inputs.separation_energy_type}) def')
+        # Set label string for mother separation energy (displayed next to nucleus)
         if beta_inputs.neutron_separation_energy_keV is not None:
-            _replace_line_starting(lines, '/sNucl ', f'/sNucl ({beta_inputs.neutron_separation_energy_keV:.1f}) def')
+            # show the actual Sn/Sp value in the label (with uncertainty if available)
+            val = beta_inputs.neutron_separation_energy_keV
+            unc = getattr(beta_inputs, 'neutron_separation_energy_uncertainty_keV', None)
+            if unc is not None:
+                label = f"{val:.1f}({unc:.1f}) keV"
+            else:
+                label = f"{val:.1f} keV"
+            _replace_line_starting(lines, '/mSn ', f'/mSn ({label}) def')
+        # Position for the separation helper line: use 1.2 * max level energy (keV)
+        max_e = 0.0
+        if levels:
+            try:
+                max_e = max((l.e_level_keV for l in levels if l.e_level_keV is not None), default=0.0)
+            except Exception:
+                max_e = 0.0
+        pos = max_e * 1.2 if max_e > 0 else (beta_inputs.neutron_separation_energy_keV or 0.0)
+        _replace_line_starting(lines, '/sNucl ', f'/sNucl {pos:.2f} def')
         
         # Level-side annotations
         _replace_line_starting(lines, '/betapcShow ', f'/betapcShow {1 if render_settings.beta_feeding_show else 0} def')
@@ -199,7 +220,8 @@ class EpsTemplateEngine:
         for level in sorted(levels, key=lambda l: l.e_level_keV):
             abf = (abf_map or {}).get(level.level_id, '')
             logft = (logft_map or {}).get(level.level_id, '')
-            level_block.append(_fmt_level_line(level, abf, logft, dashed=0, color=0))
+            dashed, color = _level_style(level)
+            level_block.append(_fmt_level_line(level, abf, logft, dashed=dashed, color=color))
         level_block.append('')
         level_block.append(LEVEL_BLOCK_END)
         lines[level_start_idx: level_end_idx + 1] = level_block
@@ -223,3 +245,21 @@ class EpsTemplateEngine:
         if not out.startswith('%!PS-Adobe'):
             raise ValueError('Generated PostScript does not start with a valid EPS header.')
         return out
+
+
+def _level_style(level: Level) -> tuple[int, int]:
+    """Return (dashed_flag, color_code) for rendering logic.
+
+    Colors: 0=black, 1=red, 2=blue.
+    Dashed flag: 0=solid, 1=dashed.
+    """
+    origin = (level.level_origin or '').strip().lower()
+    if origin == 'known':
+        color = 0
+    elif origin == 'new':
+        color = 1
+    else:
+        color = 2
+
+    dashed = 0 if getattr(level, 'certain', True) else 1
+    return dashed, color

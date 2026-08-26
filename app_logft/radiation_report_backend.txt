@@ -1,0 +1,140 @@
+from __future__ import annotations
+
+import json
+import shutil
+import subprocess
+import os
+from pathlib import Path
+from typing import Any, Optional
+
+from .logft_calc import LogftResult
+
+
+def _parse_numeric(value: Any) -> Optional[float]:
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def maybe_compute_via_radiation_report(
+    endpoint_keV: float,
+    half_life_s: float,
+    branch_fraction: float,
+    daughter_Z: int,
+    *,
+    parent_nucleus: Optional[str] = None,
+    daughter_nucleus: Optional[str] = None,
+    qbeta_keV: Optional[float] = None,
+    parent_exc_keV: float = 0.0,
+    level_e_keV: float = 0.0,
+    parent_jpi: Optional[str] = None,
+    daughter_jpi: Optional[str] = None,
+    dqbeta_keV: Optional[float] = None,
+    dhalf_life_s: Optional[float] = None,
+    dparent_exc_keV: Optional[float] = None,
+    dlevel_e_keV: Optional[float] = None,
+    dbranch_percent: Optional[float] = None,
+
+) -> Optional[LogftResult]:
+    """Attempt to compute log-ft with the bundled RadiationReport JAR.
+
+    This is intentionally conservative: if the Java runtime or the JAR is unavailable,
+    or if the bridge cannot parse the supplied inputs, the function returns None and the
+    caller falls back to the local analytical implementation.
+    """
+    java_cmd = shutil.which("java")
+    if not java_cmd:
+        return None
+
+    jar_path = Path(__file__).resolve().parent / "radiationreport" / "RadiationReport_09December2025.jar"
+    bridge_dir = Path(__file__).resolve().parent / "radiationreport"
+    bridge_class = "RadiationReportBridge"
+    if not jar_path.exists() or not bridge_dir.exists() or not (bridge_dir / f"{bridge_class}.class").exists():
+        return None
+
+    if not parent_nucleus or not daughter_nucleus:
+        # The Java bridge expects real nuclide names; without a valid parent/daughter
+        # pair we must fall back to the local implementation.
+        return None
+
+    q_value = (
+        qbeta_keV
+        if qbeta_keV is not None
+        else endpoint_keV - parent_exc_keV + level_e_keV
+    )
+
+    parent_energy = parent_exc_keV
+    level_energy = level_e_keV
+    if q_value <= 0.0:
+        return None
+
+    cmd = [
+        java_cmd,
+        "-cp",
+        classpath = os.pathsep.join([
+            str(jar_path),
+            str(bridge_dir),
+        ]),
+        bridge_class,
+        f"parent={parent_nucleus}",
+        f"daughter={daughter_nucleus}",
+        f"q={q_value}",
+        "dq=",
+        f"parent_energy={parent_energy}",
+        "dparent_energy=",
+        f"half_life={half_life_s}",
+        "dhalf_life=",
+        "half_life_unit=S",
+        f"level_energy={level_energy}",
+        "dlevel_energy=",
+        f"beta_intensity={branch_fraction * 100.0}",
+        "dbeta_intensity=",
+        f"parent_jpi={parent_jpi or ''}",
+        f"daughter_jpi={daughter_jpi or ''}",
+        "uniqueness=NO",
+        "decay_mode=B-",
+    ]
+
+    try:
+        completed = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+    except (FileNotFoundError, subprocess.SubprocessError):
+        return None
+
+    if completed.returncode != 0:
+        return None
+
+    raw = completed.stdout.strip()
+    if not raw:
+        return None
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError:
+        return None
+
+    if not payload.get("ok"):
+        return None
+
+    logft_payload = payload.get("logft") or {}
+    candidate = _parse_numeric(logft_payload.get("x"))
+    if candidate is None:
+        candidate = _parse_numeric(logft_payload.get("s"))
+    if candidate is None:
+        return None
+
+    # The bridge reports logft as a direct value. Keep the local implementation as the
+    # scientific baseline if the Java side is not trustworthy for a given dataset.
+    f_payload = payload.get("f_total") or {}
+
+    f_value = _parse_numeric(f_payload.get("x"))
+
+    if f_value is None:
+        return None
+
+    return LogftResult(
+        f_value=f_value,
+        logft=candidate,
+)
+

@@ -1,0 +1,6 @@
+category,n_rows,integral_counts_sum,emitted_sum,relative_percent_sum_computed,absolute_percent_sum_computed,reported_absolute_sum_field,sum_discrepancy,sum_ratio_computed_to_reported
+background,4,12025.0,333091.0,2.5984,2.3183,,,
+daughters,18,83716.0,4316326.0,33.671,30.0423,,,
+neglected,36,17533.0,569878.0,4.4458,3.9665,3.96645460839159,0.0,1.0
+uncertain,50,71508.0,3137502.0,24.4749,21.8372,21.8372,0.0,1.0
+unidentified,59,51099.0,2020195.0,15.7589,14.061,14.0609063177681,0.0001,1.0

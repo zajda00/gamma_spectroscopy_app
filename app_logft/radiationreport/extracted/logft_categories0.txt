@@ -1,0 +1,23 @@
+Name                            DJ        DP        ODDA     DT     Z      Number     Centroid       Width       Min               Max
+Superallowed                    0         NO                 0               31        3.494         0.016       3.174            3.525
+Isospin forbidden               0         NO                                 12         9.19         1.16        6.661            10.92
+Gamow-Teller                    1         NO                                584         5.04         0.99        2.66             9.046
+Allowed                         0         NO                                642         6.24         1.42        2.98            12.532
+                                0         NO        NO                      224         6.68         1.57        3.317           12.532
+                                0         NO        YES                     418         6.00         1.26        2.98            11.594
+Allowed                         1         NO                                1257        6.19         1.21        2.574           12.367
+                                1         NO        NO                      468         6.33         1.30        4.129           12.367
+                                1         NO        YES                     789         6.11         1.14        2.574            10.89
+First-forbidden non-unique      0         YES                               546         7.35         0.90        5.202            11.03
+                                0         YES       NO                      256         7.45         0.96        5.271            11.03
+                                0         YES       YES                     290         7.25         0.83        5.202            9.795
+                                0         YES                       <80     412         7.47         0.90        5.9              11.03
+                                0         YES                       >80     134         6.97         0.79        5.202            9.795
+First-forbidden non-unique      1         YES                               708         8.14         1.60        5.23            20.082
+                                1         YES       NO                      376         8.50         1.89        5.33            20.082
+                                1         YES       YES                     332         7.74         1.04        5.23             11.22
+                                1         YES                       <80     544         8.43         1.66        5.9             20.082
+                                1         YES                       >80     164         7.18         0.80        5.33             10.51
+First-forbidden unique          2         YES                               213         9.75         0.97        8.5              12.78
+Second-forbidden non-unique     2         NO                                 27        12.45         0.89        10.92            14.23
+Second-forbidden unique         3         NO                                 12        15.44         1.25        13.8383         18.081

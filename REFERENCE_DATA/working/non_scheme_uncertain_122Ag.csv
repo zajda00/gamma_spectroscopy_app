@@ -1,0 +1,51 @@
+peak_id,e_gamma_keV,de_gamma_keV,peak_status,category,priority,comment
+ns_pk_001,124.7,0.2,unassigned,uncertain,,
+ns_pk_002,239.71,0.19,unassigned,uncertain,,doublet with 238.6 – 212Pb
+ns_pk_003,297.67,0.14,unassigned,uncertain,,
+ns_pk_004,311.95,0.14,unassigned,uncertain,,"doublet?, 821 keV single escape?"
+ns_pk_005,409.53,0.17,unassigned,uncertain,,
+ns_pk_006,560.0,1.0,unassigned,uncertain,,no peak
+ns_pk_007,586.07,0.17,unassigned,uncertain,,doublet with 583.2 – 208Tl
+ns_pk_008,618.64,0.14,unassigned,uncertain,,
+ns_pk_009,687.0,1.0,unassigned,uncertain,,"doublet, bad fit"
+ns_pk_010,713.52,0.11,unassigned,uncertain,,
+ns_pk_011,720.48,0.12,unassigned,uncertain,,
+ns_pk_012,734.77,0.13,unassigned,uncertain,,
+ns_pk_013,739.42,0.16,unassigned,uncertain,,
+ns_pk_014,808.83,0.15,unassigned,uncertain,,
+ns_pk_015,814.47,0.13,unassigned,uncertain,,
+ns_pk_016,840.72,0.21,unassigned,uncertain,,
+ns_pk_017,957.42,0.12,unassigned,uncertain,,
+ns_pk_018,1060.7,0.13,unassigned,uncertain,,
+ns_pk_019,1115.73,0.15,unassigned,uncertain,,1627 keV single escape?
+ns_pk_020,1173.9,0.31,unassigned,uncertain,,
+ns_pk_021,1218.99,0.14,unassigned,uncertain,,
+ns_pk_022,1252.85,0.13,unassigned,uncertain,,
+ns_pk_023,1288.0,1.0,unassigned,uncertain,,no peak
+ns_pk_024,1315.0,0.23,unassigned,uncertain,,uncertain
+ns_pk_025,1335.29,0.13,unassigned,uncertain,,
+ns_pk_026,1358.08,0.27,unassigned,uncertain,,strange
+ns_pk_027,1384.74,0.23,unassigned,uncertain,,
+ns_pk_028,1474.51,0.13,unassigned,uncertain,,
+ns_pk_029,1506.16,0.12,unassigned,uncertain,,
+ns_pk_030,1515.41,0.14,unassigned,uncertain,,
+ns_pk_031,1612.01,0.17,unassigned,uncertain,,
+ns_pk_032,1667.15,0.18,unassigned,uncertain,,
+ns_pk_033,1850.54,0.16,unassigned,uncertain,,
+ns_pk_034,1903.16,0.12,unassigned,uncertain,,
+ns_pk_035,2104.17,0.28,unassigned,uncertain,,doublet with 2103.5 – 208Tl escape
+ns_pk_036,2115.17,0.29,unassigned,uncertain,,
+ns_pk_037,2159.57,0.16,unassigned,uncertain,,
+ns_pk_038,2196.62,0.28,unassigned,uncertain,,
+ns_pk_039,2219.67,0.18,unassigned,uncertain,,
+ns_pk_040,2237.9,0.15,unassigned,uncertain,,
+ns_pk_041,2246.73,0.13,unassigned,uncertain,,
+ns_pk_042,2325.05,0.17,unassigned,uncertain,,
+ns_pk_043,2386.88,0.28,unassigned,uncertain,,2897 keV single escape?
+ns_pk_044,2466.41,0.22,unassigned,uncertain,,
+ns_pk_045,2796.61,0.14,unassigned,uncertain,,
+ns_pk_046,3297.71,0.13,unassigned,uncertain,,3808 keV single escape?
+ns_pk_047,622.4,0.15,unassigned,removed_from_scheme,,1135 keV single escape?; removed from main scheme; possible 1135.23 keV single escape / artifact
+ns_pk_048,667.0,1.0,unassigned,removed_from_scheme,,"doublet, bad fit; removed from main scheme; no convincing coincidence support for 3169.71 level; former doublet split retained only as uncertain"
+ns_pk_049,867.52,0.16,unassigned,removed_from_scheme,,removed from main scheme; weak/literature-only; 2196.41 level retained via 1627.05 keV
+ns_pk_050,884.06,0.39,unassigned,removed_from_scheme,,removed from main scheme; weak/not confirmed; 3061.70 level removed

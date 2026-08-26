@@ -25,9 +25,16 @@ class BetaInputs:
     mother_spin_display: str = ''
     mother_half_life_display: str = ''
     neutron_separation_energy_keV: float | None = None
-    show_neutron_separation: bool = False
+    neutron_separation_energy_uncertainty_keV: float | None = None
+    show_neutron_separation: bool = True
     ground_state_strategy: str = 'closure_to_100'
     normalization_reference_keV: float | None = None
+    # Simplified project-level settings for apparent beta feeding / gs feeding.
+    ground_state_feeding_mode: str = 'closure_to_100'
+    manual_ground_state_feeding_percent: float | None = None
+    iterative_ground_state_feeding: bool = False
+    iterative_tolerance: float = 0.01
+    iterative_max_iterations: int = 20
     # Extended nucleus data for mother
     mother_a: int = 0
     mother_z: int = 0
@@ -42,6 +49,7 @@ class BetaInputs:
     mother_q: str = ''  # e.g., "9510(40) keV"
     mother_sn: str = ''  # separation energy neutron
     mother_pn: str = ''  # other nuclear parameter
+    mother_states: list[dict[str, str]] = field(default_factory=list)
     # Decay channel (0=blank, 1=alpha, 2=beta-, 3=beta+, 4=beta-n)
     decay_channel: int = 2
     # Separation energy type: 'n' or 'p'
@@ -59,6 +67,11 @@ class Level:
     dt12_s: float | None = None
     comments: str = ''
     in_scheme: bool = True
+    level_origin: str = ''
+    certain: bool = True
+    # Calculated values (populated after ABF/logft calculation)
+    abf: float | None = None
+    logft: float | None = None
 
 @dataclass
 class Transition:

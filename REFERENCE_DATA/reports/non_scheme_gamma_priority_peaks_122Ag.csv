@@ -1,0 +1,34 @@
+peak_id,category,rank_in_category,e_gamma_keV,decay,origin,comment
+ns_pk_006,background,1,510.75,annihilation,known,
+ns_pk_028,background,2,1460.79,Background – 40K,known,
+ns_pk_050,background,3,911.63,Background – 228Ac,known,
+ns_pk_004,background,4,352.0,Background – 214Pb,known,bad fit
+ns_pk_019,daughters,1,1140.42,122In → 122Sn,known,
+ns_pk_018,daughters,2,1013.21,122In → 122Sn,known,
+ns_pk_045,daughters,3,2759.07,122In → 122Sn,known,
+ns_pk_035,daughters,4,2065.75,122In → 122Sn,known,
+ns_pk_027,daughters,5,1389.81,122In → 122Sn,known,
+ns_pk_045,daughters,6,2975.22,122In → 122Sn,known,doublet?
+ns_pk_031,daughters,7,1635.4,122In → 122Sn,known,
+ns_pk_043,daughters,8,2407.71,122In → 122Sn,known,doublet?
+ns_pk_021,neglected,1,1234.07,?,neglected,1746 keV single escape?
+ns_pk_017,neglected,2,966.42,?,neglected,doublet
+ns_pk_017,neglected,3,990.07,?,neglected,
+ns_pk_020,neglected,4,1196.16,?,neglected,
+ns_pk_050,neglected,5,919.77,?,neglected,doublet
+ns_pk_017,neglected,6,937.9,?,neglected,
+ns_pk_008,neglected,7,608.45,?,neglected,
+ns_pk_023,neglected,8,1282.81,?,neglected,
+ns_pk_025,unidentified,1,1328.88,?,?,
+ns_pk_014,unidentified,2,778.56,?,?,doublet
+ns_pk_045,unidentified,3,2955.33,?,?,3467 keV single escape?
+ns_pk_027,unidentified,4,1409.19,?,?,
+ns_pk_042,unidentified,5,2298.58,?,?,
+ns_pk_048,uncertain,1,667.0,122Ag -> 122Cd removed_from_scheme,removed_from_scheme,"doublet, bad fit; removed from main scheme; no convincing coincidence support for 3169.71 level; former doublet split retained only as uncertain"
+ns_pk_032,uncertain,2,1667.15,uncertain,new?,
+ns_pk_034,uncertain,3,1903.16,uncertain,new?,
+ns_pk_046,uncertain,4,3297.71,uncertain,new?,3808 keV single escape?
+ns_pk_029,uncertain,5,1506.16,uncertain,new?,
+ns_pk_041,uncertain,6,2246.73,uncertain,new?,
+ns_pk_021,uncertain,7,1218.99,uncertain,new?,
+ns_pk_037,uncertain,8,2159.57,uncertain,new?,

@@ -1,0 +1,6 @@
+category,file_tool_id,n_rows,integral_counts_sum,emitted_sum,relative_percent_sum_computed,absolute_percent_sum_computed,reported_absolute_sum_field,sum_discrepancy,sum_ratio_computed_to_reported
+background,mock_background,9,76662,3745525,12.0812,1.1401,1.1401,0.0000,1.0000
+daughters,mock_daughters,9,50994,1768451,10.4907,1.1008,1.1008,0.0000,1.0000
+neglected,mock_neglected,9,65696,2047997,10.0255,0.8240,0.8240,0.0000,1.0000
+uncertain,mock_uncertain,9,88911,2902022,13.8507,1.2852,1.2852,0.0000,1.0000
+unidentified,mock_unidentified,9,69274,2232502,13.2949,1.3175,1.3175,0.0000,1.0000
